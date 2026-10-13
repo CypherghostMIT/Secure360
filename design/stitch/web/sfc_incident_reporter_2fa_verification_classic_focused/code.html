@@ -1,0 +1,294 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SFC Incident Reporter - 2FA Verification (W02)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              error: '#cc0000',
+              success: '#006633'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 4px 20px -2px rgba(0, 51, 102, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Form Controls and Focus States -->
+<style data-purpose="custom-overrides">
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    .code-input {
+      outline: none;
+      transition: all 0.15s ease-in-out;
+    }
+    .code-input:focus {
+      border-color: #003366;
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.15);
+    }
+    .code-input.input-error {
+      border-color: #cc0000 !important;
+      background-color: #fff8f8;
+    }
+    .code-input.input-error:focus {
+      box-shadow: 0 0 0 2px rgba(204, 0, 0, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col justify-center items-center p-4 antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: MainContainer -->
+<main class="w-full flex items-center justify-center">
+<!-- BEGIN: VerificationCard -->
+<div class="relative w-full max-w-[400px] bg-white rounded-[12px] border border-sfc-border p-5 shadow-card-subtle" data-purpose="verification-card">
+<!-- Back to Login Navigation -->
+<div class="w-full flex items-center justify-between mb-2">
+<a class="inline-flex items-center text-[13px] font-medium text-sfc-textMuted hover:text-sfc-navy transition gap-1.5 focus:outline-none" href="#login-w01" title="Back to Login">
+<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Back to Login</span>
+</a>
+
+</div>
+<!-- BEGIN: CardHeader -->
+<header class="flex flex-col items-center mb-6">
+<!-- Prominent Brand Logo -->
+<div class="h-[52px] w-auto flex items-center justify-center mb-1">
+<img alt="SFC Logo" class="h-[56px] w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_GaUzO-eB6-Wuab_zEkXKg1n1TPRs38D-MvGgTwVvmTesnxLldOGHRgNwc2nLmv0OlYGD7ZeaH6XNba4a9aCJCvPEiQChsQOqOTh1ALpEhjcSQP6KE4Pvfz1nByTXbTshQk2WKKJwgbhTsod5v0GasXK5GgzOn6tj9rNb09BeO7uAa8HWpUmfwZ7x1CzIrJMEG1byWqxoyEReMs_o6xGx_GAiubhXD09X3K9oVNBHrax8-wGRzsxsFd70xPzxFL17Ry0">
+</div>
+<!-- Platform Title -->
+<h2 class="text-[24px] font-bold text-sfc-textPrimary tracking-tight text-center mt-3">Two-step verification</h2>
+<!-- Subtitle Indicator -->
+<p class="text-[14px] font-normal text-sfc-textMuted text-center mt-1">
+  Enter the 6-digit code from your authenticator app.
+</p>
+</header>
+<!-- END: CardHeader -->
+<!-- BEGIN: VerificationForm -->
+<form class="space-y-6" data-purpose="auth-form" id="2fa-form" onsubmit="event.preventDefault(); handleVerify();">
+<!-- 6-digit Code Inputs Group -->
+<div>
+<div class="flex items-center justify-center gap-2" id="otp-container">
+<input autocomplete="one-time-code" autofocus="" class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="0" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+<input class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="1" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+<input class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="2" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+<input class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="3" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+<input class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="4" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+<input class="code-input w-[48px] h-[56px] rounded-[8px] border-2 border-sfc-border text-[22px] font-bold text-center text-sfc-textPrimary font-mono" data-index="5" inputmode="numeric" maxlength="1" pattern="[0-9]*" type="text">
+</div>
+<!-- Dynamic Error / Status Alert -->
+<div class="hidden mt-3 flex items-center justify-center gap-1.5 text-center text-[13px] font-medium text-sfc-error" id="status-message">
+<svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="9"></circle>
+<line x1="12" x2="12" y1="8" y2="12"></line>
+<line x1="12" x2="12.01" y1="16" y2="16"></line>
+</svg>
+<span id="status-text" class="">This code is not valid.</span>
+</div>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full h-[40px] bg-sfc-navy text-white text-[14px] font-semibold rounded-[8px] hover:bg-sfc-navyHover active:scale-[0.99] transition duration-150 shadow-sm flex items-center justify-center mt-6" id="verify-btn" type="submit">
+  Verify
+</button><div class="text-center mt-4 pt-1"><p class="text-[13px] text-sfc-textMuted">Lost access to your app? <a href="#support" class="text-sfc-navy hover:underline font-medium">Ask an administrator</a> to reset your 2-step verification.</p></div>
+<!-- Resend Code Link with Timer -->
+
+</form>
+<!-- END: VerificationForm -->
+<!-- Demo Helper Bar for Testing -->
+
+<!-- BEGIN: CardFooter -->
+<footer class="mt-5 pt-4 border-t border-sfc-border/80 flex items-center justify-between text-sfc-textMuted text-[12px]"><span class="font-medium">Security First Cameroon</span><div class="flex items-center space-x-1.5"><button type="button" class="hover:text-sfc-navy font-semibold text-sfc-textPrimary transition">FR</button><span class="text-sfc-border">|</span><button type="button" class="hover:text-sfc-navy transition text-sfc-textMuted">EN</button></div></footer>
+<!-- END: CardFooter -->
+</div>
+<!-- END: VerificationCard -->
+</main>
+<!-- END: MainContainer -->
+<!-- BEGIN: Script Interactions -->
+<script data-purpose="2fa-input-controller">
+  const inputs = Array.from(document.querySelectorAll('#otp-container input'));
+  const form = document.getElementById('2fa-form');
+  const verifyBtn = document.getElementById('verify-btn');
+  const statusMessage = document.getElementById('status-message');
+  const statusText = document.getElementById('status-text');
+  const resendBtn = document.getElementById('resend-btn');
+  const resendTimer = document.getElementById('resend-timer');
+
+  // Input events: Auto-advance, backspace handling, digit validation
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? val.slice(-1) : '';
+      clearErrors();
+
+      if (e.target.value && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+        inputs[index + 1].select();
+      }
+
+      checkAndAutoSubmit();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        if (!e.target.value && index > 0) {
+          inputs[index - 1].focus();
+          inputs[index - 1].value = '';
+          clearErrors();
+        }
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        inputs[index - 1].focus();
+      } else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    // Paste event support (spread 6 digits)
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
+      const digits = pasteData.replace(/[^0-9]/g, '').slice(0, 6);
+      if (digits.length > 0) {
+        digits.split('').forEach((char, idx) => {
+          if (inputs[idx]) {
+            inputs[idx].value = char;
+          }
+        });
+        clearErrors();
+        const nextFocusIndex = Math.min(digits.length, inputs.length - 1);
+        inputs[nextFocusIndex].focus();
+        checkAndAutoSubmit();
+      }
+    });
+  });
+
+  function clearErrors() {
+    inputs.forEach(i => i.classList.remove('input-error'));
+    statusMessage.classList.add('hidden');
+    statusMessage.classList.remove('text-sfc-success');
+    statusMessage.classList.add('text-sfc-error');
+  }
+
+  function getCode() {
+    return inputs.map(i => i.value.trim()).join('');
+  }
+
+  function checkAndAutoSubmit() {
+    const code = getCode();
+    if (code.length === 6) {
+      handleVerify();
+    }
+  }
+
+  function handleVerify() {
+    const code = getCode();
+    if (code.length < 6) {
+      showError('Please enter all 6 digits of the verification code.');
+      return;
+    }
+
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Verifying...
+    `;
+
+    setTimeout(() => {
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = 'Verify';
+
+      // Demo verification logic: "000000" triggers error, other codes pass
+      if (code === '000000') {
+        showError('Invalid code. Please check your authenticator and try again.');
+      } else {
+        // Success state redirect simulation to W04
+        statusMessage.classList.remove('hidden', 'text-sfc-error');
+        statusMessage.classList.add('text-sfc-success');
+        statusMessage.innerHTML = `
+          <svg class="w-4 h-4 shrink-0 text-sfc-success" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Identity verified! Redirecting to Dashboard (W04)...</span>
+        `;
+        inputs.forEach(i => {
+          i.classList.remove('input-error');
+          i.classList.add('border-emerald-500', 'bg-emerald-50/50');
+        });
+        setTimeout(() => {
+          window.location.hash = '#dashboard-w04';
+        }, 1200);
+      }
+    }, 600);
+  }
+
+  function showError(msg) {
+    inputs.forEach(i => i.classList.add('input-error'));
+    statusMessage.classList.remove('hidden');
+    statusText.textContent = msg;
+    const firstEmpty = inputs.find(i => !i.value) || inputs[0];
+    firstEmpty.focus();
+    firstEmpty.select();
+  }
+
+  // Resend Timer countdown
+  let countdown = 45;
+  const timerInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      resendTimer.textContent = `${countdown}s`;
+    } else {
+      clearInterval(timerInterval);
+      resendBtn.disabled = false;
+      resendBtn.classList.remove('cursor-not-allowed');
+      resendBtn.classList.add('hover:text-sfc-navy', 'hover:underline', 'cursor-pointer');
+      resendBtn.textContent = 'Resend Code';
+    }
+  }, 1000);
+
+  resendBtn.addEventListener('click', () => {
+    if (countdown <= 0) {
+      alert('A new 6-digit code has been dispatched to your authenticator application.');
+      countdown = 45;
+      resendBtn.disabled = true;
+      resendBtn.classList.add('cursor-not-allowed');
+      resendBtn.classList.remove('hover:text-sfc-navy', 'hover:underline', 'cursor-pointer');
+      resendBtn.innerHTML = `Resend code in <span id="resend-timer" class="font-semibold">45s</span>`;
+    }
+  });
+
+  // Test helper function
+  window.fillTestCode = function(codeStr) {
+    codeStr.split('').forEach((char, idx) => {
+      if (inputs[idx]) inputs[idx].value = char;
+    });
+    clearErrors();
+    checkAndAutoSubmit();
+  };
+</script>
+<!-- END: Script Interactions -->
+
+
+</body></html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html><html class="h-full" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SFC Incident Reporter - Reset Your Password (W03)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              lightBlue: '#e6f0fa',
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 4px 20px -2px rgba(0, 51, 102, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Form Controls and Focus States -->
+<style data-purpose="custom-overrides">
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    .form-input-custom:focus {
+      outline: none;
+      border-color: #003366;
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col justify-center items-center p-4 antialiased text-sfc-textPrimary bg-sfc-bg relative">
+<!-- Interactive Reviewer Toggle Controls (Top Bar) -->
+
+<!-- BEGIN: MainContainer -->
+<main class="w-full flex items-center justify-center">
+<!-- BEGIN: ResetCard -->
+<div class="w-full max-w-[400px] bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle relative" data-purpose="reset-card">
+<!-- Top Navigation & Screen ID Row -->
+<div class="flex items-center justify-between mb-4">
+<a class="inline-flex items-center text-[13px] text-sfc-textMuted hover:text-sfc-navy transition font-medium" href="#login">
+<svg class="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+      Back to Login
+    </a>
+
+</div>
+<!-- BEGIN: CardHeader -->
+<header class="flex flex-col items-center mb-6"><div class="h-16 w-auto flex items-center justify-center mb-3"><img alt="Security First Cameroon Logo" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfin8nnvU1wN7UP9UVb8y4oUfSEmAXkbAhw0qCbO2UzAsQRXhcoEPEDTfScR5AjqMnO3hKeZiKZs7W8CLLpUSOvvqDngZrmzW3gCtau0sVn_YjOKfcUK4Z7mGtFr1cbrVmWtQIArVzet3n3BHGHTHjP9qhHMx-lgkBIpVC-b7cp22ZWr3iiA4ajzWPRk-T5lUvsyqwDYQ3VL7UzhXN_-oFSS97kpJerKV0qBwkkgrpubLrK-jd4fQht4v4GRcbuPP1z4g"></div><div class="text-center mb-1"><span class="text-[11px] font-semibold uppercase tracking-wider text-sfc-navy/80 block">Security First Cameroon</span><span class="text-[18px] font-bold text-sfc-navy tracking-tight block">Secure360</span></div><h1 class="text-[22px] font-bold text-sfc-textPrimary tracking-tight text-center mb-2 mt-2">Reset Your Password</h1><p class="text-[14px] font-normal text-sfc-textMuted text-center leading-relaxed max-w-[320px]">Enter your email address and we'll send you a link to reset your password.</p></header>
+<!-- END: CardHeader -->
+<!-- BEGIN: Form Section -->
+<div id="reset-form-container" class="hidden">
+<form class="space-y-5" data-purpose="reset-password-form" id="reset-form">
+<!-- Email Field Group -->
+<div class="space-y-1.5">
+<label class="block text-[13px] font-semibold text-sfc-textPrimary" for="reset-email">
+          Work Email
+        </label>
+<div class="relative flex items-center">
+<!-- Mail Icon -->
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<input class="form-input-custom w-full h-[40px] pl-9 pr-3 rounded-[8px] border border-sfc-border text-[14px] text-sfc-textPrimary placeholder:text-sfc-textMuted placeholder:opacity-60 transition duration-150" id="reset-email" name="email" placeholder="technician@sfc-soc.net" required="" type="email" value="technician@sfc-soc.net">
+</div>
+</div>
+<!-- Primary Submit Button -->
+<button class="w-full h-[40px] bg-sfc-navy text-white text-[14px] font-medium rounded-[8px] hover:bg-sfc-navyHover active:scale-[0.99] transition duration-150 shadow-sm flex items-center justify-center gap-2" id="submit-btn" type="submit">
+<span class="hidden animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" id="btn-spinner"></span>
+<span id="btn-text" class="">Send Reset Link</span>
+</button>
+<!-- Back to Login Link -->
+<div class="text-center pt-1">
+<a class="inline-flex items-center text-[14px] text-sfc-textMuted hover:text-sfc-navy transition font-medium" href="#login">
+<svg class="h-3.5 w-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Back to Login
+        </a>
+</div>
+</form>
+</div>
+<!-- END: Form Section -->
+<!-- BEGIN: Success Confirmation State (Hidden initially) -->
+<div class="space-y-5 animate-fadeIn" data-purpose="success-state" id="reset-success-container">
+<!-- Generic Security Reassurance Alert -->
+<div class="bg-sfc-lightBlue border border-sfc-navy/20 rounded-[8px] p-4 text-sfc-navy flex items-start gap-3">
+<!-- Shield / Checkmark Icon -->
+<div class="flex-shrink-0 mt-0.5">
+<svg class="h-5 w-5 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h4 class="text-[14px] font-semibold text-sfc-navy mb-1">Check Your Inbox</h4>
+<p class="text-[13px] leading-snug text-sfc-navy/90">
+          If an account exists with this email, you will receive a reset link.
+        </p>
+</div>
+</div>
+<p class="text-[13px] text-sfc-textMuted text-center">Didn't receive an email? Check your spam folder or contact your Secure360 administrator.</p>
+<!-- Action Buttons -->
+<div class="space-y-2.5 pt-1">
+<a class="w-full h-[40px] bg-sfc-navy text-white text-[14px] font-medium rounded-[8px] hover:bg-sfc-navyHover transition shadow-sm flex items-center justify-center" href="#login">
+        Return to Login</a>
+<button class="w-full h-[36px] bg-transparent text-[13px] text-sfc-textMuted hover:text-sfc-navy transition font-medium flex items-center justify-center" id="resend-btn" type="button">
+        Try another email
+      </button>
+</div>
+</div>
+<!-- END: Success Confirmation State -->
+<!-- BEGIN: CardFooter -->
+
+<!-- END: CardFooter -->
+</div>
+<!-- END: ResetCard -->
+</main><footer class="w-full max-w-[400px] mt-6 flex items-center justify-between text-[12px] text-sfc-textMuted px-2"><span class="font-medium">© Security First Cameroon</span><div class="flex items-center gap-1.5 font-medium"><button type="button" class="hover:text-sfc-navy transition text-sfc-textMuted">FR</button><span class="text-sfc-border">|</span><button type="button" class="text-sfc-navy font-bold">EN</button></div></footer>
+<!-- END: MainContainer -->
+<!-- BEGIN: Script Interactions -->
+<script data-purpose="reset-password-flow">
+  document.addEventListener('DOMContentLoaded', () => {
+    const resetForm = document.getElementById('reset-form');
+    const formContainer = document.getElementById('reset-form-container');
+    const successContainer = document.getElementById('reset-success-container');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const btnText = document.getElementById('btn-text');
+    const demoToggleBtn = document.getElementById('demo-toggle-btn');
+    const resendBtn = document.getElementById('resend-btn');
+
+    let isSuccessState = false;
+
+    function setSuccessState(showSuccess) {
+      isSuccessState = showSuccess;
+      if (showSuccess) {
+        formContainer.classList.add('hidden');
+        successContainer.classList.remove('hidden');
+        demoToggleBtn.textContent = 'Preview Form State';
+      } else {
+        formContainer.classList.remove('hidden');
+        successContainer.classList.add('hidden');
+        demoToggleBtn.textContent = 'Preview Success State';
+        submitBtn.disabled = false;
+        btnSpinner.classList.add('hidden');
+        btnText.textContent = 'Send Reset Link';
+      }
+    }
+
+    // Form submit handler with simulated network latency
+    resetForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      btnSpinner.classList.remove('hidden');
+      btnText.textContent = 'Sending...';
+
+      setTimeout(() => {
+        setSuccessState(true);
+      }, 700);
+    });
+
+    // Reviewer Demo State Toggle
+    demoToggleBtn.addEventListener('click', () => {
+      setSuccessState(!isSuccessState);
+    });
+
+    // Reset back to input form
+    resendBtn.addEventListener('click', () => {
+      setSuccessState(false);
+    });
+  });
+</script>
+<!-- END: Script Interactions -->
+
+
+
+
+</body></html>

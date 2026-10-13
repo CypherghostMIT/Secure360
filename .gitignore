@@ -1,0 +1,52 @@
+# Dependencies and builds
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Expo / React Native
+.expo/
+apps/mobile/android/
+apps/mobile/ios/
+*.apk
+*.aab
+*.ipa
+
+# Secrets — NEVER commit these (see docs/WORKFLOW.md §6)
+.env
+.env.*
+!.env.example
+secrets/
+infra/secrets/
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+*firebase-adminsdk*.json
+service-account*.json
+
+# Local data
+*.log
+*.sqlite
+infra/data/
+backups/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Reference documents: SFC specification, research notes and deliverables stay local
+# until the supervisor approves publication (see docs/reference/README.md)
+docs/reference/**
+!docs/reference/README.md
+
+# Task Master local state (tasks.json and the PRD ARE committed)
+.taskmaster/reports/
+.taskmaster/*.log

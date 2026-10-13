@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure360 - Incident SFC-2026-001234 (Security First Cameroon)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#ff9900',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+            'modal-heavy': '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg relative">
+<!-- Toast Notification Feedback -->
+<div class="fixed top-5 right-6 z-[60] transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none flex items-center gap-3 px-4 py-3 bg-[#006633] text-white rounded-lg shadow-xl border border-emerald-400/40" id="toast-notification">
+<div class="w-6 h-6 rounded-full bg-white/20 text-white flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div class="text-[13px] font-medium" id="toast-message">Incident state updated successfully.</div>
+</div>
+<!-- ==============================================
+     ACTIVE RESOLVE INCIDENT MODAL OVERLAY (W09)
+     ============================================== -->
+<div aria-labelledby="resolve-modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200" id="resolve-incident-modal" role="dialog">
+<!-- Dark Backdrop with blur -->
+<div class="fixed inset-0 bg-black/55 backdrop-blur-[4px] transition-opacity" onclick="closeResolveModal()"></div>
+<!-- Centered Modal Window (Exactly 560px, rounded-2xl / 16px radius, crisp shadow-2xl, #ffffff, border-slate-200) -->
+<div class="relative w-full max-w-[560px] bg-white rounded-[8px] border border-[#E0E0E0] shadow-2xl overflow-hidden z-10 flex flex-col my-auto max-h-[94vh]"><div class="px-6 pt-5 pb-4 border-b border-[#E0E0E0] flex items-start justify-between bg-white"><div><div class="flex items-center gap-2 mb-1"><span class="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded">INCIDENT CLOSURE &amp; AUDIT TRAIL</span><span class="text-[11px] text-slate-400">• Incident SFC-2026-001234</span></div><div class="flex items-center gap-2.5 mt-1"><div class="w-7 h-7 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><h3 class="text-[18px] font-bold text-slate-900 leading-tight" id="resolve-modal-title">Resolve Incident</h3></div></div><button aria-label="Close dialog" class="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1.5 rounded-md transition-colors focus:outline-none mt-0.5" onclick="closeResolveModal()" title="Close dialog"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg></button></div><div class="p-6 space-y-4 overflow-y-auto"><div class="bg-slate-50 border border-[#E0E0E0] rounded-[8px] p-3 flex items-center justify-between gap-3"><div class="min-w-0 flex-1"><div class="flex items-center gap-2"><span class="font-mono text-[11px] font-bold text-[#003366] bg-white px-2 py-0.5 rounded border border-slate-200">SFC-2026-001234</span><span class="text-[13px] font-semibold text-slate-900 truncate">Mobile Money fraud</span></div><div class="text-[11px] text-slate-500 mt-1 truncate">Kamdem Distribution SARL · Reporter: <span class="font-medium text-slate-700">Aimé Kamga</span></div></div><div class="flex items-center gap-1.5 flex-shrink-0"><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]">In progress</span><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-[#006633] border border-emerald-300"><span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>RESOLVED</span></div></div><div><label class="block text-[12px] font-semibold text-slate-800 mb-2">Outcome <span class="text-rose-600 font-bold">*</span></label><div class="space-y-2"><label class="flex items-start gap-3 p-2.5 rounded-[6px] border border-emerald-300 bg-emerald-50/50 cursor-pointer"><input checked="" class="mt-0.5 text-[#006633] focus:ring-[#006633] border-slate-300" name="outcome-choice" type="radio" value="Handled"/><div class="text-xs"><span class="font-semibold text-slate-900">Handled</span><span class="text-slate-600 ml-1">— the threat was stopped</span></div></label><label class="flex items-start gap-3 p-2.5 rounded-[6px] border border-slate-200 hover:bg-slate-50 cursor-pointer"><input class="mt-0.5 text-[#006633] focus:ring-[#006633] border-slate-300" name="outcome-choice" type="radio" value="Not an incident"/><div class="text-xs"><span class="font-semibold text-slate-900">Not an incident</span><span class="text-slate-600 ml-1">— no risk found</span></div></label><label class="flex flex-col gap-2 p-2.5 rounded-[6px] border border-slate-200 hover:bg-slate-50 cursor-pointer"><div class="flex items-start gap-3"><input class="mt-0.5 text-[#006633] focus:ring-[#006633] border-slate-300" name="outcome-choice" type="radio" value="Duplicate"/><div class="text-xs"><span class="font-semibold text-slate-900">Duplicate</span><span class="text-slate-600 ml-1">— same as another report (enter reference)</span></div></div><div class="pl-6"><input class="w-full text-xs bg-white border border-slate-200 rounded px-2.5 py-1.5 text-slate-800 placeholder:text-slate-400 focus:border-[#003366] focus:ring-1 focus:ring-[#003366]" placeholder="e.g. SFC-2026-001229" type="text"/></div></label></div></div><div><div class="flex items-center justify-between mb-1.5"><label class="block text-[12px] font-semibold text-slate-800" for="resolution-notes-field">Resolution notes <span class="text-rose-600 font-bold">*</span></label><span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">Shared with reporter</span></div><textarea class="w-full rounded-[6px] border border-slate-300 text-[13px] p-3 text-slate-800 leading-relaxed focus:border-[#006633] focus:ring-1 focus:ring-[#006633] placeholder:text-slate-400 resize-none" id="resolution-notes-field" rows="3">We contacted Orange Cameroun, the fraudulent transfers were blocked and the account secured. Change your Mobile Money PIN and never share it.</textarea><p class="text-[11px] text-slate-500 mt-1">This summary will be visible to Aimé Kamga in the Secure360 mobile app and sent via push notification.</p></div><div><div class="flex items-center justify-between mb-1.5"><label class="block text-[12px] font-semibold text-slate-800" for="internal-notes-field">Internal notes <span class="text-slate-400 font-normal">(optional, SFC only)</span></label><span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-900 border border-amber-200">🔒 SFC Staff Only</span></div><textarea class="w-full rounded-[6px] border border-slate-300 text-[12px] p-2.5 text-slate-800 leading-relaxed focus:border-[#003366] focus:ring-1 focus:ring-[#003366] placeholder:text-slate-400 resize-none" id="internal-notes-field" placeholder="Add SOC investigation telemetry, carrier ticket numbers, or internal debrief notes..." rows="2"></textarea></div><div class="bg-blue-50 border border-blue-200 rounded-[6px] p-3 flex items-start gap-2.5 text-xs text-blue-900"><svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="16" y2="12"></line><line x1="12" x2="12.01" y1="8" y2="8"></line></svg><span class="leading-relaxed">The reporter will be notified. The incident closes automatically after 7 days unless reopened.</span></div></div><div class="px-6 py-4 border-t border-[#E0E0E0] bg-white flex items-center justify-end gap-3"><button class="px-4 py-2 rounded-[6px] border border-slate-300 text-slate-700 hover:bg-slate-50 text-[13px] font-medium transition-colors focus:outline-none" onclick="closeResolveModal()" type="button">Cancel</button><button class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-[6px] bg-[#006633] hover:bg-[#00552b] text-white text-[13px] font-medium shadow-sm transition-colors focus:outline-none" onclick="confirmResolveIncident()" type="button"><svg class="w-4 h-4 text-emerald-200" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Mark as resolved</span></button></div></div>
+</div>
+<!-- ==============================================
+     SECONDARY ASSIGN INCIDENT MODAL (Preserved, Hidden)
+     ============================================== -->
+<div aria-labelledby="assign-modal-title" aria-modal="true" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200" id="assign-incident-modal" role="dialog">
+<div class="fixed inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity" onclick="closeAssignModal()"></div>
+<div class="relative w-full max-w-[480px] bg-white rounded-[16px] border border-[#e2e8f0] shadow-modal-heavy overflow-hidden z-10 flex flex-col my-auto max-h-[92vh]">
+<div class="px-6 pt-5 pb-4 border-b border-[#f1f5f9] flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[11px] font-semibold text-sfc-navy uppercase tracking-wider bg-sfc-primaryLight px-2 py-0.5 rounded">Incident Routing</span>
+<span class="text-[11px] text-[#64748b]">• Tier Escalation</span>
+</div>
+<h3 class="text-[20px] font-semibold text-[#0f172a] leading-tight" id="assign-modal-title">Assign Incident</h3>
+</div>
+<button aria-label="Close dialog" class="text-[#94a3b8] hover:text-[#0f172a] hover:bg-[#f1f5f9] p-1.5 rounded-lg transition-colors focus:outline-none" onclick="closeAssignModal()" title="Close dialog">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="p-6 space-y-4 overflow-y-auto">
+<div class="bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-3 flex items-center justify-between gap-2.5">
+<div class="min-w-0 flex-1">
+<span class="font-mono text-[11px] font-bold text-sfc-navy uppercase tracking-wider block">INC-9042</span>
+<div class="text-[12px] font-medium text-[#1e293b] truncate mt-0.5">Ransomware Lateral Spread via PsExec</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-[#fee2e2] text-[#cc0000] border border-[#fca5a5] flex-shrink-0">
+          ● Critical
+        </span>
+</div>
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="block text-[12px] font-semibold text-[#1e293b]" for="technician-select">Assign Technician</label>
+<span class="text-[11px] font-medium text-[#0284c7] bg-[#e0f2fe] px-2 py-0.5 rounded-full" id="workload-hint-badge">
+            Auto-rebalancing active
+          </span>
+</div>
+<div class="relative">
+<select class="w-full text-[13px] bg-[#ffffff] border border-[#cbd5e1] rounded-lg px-3.5 py-2.5 font-medium text-[#1e293b] focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy shadow-sm transition-colors cursor-pointer" id="technician-select" onchange="onTechnicianSelectChange(this.value)">
+<option data-badge="bg-emerald-100 text-emerald-800 border-emerald-200" data-incidents="2" data-status="Low Load - Recommended" selected="" value="Elena Rostova">
+              Elena Rostova (Principal SecOps) — 2 active incidents [Low Load - Recommended]
+            </option>
+<option data-badge="bg-blue-100 text-blue-800 border-blue-200" data-incidents="3" data-status="Optimal Load" value="Sarah Travis">
+              Sarah Travis (Lead SecOps Analyst) — 3 active incidents [Optimal Load]
+            </option>
+<option data-badge="bg-slate-100 text-slate-800 border-slate-200" data-incidents="5" data-status="Normal Load" value="Alex Vance">
+              Alex Vance (Tier 3 Lead) — 5 active incidents [Normal Load]
+            </option>
+<option data-badge="bg-amber-100 text-amber-900 border-amber-300" data-incidents="8" data-status="Heavy Load - Warning" value="Marcus Vance">
+              Marcus Vance (Tier 2 Network IR) — 8 active incidents [Heavy Load - Warning]
+            </option>
+<option data-badge="bg-emerald-100 text-emerald-800 border-emerald-200" data-incidents="1" data-status="Available" value="Kevin Zhao">
+              Kevin Zhao (Senior Analyst) — 1 active incident [Available]
+            </option>
+</select>
+</div>
+<div class="mt-2.5 p-3 rounded-lg bg-[#f8fafc] border border-[#e2e8f0] flex items-center justify-between text-[11px]" id="technician-load-card">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-emerald-500" id="tech-dot"></span>
+<span class="text-[#475569] font-medium" id="tech-capacity-text">Capacity: <strong>2/10</strong> incidents</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-16 h-2 bg-[#e2e8f0] rounded-full overflow-hidden flex">
+<div class="bg-emerald-500 h-full rounded-full transition-all duration-300" id="tech-bar-fill" style="width: 20%;"></div>
+</div>
+<span class="font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px]" id="tech-status-pill">Low Load</span>
+</div>
+</div>
+</div>
+<div>
+<label class="block text-[12px] font-semibold text-[#1e293b] mb-1.5" for="modal-priority-select">Assignment Priority &amp; Escalation</label>
+<div class="relative">
+<select class="w-full text-[13px] bg-[#ffffff] border border-[#cbd5e1] rounded-lg px-3.5 py-2.5 font-medium text-[#1e293b] focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy shadow-sm transition-colors cursor-pointer" id="modal-priority-select">
+<option selected="" value="Critical">Critical (P1 - Immediate Blast Radius SLA 15m) [Selected]</option>
+<option value="High">High (P2 - Urgent SLA 1h)</option>
+<option value="Medium">Medium (P3 - Standard SLA 4h)</option>
+<option value="Low">Low (P4 - Routine)</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block text-[12px] font-semibold text-[#1e293b] mb-1.5" for="modal-notes">Assignment / Handoff Notes (Optional)</label>
+<textarea class="w-full rounded-lg border-[#cbd5e1] text-[13px] p-3 focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy placeholder:text-[#94a3b8] resize-none shadow-sm" id="modal-notes" placeholder="Add specific instructions, investigative priorities, or handover context for the assigned technician..." rows="4">Host isolated at 09:22 UTC. Focus on verifying Kerberos golden ticket mitigation and staging folder enc_blob.dat reverse engineering.</textarea>
+</div>
+<div class="pt-1">
+<label class="flex items-start gap-2.5 cursor-pointer select-none">
+<input checked="" class="mt-0.5 rounded border-[#cbd5e1] text-sfc-navy focus:ring-sfc-navy h-4 w-4" id="notify-channel-toggle" type="checkbox"/>
+<span class="text-[12px] text-[#475569] leading-tight">
+            Notify technician immediately via Slack / PagerDuty and update Incident Detail (W07)
+          </span>
+</label>
+</div>
+</div>
+<div class="px-6 py-4 border-t border-[#f1f5f9] bg-white flex items-center justify-end gap-3">
+<button class="px-4 py-2 rounded-lg border border-[#cbd5e1] text-[#475569] hover:bg-[#f8fafc] text-[13px] font-medium transition-colors focus:outline-none" onclick="closeAssignModal()" type="button">Cancel</button>
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-lg bg-sfc-navy hover:bg-[#002244] text-white text-[13px] font-medium shadow-sm transition-colors focus:outline-none" onclick="confirmAssignIncident()" type="button">
+<span>Assign Incident</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-[#E0E0E0] shadow-sm" data-purpose="soc-sidebar"><div><div class="p-4 border-b border-[#E0E0E0]"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-md bg-white border border-slate-200 p-1 flex items-center justify-center flex-shrink-0 shadow-xs overflow-hidden"><img alt="Secure360 Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPyDfexPg7Y6EH4cm64NLyEgJe5fZWObNExP0cuvX2yWIXuvlVlEdeRitVFULSvsZ2s6tvxGcbOyQA6wNEglTt0SC0hYP7FQg7OZWc3-X191zoU5ZjgZbVnaTeJ22nChv18J8xrBRQdk_RfGfTWaDeNHu2ZpdGqtRyoGpSr44Q8drpiyigDtU7lpGTUctwtZkc4LZs2jWzKjaSXhmcU31vOtMhnz5H8ny7PLmkFk1emfKQpdHxvAT08jsut--QmDVz-Ko"/></div><div class="min-w-0 flex-1"><h1 class="text-[15px] font-bold text-[#003366] leading-snug truncate tracking-tight">Secure360</h1><p class="text-[11px] font-medium text-slate-500 truncate">Security First Cameroon</p></div></div></div><nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1"><a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><div class="flex items-center gap-2.5 truncate"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Queue</span></div><span class="inline-flex items-center justify-center px-1.5 py-0.2 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">4</span></a><a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-[#e6f0fa] text-[#003366] text-[13px] font-semibold transition-colors" href="javascript:void(0)"><div class="absolute left-0 top-1 bottom-1 w-1 bg-[#003366] rounded-r"></div><div class="flex items-center gap-2.5 truncate"><svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Incidents</span></div><span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-[#cc0000] text-white">24</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Statistics</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Reports</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Organizations</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Users</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="truncate">Audit log</span></a><a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg><span class="truncate">Settings</span></a></nav></div><div class="p-3 border-t border-[#E0E0E0]"><div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/80"><div class="flex items-center gap-2.5 min-w-0"><div class="relative flex-shrink-0"><div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs">JN</div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span></div><div class="truncate"><p class="text-[12px] font-semibold text-slate-900 leading-tight truncate">Jean-Paul Nguemo</p><p class="text-[11px] text-slate-500 truncate">SOC Analyst</p></div></div><button class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded transition-colors" title="Sign out"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-[#E0E0E0] px-6 flex items-center justify-between z-20" data-purpose="top-header"><div class="flex items-center gap-3.5 flex-wrap"><a class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#003366] hover:underline transition-colors" href="javascript:void(0)"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Incidents</span></a><div class="h-4 w-px bg-slate-300 hidden sm:block"></div><div class="flex items-center gap-2"><h2 class="text-[18px] font-bold text-slate-900 tracking-tight">Incident SFC-2026-001234</h2></div><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#EFEBF7] text-[#5B4B9A] border border-[#5B4B9A]/20" id="header-status-badge">Assigned</span><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20" id="header-severity-badge">Critical</span><div class="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Acknowledged · resolution target 13:42 <strong class="font-semibold text-slate-900">(2 h 18 left)</strong></span></div></div><div class="flex items-center gap-2"><button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-[6px] bg-[#003366] hover:bg-[#002244] text-white text-sm font-medium shadow-xs transition-colors" onclick="openResolveModal()" title="Resolve"><svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg><span>Resolve</span></button><button class="hidden sm:inline-flex items-center px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors">Re-qualify severity</button><button class="hidden md:inline-flex items-center px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors">Reassign</button><button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors"><svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span>Generate PDF</span></button><button aria-label="More actions" class="p-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-600 transition-colors"><svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button></div></header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Main Scrollable Content Area (Two Columns: 60% / 40%) -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg"><div class="max-w-[1248px] mx-auto"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><div class="lg:col-span-8 space-y-6"><section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="incident-report-card"><div class="flex items-start justify-between gap-4"><div><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200"><span>Fraud &amp; scams</span><span class="text-amber-400">›</span><span>Mobile Money fraud</span></div><h3 class="text-xl font-bold text-slate-900 mt-2 leading-snug">Mobile Money fraud</h3></div><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><span>Confidential reporter 🔒</span></span></div><div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-sm"><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Organization:</span><span class="font-semibold text-slate-900">Kamdem Distribution SARL</span></div><div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Reporter:</span><span class="font-medium text-slate-900">Aimé Kamga</span><span class="text-slate-400 font-mono text-xs">· +237 6 77 12 34 56</span></div></div><div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3 pt-3 border-t border-slate-100 text-xs"><div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80"><span class="text-slate-500 block mb-0.5">Reported</span><span class="font-semibold text-slate-900">14/09/2026 10:42 WAT</span></div><div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80"><span class="text-slate-500 block mb-0.5">Location</span><span class="font-semibold text-slate-900">Akwa office, Douala</span></div><div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80"><span class="text-slate-500 block mb-0.5">Device</span><span class="font-semibold text-slate-900">Work phone (Samsung Galaxy A15)</span></div></div><div class="mt-4"><label class="text-xs font-semibold text-slate-600 uppercase tracking-wide block mb-1.5">Report Narrative</label><div class="text-sm leading-relaxed text-slate-800 bg-[#fcfcfd] p-4 rounded-lg border border-slate-200/80">"I received an SMS claiming to be from MTN Mobile Money stating that my corporate account was temporarily blocked due to a KYC compliance check. A few minutes later, an unknown caller (+237 6 51 xx xx xx) phoned me asking me to approve a confirmation popup to prevent account deactivation. Shortly after, an unauthorized transfer of 250,000 FCFA was debited from our business cash float account towards an unknown number."</div></div><div class="mt-5 pt-4 border-t border-slate-100"><p class="text-xs font-semibold uppercase text-slate-500 tracking-wide mb-2.5">Reporter's answers</p><div class="flex flex-wrap items-center gap-2.5"><span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-300"><span class="w-2 h-2 rounded-full bg-[#cc0000]"></span><span>Money lost: Yes (250,000 FCFA)</span></span><span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Shared a code: No</span></span><span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>Others affected: No</span></span><div class="ml-auto flex items-center gap-1.5 text-xs font-bold text-[#cc0000]"><svg class="w-4 h-4 text-[#cc0000]" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg><span>Initial severity computed: Critical</span></div></div></div></section><section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="evidence-card"><div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]"><div><h3 class="text-base font-bold text-slate-900">Evidence (2 attachments)</h3><p class="text-xs text-slate-500">Captured media submitted by reporter</p></div><span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">2 Files Verified</span></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4"><div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:border-slate-300 transition-colors shadow-xs"><div class="h-32 bg-white border border-slate-200 rounded flex flex-col justify-center items-center p-3 text-center overflow-hidden"><div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg></div><p class="text-xs font-semibold text-slate-800 truncate w-full">SMS_alert_screenshot.jpg</p><span class="text-[11px] text-slate-500">1.4 MB · JPEG Image</span></div><div class="mt-2.5 flex items-center justify-between"><span class="text-xs font-medium text-slate-700 truncate">SMS phishing prompt received</span><div class="flex items-center gap-1.5"><button class="px-2 py-1 rounded text-xs font-semibold text-[#003366] hover:bg-[#e6f0fa] transition-colors">Open</button><button class="px-2 py-1 rounded text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors">Download</button></div></div></div><div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:border-slate-300 transition-colors shadow-xs"><div class="h-32 bg-white border border-slate-200 rounded flex flex-col justify-center items-center p-3 text-center overflow-hidden"><div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div><p class="text-xs font-semibold text-slate-800 truncate w-full">MoMo_debit_notification.png</p><span class="text-[11px] text-slate-500">850 KB · PNG Statement</span></div><div class="mt-2.5 flex items-center justify-between"><span class="text-xs font-medium text-slate-700 truncate">Transaction debit statement</span><div class="flex items-center gap-1.5"><button class="px-2 py-1 rounded text-xs font-semibold text-[#003366] hover:bg-[#e6f0fa] transition-colors">Open</button><button class="px-2 py-1 rounded text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors">Download</button></div></div></div></div></section></div><div class="lg:col-span-4 space-y-6"><section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="timeline-card"><div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]"><h3 class="text-base font-bold text-slate-900">Timeline</h3><span class="text-xs font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600">Phase: Assigned</span></div><div class="mt-5 relative pl-6 space-y-5 text-xs"><div class="absolute left-[11px] top-2 bottom-3 w-0.5 bg-slate-200"></div><div class="relative flex items-start gap-3"><div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg></div><div><p class="font-semibold text-slate-900">10:42 WAT · Reported</p><p class="text-slate-500 mt-0.5">Submitted by Aimé Kamga via Secure360 Portal</p></div></div><div class="relative flex items-start gap-3"><div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg></div><div><p class="font-semibold text-slate-900">10:51 WAT · Assigned</p><p class="text-slate-500 mt-0.5">Assigned to Jean-Paul Nguemo (SOC Analyst)</p></div></div><div class="relative flex items-start gap-3"><div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white"><svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg></div><div><p class="font-semibold text-slate-900">10:52 WAT · Message sent to reporter</p><p class="text-slate-500 mt-0.5">Direct acknowledgment and MTN freeze dispatch</p></div></div><div class="relative flex items-start gap-3 opacity-60"><div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div><div><p class="font-semibold text-slate-600">Work commenced (In progress)</p><p class="text-slate-400 mt-0.5">Awaiting analyst Start work trigger</p></div></div><div class="relative flex items-start gap-3 opacity-60"><div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div><div><p class="font-semibold text-slate-600">Mitigation &amp; Recovery</p><p class="text-slate-400 mt-0.5">MTN MoMo wallet freeze and reversal</p></div></div><div class="relative flex items-start gap-3 opacity-40"><div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div><div><p class="font-semibold text-slate-600">Resolved &amp; Closed</p><p class="text-slate-400 mt-0.5">Final post-incident summary and closure</p></div></div></div></section><section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm flex flex-col" data-purpose="conversation-card"><div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]"><h3 class="text-base font-bold text-slate-900">Conversation</h3><span class="text-xs text-slate-500 font-medium">3 Messages</span></div><div class="mt-3 flex items-center border-b border-slate-200 text-xs font-semibold"><button class="px-3.5 py-2 border-b-2 border-[#003366] text-[#003366] -mb-px flex items-center gap-1.5"><span>With reporter</span><span class="px-1.5 py-0.2 rounded-full bg-[#003366]/10 text-[#003366] text-[10px]">3</span></button><button class="px-3.5 py-2 text-slate-500 hover:text-slate-800 -mb-px flex items-center gap-1.5"><span>Internal notes</span><span class="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Staff only</span></button></div><div class="mt-3 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2"><svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="11" rx="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg><span>🔒 Only SFC staff can see notes — hidden from client reporter</span></div><div class="mt-4 space-y-3.5 max-h-[340px] overflow-y-auto pr-1"><div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">AK</div><div class="flex-1 max-w-[88%]"><div class="flex items-center gap-1.5 mb-1 text-xs"><span class="font-bold text-slate-900">Aimé Kamga</span><span class="text-[10px] font-medium text-slate-400">10:42 WAT</span></div><div class="bg-slate-100 text-slate-800 text-xs rounded-r-lg rounded-bl-lg p-3 border border-slate-200 leading-relaxed">"Please help urgently, our cash float was debited 250,000 FCFA without authorization!"</div></div></div><div class="flex items-start gap-2.5 flex-row-reverse"><div class="w-7 h-7 rounded-full bg-[#003366] text-white font-bold text-xs flex items-center justify-center flex-shrink-0">JN</div><div class="flex-1 max-w-[88%]"><div class="flex items-center justify-end gap-1.5 mb-1 text-xs"><span class="text-[10px] font-medium text-slate-400">10:52 WAT</span><span class="font-bold text-[#003366]">Jean-Paul Nguemo</span><span class="text-[10px] font-semibold text-slate-500">(SOC Analyst)</span></div><div class="bg-[#e6f0fa] text-[#003366] text-xs rounded-l-lg rounded-br-lg p-3 border border-blue-200 text-left leading-relaxed">"Hello Mr. Kamga, this is Jean-Paul from SFC. We are actively contacting MTN Cameroon anti-fraud desk to freeze the recipient wallet. Please do not accept any new USSD prompts."</div></div></div><div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">AK</div><div class="flex-1 max-w-[88%]"><div class="flex items-center gap-1.5 mb-1 text-xs"><span class="font-bold text-slate-900">Aimé Kamga</span><span class="text-[10px] font-medium text-slate-400">10:55 WAT</span></div><div class="bg-slate-100 text-slate-800 text-xs rounded-r-lg rounded-bl-lg p-3 border border-slate-200 leading-relaxed">"Understood. The suspicious number that called me was +237 6 51 88 92 10. Thank you for acting quickly."</div></div></div></div></section></div></div></div></main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Evidence Preview Modal -->
+<div class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" id="evidence-modal">
+<div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<h4 class="text-[16px] font-bold text-sfc-textPrimary" id="modal-title">Evidence Artifact</h4>
+</div>
+<button class="text-slate-400 hover:text-slate-600 p-1 rounded-md" onclick="closeEvidenceModal()">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="mt-4">
+<span class="text-[11px] font-semibold text-sfc-navy uppercase tracking-wider bg-sfc-primaryLight px-2 py-0.5 rounded" id="modal-category">Artifact Category</span>
+<div class="mt-3 p-4 bg-slate-900 text-emerald-400 rounded-lg font-mono text-[12px] leading-relaxed break-all select-all" id="modal-content">
+        Inspection payload data...
+      </div>
+</div>
+<div class="mt-5 flex justify-end gap-2">
+<button class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-sfc-textPrimary text-[12px] font-semibold rounded-md transition" onclick="copyModalContent()">Copy Data</button>
+<button class="px-4 py-1.5 bg-sfc-navy hover:bg-sfc-navyHover text-white text-[12px] font-semibold rounded-md transition" onclick="closeEvidenceModal()">Close</button>
+</div>
+</div>
+</div>
+<!-- Host Isolation Confirmation Modal -->
+<div class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" id="isolation-modal">
+<div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-rose-200">
+<div class="flex items-center gap-3 text-rose-600 mb-3">
+<div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+<svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+</div>
+<div>
+<h4 class="text-[16px] font-bold text-sfc-textPrimary">Execute Host Network Isolation?</h4>
+<p class="text-[12px] text-sfc-textMuted">Target: WKSTN-892, srv-fin-db01.corp</p>
+</div>
+</div>
+<p class="text-[13px] text-slate-600 leading-normal">
+      This emergency containment action severs all TCP/UDP traffic except EDR command telemetry. Standby replicas will take over active transactional queues.
+    </p>
+<div class="mt-5 flex items-center justify-end gap-2.5">
+<button class="px-3.5 py-2 text-[13px] font-semibold text-slate-700 hover:bg-slate-100 rounded-md transition" onclick="closeIsolationModal()">Cancel</button>
+<button class="px-4 py-2 text-[13px] font-semibold bg-sfc-danger hover:bg-red-700 text-white rounded-md transition shadow-sm" onclick="confirmHostIsolation()">Confirm EDR Isolation</button>
+</div>
+</div>
+</div>
+<!-- Interactive Client Behaviors -->
+<script>
+  function toggleActionsMenu() {
+    const menu = document.getElementById('actions-menu');
+    menu.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = document.querySelector('#actions-dropdown-wrapper button');
+    const menu = document.getElementById('actions-menu');
+    if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  function triggerToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.innerText = message;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    }, 4000);
+  }
+
+  /* Resolve Incident Modal (W09) Controls */
+  function openResolveModal() {
+    const modal = document.getElementById('resolve-incident-modal');
+    modal.classList.remove('hidden');
+  }
+
+  function closeResolveModal() {
+    const modal = document.getElementById('resolve-incident-modal');
+    modal.classList.add('hidden');
+  }
+
+  function confirmResolveIncident() {
+    const category = document.getElementById('resolution-category-select').value;
+    const notes = document.getElementById('resolution-root-cause-notes').value;
+    const timeSpent = document.getElementById('time-spent-input').value;
+    const followUp = document.getElementById('follow-up-checkbox').checked;
+
+    // Update Header Status Badge
+    const statusBadge = document.getElementById('header-status-badge');
+    statusBadge.innerHTML = '● Resolved';
+    statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#dcfce7] text-[#006633] border border-[#bbf7d0]';
+
+    // Update status selector on the page
+    const statusSelector = document.getElementById('status-selector');
+    if (statusSelector) {
+      statusSelector.value = 'Resolved';
+    }
+
+    // Update Timeline Step 4 to Completed
+    const tDot4 = document.getElementById('timeline-step-4-dot');
+    if (tDot4) {
+      tDot4.className = 'absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-100 flex items-center justify-center';
+      tDot4.innerHTML = '<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>';
+    }
+    const tBox4 = document.getElementById('timeline-step-4-box');
+    if (tBox4) {
+      tBox4.className = 'flex-1 bg-emerald-50/70 border border-emerald-200 rounded-lg p-3';
+    }
+    const tPill4 = document.getElementById('timeline-step-4-pill');
+    if (tPill4) {
+      tPill4.className = 'text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800';
+      tPill4.innerText = 'Completed';
+    }
+    const tTitle4 = document.getElementById('timeline-step-4-title');
+    if (tTitle4) {
+      tTitle4.className = 'text-[13px] font-bold text-slate-900';
+    }
+    const tDesc4 = document.getElementById('timeline-step-4-desc');
+    if (tDesc4) {
+      tDesc4.className = 'text-[12px] text-slate-700 mt-1';
+      tDesc4.innerText = `Resolved via category '${category}'. Time spent: ${timeSpent || '3.5'}h. Root cause mitigation applied.`;
+    }
+
+    const stageInd = document.getElementById('timeline-stage-indicator');
+    if (stageInd) {
+      stageInd.innerText = 'Stage: Resolved (4 of 5)';
+      stageInd.className = 'text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200';
+    }
+
+    closeResolveModal();
+    triggerToast(`Incident SFC-2026-001234 marked RESOLVED [${category}] • Audit record cryptographically signed & dispatched to Sarah Jenkins`);
+  }
+
+  // Character counter for textarea
+  const notesArea = document.getElementById('resolution-root-cause-notes');
+  const counterSpan = document.getElementById('char-counter');
+  if (notesArea && counterSpan) {
+    notesArea.addEventListener('input', () => {
+      counterSpan.innerText = `${notesArea.value.length} chars`;
+    });
+  }
+
+  /* Assign Modal Controls */
+  const techProfiles = {
+    'Elena Rostova': { role: 'Principal SecOps Analyst', avatar: 'ER', count: 2, max: 10, statusText: 'Low Load', pillClass: 'bg-emerald-50 text-emerald-700 border-emerald-200', barClass: 'bg-emerald-500', percent: 20 },
+    'Sarah Travis': { role: 'Lead SecOps Analyst', avatar: 'ST', count: 3, max: 10, statusText: 'Optimal Load', pillClass: 'bg-blue-50 text-blue-700 border-blue-200', barClass: 'bg-blue-500', percent: 30 },
+    'Alex Vance': { role: 'Tier 3 Incident Lead', avatar: 'AV', count: 5, max: 10, statusText: 'Normal Load', pillClass: 'bg-slate-100 text-slate-700 border-slate-200', barClass: 'bg-slate-500', percent: 50 },
+    'Marcus Vance': { role: 'Tier 2 Network IR', avatar: 'MV', count: 8, max: 10, statusText: 'Heavy Load - Warning', pillClass: 'bg-amber-50 text-amber-900 border-amber-300', barClass: 'bg-amber-500', percent: 80 },
+    'Kevin Zhao': { role: 'Senior SOC Analyst', avatar: 'KZ', count: 1, max: 10, statusText: 'Available', pillClass: 'bg-emerald-50 text-emerald-700 border-emerald-200', barClass: 'bg-emerald-500', percent: 10 }
+  };
+
+  function onTechnicianSelectChange(techName) {
+    const profile = techProfiles[techName] || techProfiles['Elena Rostova'];
+    const capText = document.getElementById('tech-capacity-text');
+    const barFill = document.getElementById('tech-bar-fill');
+    const statusPill = document.getElementById('tech-status-pill');
+    const techDot = document.getElementById('tech-dot');
+
+    if (capText && barFill && statusPill && techDot) {
+      capText.innerHTML = `Capacity: <strong>${profile.count}/${profile.max}</strong> incidents`;
+      barFill.style.width = `${profile.percent}%`;
+      barFill.className = `h-full rounded-full transition-all duration-300 ${profile.barClass}`;
+      statusPill.innerText = profile.statusText;
+      statusPill.className = `font-semibold px-1.5 py-0.5 rounded text-[10px] border ${profile.pillClass}`;
+      techDot.className = `w-2 h-2 rounded-full ${profile.percent >= 75 ? 'bg-amber-500' : profile.percent <= 30 ? 'bg-emerald-500' : 'bg-blue-500'}`;
+    }
+  }
+
+  function openAssignModal() {
+    const modal = document.getElementById('assign-incident-modal');
+    modal.classList.remove('hidden');
+    const techSelect = document.getElementById('technician-select');
+    if (techSelect) onTechnicianSelectChange(techSelect.value);
+  }
+
+  function closeAssignModal() {
+    const modal = document.getElementById('assign-incident-modal');
+    modal.classList.add('hidden');
+  }
+
+  function confirmAssignIncident() {
+    const techSelect = document.getElementById('technician-select');
+    const selectedName = techSelect.value;
+    const profile = techProfiles[selectedName] || techProfiles['Elena Rostova'];
+
+    document.getElementById('current-assignee-name').innerText = selectedName;
+    document.getElementById('current-assignee-role').innerText = profile.role;
+    document.getElementById('current-assignee-avatar').innerText = profile.avatar;
+
+    const selectInline = document.getElementById('reassign-analyst-select');
+    if (selectInline) selectInline.value = selectedName;
+
+    const timelineCurrentActor = document.getElementById('timeline-current-actor');
+    if (timelineCurrentActor) timelineCurrentActor.innerText = `${selectedName} (${profile.role})`;
+
+    closeAssignModal();
+    triggerToast(`Incident assigned to ${selectedName} • Detail updated`);
+  }
+
+  function handleStatusUpdate(e) {
+    e.preventDefault();
+    const newStatus = document.getElementById('status-selector').value;
+    const newSeverity = document.getElementById('severity-selector').value;
+
+    const statusBadge = document.getElementById('header-status-badge');
+    statusBadge.innerText = `● ${newStatus}`;
+
+    if (newStatus === 'Investigating') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]';
+    } else if (newStatus === 'Containment') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f3e8ff] text-[#7c3aed] border border-[#d8b4fe]';
+    } else if (newStatus === 'Eradication' || newStatus === 'Recovery') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#eff6ff] text-[#2563eb] border border-[#bfdbfe]';
+    } else if (newStatus === 'Resolved' || newStatus === 'Closed') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#dcfce7] text-[#006633] border border-[#bbf7d0]';
+    }
+
+    const sevBadge = document.getElementById('header-severity-badge');
+    sevBadge.innerText = `● ${newSeverity}`;
+
+    triggerToast(`Incident updated to ${newStatus} [${newSeverity}]`);
+  }
+
+  function handleSendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input-field');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const isInternal = document.getElementById('internal-note-toggle').checked;
+    const container = document.getElementById('messages-container');
+    const timeNow = new Date().toISOString().substring(11, 16) + ' UTC';
+    const currentName = document.getElementById('current-assignee-name').innerText || 'Alex Vance';
+    const profile = techProfiles[currentName] || { avatar: 'AV', role: 'SOC Tier 3' };
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'flex items-start gap-3 flex-row-reverse';
+    msgDiv.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-sfc-navy text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+        ${profile.avatar}
+      </div>
+      <div class="flex-1 max-w-[85%] text-right">
+        <div class="flex items-center justify-end gap-2 mb-1">
+          <span class="text-[11px] text-sfc-textMuted font-mono">${timeNow}</span>
+          <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isInternal ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-blue-100 text-blue-900'} uppercase">
+            ${isInternal ? 'Internal SOC Note' : 'SOC Tier 3'}
+          </span>
+          <span class="text-[12px] font-bold text-sfc-textPrimary">${currentName}</span>
+        </div>
+        <div class="${isInternal ? 'bg-amber-50/80 border border-amber-300 text-amber-950' : 'bg-sfc-primaryLight border border-blue-200 text-sfc-navy'} text-[13px] rounded-l-xl rounded-br-xl p-3 text-left">
+          ${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+    input.value = '';
+    triggerToast(isInternal ? 'Internal SOC note saved' : 'Message dispatched to response stream');
+  }
+
+  function copyHashToClipboard() {
+    const hash = document.getElementById('forensic-hash').innerText;
+    navigator.clipboard.writeText(hash).then(() => {
+      triggerToast('SHA-256 hash copied to clipboard');
+    });
+  }
+
+  function copyText(val, toastMsg) {
+    navigator.clipboard.writeText(val).then(() => {
+      triggerToast(toastMsg || 'Copied!');
+    });
+  }
+
+  function openEvidenceModal(title, content, category) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerText = content;
+    document.getElementById('modal-category').innerText = category;
+    document.getElementById('evidence-modal').classList.remove('hidden');
+  }
+
+  function closeEvidenceModal() {
+    document.getElementById('evidence-modal').classList.add('hidden');
+  }
+
+  function copyModalContent() {
+    const content = document.getElementById('modal-content').innerText;
+    navigator.clipboard.writeText(content).then(() => {
+      triggerToast('Evidence details copied to clipboard');
+    });
+  }
+
+  function triggerHostIsolationModal() {
+    document.getElementById('isolation-modal').classList.remove('hidden');
+  }
+
+  function closeIsolationModal() {
+    document.getElementById('isolation-modal').classList.add('hidden');
+  }
+
+  function confirmHostIsolation() {
+    closeIsolationModal();
+    triggerToast('🚨 EDR Host Isolation triggered for WKSTN-892 & DB-Core');
+  }
+</script>
+</body></html>

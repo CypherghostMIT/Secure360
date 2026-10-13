@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {"colors": {"on-tertiary": "#ffffff", "inverse-primary": "#a7c8ff", "background": "#ffffff", "on-surface-variant": "#43474f", "inverse-surface": "#2f3034", "secondary-container": "#dae4ee", "on-tertiary-fixed": "#341100", "tertiary-fixed": "#ffdbca", "surface-tint": "#3a5f94", "border": "#e0e0e0", "outline": "#737780", "on-secondary-container": "#5c666e", "surface-dim": "#dad9de", "danger": "#cc0000", "surface-container": "#eeedf2", "primary": "#001e40", "on-primary-container": "#799dd6", "secondary": "#566068", "primary-fixed": "#d5e3ff", "surface-container-high": "#e8e8ed", "on-tertiary-fixed-variant": "#723610", "success": "#006633", "text-primary": "#1e1e1e", "secondary-fixed-dim": "#bec8d1", "outline-variant": "#c3c6d1", "on-background": "#1a1c1f", "tertiary-container": "#592300", "on-error-container": "#93000a", "on-primary": "#ffffff", "surface-container-low": "#f4f3f8", "surface-container-highest": "#e2e2e7", "on-tertiary-container": "#d8885c", "error-container": "#ffdad6", "surface": "#f8f9fc", "on-secondary": "#ffffff", "on-primary-fixed": "#001b3c", "secondary-fixed": "#dae4ee", "on-secondary-fixed": "#131d24", "on-secondary-fixed-variant": "#3e4850", "text-secondary": "#666666", "error": "#ba1a1a", "tertiary-fixed-dim": "#ffb690", "tertiary": "#381300", "inverse-on-surface": "#f1f0f5", "on-error": "#ffffff", "primary-fixed-dim": "#a7c8ff", "surface-variant": "#e2e2e7", "on-primary-fixed-variant": "#1f477b", "on-surface": "#1a1c1f", "surface-bright": "#f9f9fe", "surface-container-lowest": "#ffffff", "primary-container": "#003366"}, "borderRadius": {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"}, "spacing": {"space-md": "1rem", "space-xl": "2rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "gutter": "1rem", "margin": "1rem"}, "fontFamily": {"caption": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"], "headline-md": ["Inter"]}, "fontSize": {"caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}], "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}], "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}], "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}], "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}]}}}};</script><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface pt-safe pb-safe flex flex-col min-h-screen text-on-surface"><main class="flex flex-col relative w-full bg-surface flex-1"><div class="flex flex-col w-full pb-24 text-on-surface">
+<!-- Header Bar -->
+<div><div class="px-space-md py-space-md bg-primary text-on-primary flex items-center justify-between"><div class="flex items-center space-x-space-md"><button aria-label="Go back" class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface/20 hover:bg-surface/30 transition-colors text-on-primary" onclick="window.history.back()"><span class="material-symbols-outlined text-[20px]">arrow_back</span></button><div><div class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface/20 text-on-primary text-[11px] font-medium tracking-wide uppercase mb-0.5">Step 3 of 3 • Evidence</div><h1 class="font-headline-md text-on-primary text-[20px] leading-tight">Add evidence</h1></div></div><button class="w-10 h-10 flex items-center justify-center rounded-xl text-on-primary/80 hover:bg-surface/20" title="Help"><span class="material-symbols-outlined text-[20px]">help</span></button></div><div class="px-space-md py-2.5 flex items-center space-x-2.5 border-b" style="background-color: #FFF4E0; border-color: #FFE2A8; color: #B26A00;"><span class="material-symbols-outlined text-[20px] shrink-0">wifi_off</span><p class="text-[12px] leading-snug font-medium">You're offline. Your report will be saved and sent automatically when the connection returns.</p></div></div>
+<!-- Progress Bar Line -->
+<!-- Form Content -->
+<div class="px-space-md py-space-lg flex flex-col space-y-space-md bg-surface rounded-xl shadow-xl mt-3 mx-space-md relative z-10 border border-border" id="incident-form"><p class="text-body-sm text-text-secondary leading-relaxed">A photo or screenshot helps the analyst a lot (for example the SMS, the transaction, the error message). This is optional.</p><div class="grid grid-cols-2 gap-space-md"><button class="flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container border border-border transition-colors text-primary" type="button"><span class="material-symbols-outlined text-[32px] mb-1.5 text-primary">photo_camera</span><span class="font-medium font-body-sm text-text-primary text-[14px]">Take a photo</span></button><button class="flex flex-col items-center justify-center p-space-md rounded-xl bg-surface-container-low hover:bg-surface-container border border-border transition-colors text-primary" type="button"><span class="material-symbols-outlined text-[32px] mb-1.5 text-primary">photo_library</span><span class="font-medium font-body-sm text-text-primary text-[14px]">Choose from gallery</span></button></div><div class="flex flex-col space-y-space-xs pt-1"><div class="flex items-center justify-between"><label class="font-body-sm text-text-primary font-medium">Attached (2/5)</label><span class="text-[11px] text-text-secondary">Max 5 images</span></div><div class="grid grid-cols-2 gap-space-sm"><div class="relative w-full h-[120px] rounded-xl bg-surface-container-lowest flex flex-col justify-between p-2.5 overflow-hidden border border-border shadow-sm"><div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-[#ff7900]"></span><span class="text-[10px] font-semibold text-text-secondary tracking-wide uppercase">OrangeMoney</span></div><div class="bg-surface-container-low p-1.5 rounded text-[10px] text-text-primary leading-tight font-mono line-clamp-3">Vous avez transféré 25,000 FCFA à 69XXXX821. Réf: OM98124019</div><button class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-inverse-surface/80 hover:bg-inverse-surface text-inverse-on-surface flex items-center justify-center shadow" title="Remove photo" type="button"><span class="material-symbols-outlined text-[13px]">close</span></button></div><div class="relative w-full h-[120px] rounded-xl bg-surface-container-lowest flex flex-col justify-between p-2.5 overflow-hidden border border-border shadow-sm"><div class="flex items-center space-x-1.5"><span class="w-2 h-2 rounded-full bg-[#ffcc00]"></span><span class="text-[10px] font-semibold text-text-secondary tracking-wide uppercase">MTN MoMo</span></div><div class="bg-surface-container-low p-1.5 rounded text-[10px] text-text-primary leading-tight font-mono line-clamp-3">MTN MoMo: Retrait débité 25,000 FCFA. Solde: 1,450 FCFA. Tx: 4098124</div><button class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-inverse-surface/80 hover:bg-inverse-surface text-inverse-on-surface flex items-center justify-center shadow" title="Remove photo" type="button"><span class="material-symbols-outlined text-[13px]">close</span></button></div></div><span class="font-caption text-text-secondary pt-0.5">2 of 5 images · photos are reduced automatically to save your data</span></div><div class="pt-2 border-t border-border flex items-center space-x-2 text-text-secondary"><span class="material-symbols-outlined text-[18px] text-outline shrink-0">location_off</span><p class="text-[12px] leading-snug">Location data is removed from photos before sending.</p></div></div>
+<!-- Sticky Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md px-space-md py-space-md flex items-center space-x-space-sm shadow-xl z-50"><button class="flex-1 h-12 rounded-xl bg-surface-container-low hover:bg-surface-container text-text-primary font-medium font-body-sm transition-colors flex items-center justify-center border border-border" onclick="alert('Skipped evidence addition');" type="button"><span>Skip</span></button><button class="flex-[1.4] h-12 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-medium font-body-sm transition-colors flex items-center justify-center space-x-1.5 shadow-md px-3" onclick="alert('Report saved offline! It will be transmitted when connection is restored.');" type="button"><span class="material-symbols-outlined text-[18px]">schedule_send</span><span class="text-[14px]">Save and send later</span></button></div>
+<!-- Toast Notification Container -->
+<div class="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none" id="toast-container">
+<div class="bg-inverse-surface text-inverse-on-surface px-space-md py-space-sm rounded-xl shadow-xl flex items-center space-x-2">
+<span class="material-symbols-outlined text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-sm" id="toast-message">Draft saved successfully</span>
+</div>
+</div>
+<!-- Interactive Logic Script -->
+<script>
+    let selectedSeverity = '';
+
+    function setSeverity(level, element) {
+      selectedSeverity = level;
+      document.getElementById('severity-value').value = level;
+      
+      // Reset all buttons
+      document.querySelectorAll('.severity-btn').forEach(btn => {
+        btn.classList.remove('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-bold');
+        btn.classList.add('text-text-secondary');
+      });
+
+      // Highlight selected
+      element.classList.remove('text-text-secondary');
+      element.classList.add('bg-surface-container-lowest', 'shadow-sm', 'text-primary', 'font-bold');
+    }
+
+    function validateField(fieldName) {
+      const field = document.getElementById(`incident-${fieldName}`);
+      const status = document.getElementById(`${fieldName}-status`);
+      
+      if (field.value.trim().length > 0) {
+        status.classList.remove('hidden');
+        status.classList.add('flex');
+      } else {
+        status.classList.remove('flex');
+        status.classList.add('hidden');
+      }
+    }
+
+    function useCurrentLocation() {
+      const locInput = document.getElementById('incident-location');
+      locInput.value = "Building 4, Floor 3, Server Room B";
+      validateField('location');
+    }
+
+    function saveDraft() {
+      const toast = document.getElementById('toast-container');
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+
+    function proceedToNext() {
+      const title = document.getElementById('incident-title').value;
+      const desc = document.getElementById('incident-desc').value;
+      const location = document.getElementById('incident-location').value;
+
+      if (!title || !desc || !selectedSeverity || !location) {
+        alert('Please fill in all required fields marked with * and select a severity level.');
+        return;
+      }
+
+      // Simulate navigation to Evidence Addition
+      alert('Proceeding to Step 3: Evidence Addition');
+    }
+  </script>
+</div></main></body></html>

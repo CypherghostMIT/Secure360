@@ -1,0 +1,219 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SFC Incident Reporter - Messaging Panel (Classic SOC Enterprise)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#ff9900',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+            'drawer': '-4px 0 24px rgba(0, 0, 0, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+
+    @keyframes pulse-dot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .typing-dot-1 { animation: pulse-dot 1.2s infinite ease-in-out; }
+    .typing-dot-2 { animation: pulse-dot 1.2s infinite ease-in-out 0.2s; }
+    .typing-dot-3 { animation: pulse-dot 1.2s infinite ease-in-out 0.4s; }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg relative">
+<!-- Toast Notification Feedback -->
+<div class="fixed top-5 right-6 z-[60] transform transition-all duration-300 flex items-center gap-3 px-4 py-3 bg-sfc-navy text-white rounded-lg shadow-xl border border-blue-400/30 opacity-0 pointer-events-none translate-y-[-100px]" id="toast-notification">
+<div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div class="text-[13px] font-medium" id="toast-message">Messaging panel minimized</div>
+</div>
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-sfc-border shadow-sm" data-purpose="soc-sidebar"><div class="flex flex-col flex-1"><div class="p-4 border-b border-sfc-border"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg bg-white p-1 flex items-center justify-center flex-shrink-0 border border-slate-200 shadow-2xs"><img alt="Secure360 Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcRfRgfIJ_d7DlPoFEae5MXcnZShcNOp7ypc6Z08rJqZkPC_nFsDftBJWU2tFZHfK5KJWOJC2pLJgkrhY3eA6pkUM2Qh9ls7Eht9CyDmwn0L4YO6WPJF1g65wucLl_CclCx1M7z-YlSE_22pF8AQ7AOIplHu2E6QawoTk8_eNwXDfwmmty4VMfnoaApDmp4WVPbYvnKcupu8A8w_OUSw81QyMo7-wNkAj3JsoQDOpZU33HELd3GHJ3-A3SAVvLwvErb68"></div><div class="min-w-0 flex-1"><h1 class="text-[15px] font-bold text-sfc-navy leading-tight truncate tracking-tight">Secure360</h1><span class="text-[11px] text-sfc-textMuted font-medium block truncate">SOC Operations</span></div></div></div><nav aria-label="Sidebar Navigation" class="p-3 space-y-1 overflow-y-auto flex-1"><a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><div class="flex items-center gap-3"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Queue</span></div><span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-600 border border-slate-200">4</span></a><a class="flex items-center justify-between px-3 py-2 rounded-md bg-sfc-primaryLight text-sfc-navy text-[13px] font-semibold border border-blue-200 transition-colors" href="javascript:void(0)"><div class="flex items-center gap-3"><svg class="w-4 h-4 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Incidents</span></div><span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-sfc-navy text-white">24</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><span class="">Statistics</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg><span class="">Reports</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg><span class="">Organizations</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg><span class="">Users</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg><span class="">Audit log</span></a><a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg><span class="">Settings</span></a></nav></div><div class="p-3 border-t border-sfc-border"><div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/80"><div class="flex items-center gap-2.5 min-w-0"><div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">JN</div><div class="truncate"><p class="text-[12px] font-semibold text-slate-800 leading-tight truncate">Jean-Paul Nguemo</p><p class="text-[10px] text-slate-500 truncate">SOC Analyst</p></div></div><button class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-md transition-colors" title="Sign Out"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div></aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between z-20" data-purpose="top-header"><div class="flex items-center gap-4 flex-wrap"><a class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-sfc-navy hover:text-sfc-navyHover px-2 py-1 rounded hover:bg-slate-100 transition-colors" href="javascript:void(0)"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Back to Incidents</span></a><div class="h-5 w-px bg-sfc-border hidden sm:block"></div><div class="flex items-center gap-2.5"><h2 class="text-[18px] font-bold text-sfc-textPrimary tracking-tight">SFC-2026-001234</h2><span class="text-[13px] text-slate-500 font-medium">· Mobile Money fraud</span></div><span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">In progress</span><span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">Critical</span></div><div class="flex items-center gap-3"><button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-sfc-border hover:bg-slate-50 text-slate-700 text-[13px] font-medium transition-colors" onclick="toggleMessagesDrawer()"><svg class="w-4 h-4 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Open Messages</span><span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-sfc-navy text-white">4</span></button><div class="h-6 w-px bg-sfc-border hidden md:block"></div><div class="flex items-center gap-2.5 pl-1"><div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs shadow-xs">JN</div><div class="text-left hidden lg:block"><div class="text-[13px] font-semibold text-sfc-textPrimary leading-none">Jean-Paul Nguemo</div><div class="text-[11px] text-sfc-textMuted mt-0.5">SOC Analyst</div></div></div></div></header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Main Scrollable Content Area (Background Screen) -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg"><div class="max-w-[1440px] mx-auto"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"><div class="lg:col-span-7 space-y-6"><section class="bg-white rounded-lg border border-sfc-border p-6 shadow-card-subtle"><div class="flex items-start justify-between gap-4 pb-4 border-b border-sfc-border"><div><span class="text-[11px] font-bold uppercase tracking-wider text-sfc-navy bg-sfc-primaryLight px-2.5 py-0.5 rounded">MOBILE MONEY FRAUD</span><h3 class="text-[18px] font-bold text-sfc-textPrimary mt-2 leading-snug">Mobile Money fraud</h3><p class="text-[13px] text-slate-500 mt-1 flex items-center gap-1.5"><span class="">Reported by</span><span class="inline-flex items-center gap-1 font-semibold text-slate-800"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>Confidential reporter</span><span class="">· Kamdem Distribution SARL</span></p></div><span class="inline-flex items-center px-2.5 py-1 rounded bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20 text-[11px] font-semibold flex-shrink-0">In progress</span></div><div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4 pt-1"><div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70"><span class="text-[11px] text-slate-500 block font-medium">Organization</span><span class="text-[13px] font-bold text-slate-800 mt-0.5 block truncate">Kamdem Distribution SARL</span></div><div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70"><span class="text-[11px] text-slate-500 block font-medium">Disputed Amount</span><span class="text-[13px] font-bold text-rose-700 mt-0.5 block">25,000 FCFA</span></div><div class="p-3 rounded-lg bg-slate-50 border border-slate-200/70"><span class="text-[11px] text-slate-500 block font-medium">Report Channel</span><span class="text-[13px] font-bold text-slate-800 mt-0.5 block">Secure360 mobile app</span></div></div><div class="mt-5"><h4 class="text-[12px] font-bold text-slate-700 uppercase tracking-wider mb-2">Case Summary &amp; Description</h4><div class="text-[13px] leading-relaxed text-slate-700 bg-slate-50/60 p-4 rounded-lg border border-slate-200">25,000 FCFA debited from an Orange Money account, reported from the Secure360 mobile app. Incident reported by confidential reporter following fraudulent SMS notification.</div></div></section><section class="bg-white rounded-lg border border-sfc-border p-6 shadow-card-subtle"><h3 class="text-[15px] font-bold text-sfc-textPrimary pb-3 border-b border-sfc-border">Evidence</h3><div class="space-y-3 mt-4"><div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded bg-blue-50 text-blue-700 flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><div class="text-[13px] font-semibold text-slate-800">Orange_SMS_screenshot.jpg</div><div class="text-[11px] text-slate-500">Orange Money debit SMS notification · Uploaded by Confidential reporter</div></div></div><button class="px-2.5 py-1 text-[12px] font-semibold text-sfc-navy hover:underline" onclick="triggerToast('Opening SMS notification screenshot...')">View File</button></div></div></section></div><div class="lg:col-span-5 space-y-6"><section class="bg-white rounded-lg border border-sfc-border p-6 shadow-card-subtle"><h3 class="text-[15px] font-bold text-sfc-textPrimary pb-3 border-b border-sfc-border">Assigned Investigator</h3><div class="mt-4 flex items-center justify-between p-3.5 rounded-lg bg-slate-50 border border-slate-200"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-sm">JN</div><div><div class="text-[13px] font-bold text-sfc-textPrimary">Jean-Paul Nguemo</div><div class="text-[11px] text-sfc-textMuted">SOC Analyst · Incident Responder</div></div></div><span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span class="">Active</span></span></div></section><section class="bg-white rounded-lg border border-sfc-border p-6 shadow-card-subtle"><h3 class="text-[15px] font-bold text-sfc-textPrimary pb-3 border-b border-sfc-border">Incident Metadata</h3><div class="space-y-3 mt-4 text-[13px]"><div class="flex justify-between py-1.5 border-b border-slate-100"><span class="text-slate-500">Reported Date</span><span class="font-medium text-slate-800">31 Oct 2026, 10:45 WAT</span></div><div class="flex justify-between py-1.5 border-b border-slate-100"><span class="text-slate-500">SLA Target</span><span class="font-medium text-emerald-700 font-semibold">Response within 15 min (Met)</span></div><div class="flex justify-between py-1.5 border-b border-slate-100"><span class="text-slate-500">Carrier Contact</span><span class="font-medium text-slate-800">Orange Money Cameroon Fraud Desk</span></div><div class="flex justify-between py-1.5"><span class="text-slate-500">Primary Reporter Contact</span><span class="font-medium text-slate-800">+237 6 77 12 34 56</span></div></div></section></div></div></div></main>
+<!-- END: Background Screen -->
+<!-- ========================================================================= -->
+<!-- BEGIN: Dimmed Backdrop Overlay (rgba(0,0,0,0.4))                         -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px] transition-opacity duration-300 opacity-0 pointer-events-none" id="drawer-backdrop" onclick="toggleMessagesDrawer()"></div>
+<!-- ========================================================================= -->
+<!-- BEGIN: Slide-in Drawer Panel (Exactly 400px wide, anchored to right side) -->
+<!-- ========================================================================= -->
+<aside aria-label="Incident Messages Panel" class="fixed top-0 right-0 w-[480px] h-screen bg-white z-50 flex flex-col shadow-2xl border-l border-[#E0E0E0] transition-transform duration-300 transform translate-x-0" id="messages-drawer"><div class="h-16 px-5 py-3 border-b border-slate-200 bg-white flex items-center justify-between flex-shrink-0"><div class="min-w-0 flex-1 pr-2"><div class="flex items-center gap-2"><h2 class="text-[15px] font-bold text-sfc-navy leading-none">Conversation · SFC-2026-001234</h2><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]">In progress</span></div><p class="text-[12px] text-slate-500 truncate mt-1 font-medium">Confidential reporter · Kamdem Distribution SARL</p></div><button aria-label="Close conversation panel" class="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0" onclick="toggleMessagesDrawer()"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg></button></div><div class="border-b border-slate-200 bg-white px-5 pt-2 flex items-center gap-4 flex-shrink-0"><button class="pb-2.5 text-[13px] font-bold border-b-2 border-sfc-navy text-sfc-navy flex items-center gap-2 transition" id="tab-btn-reporter" onclick="switchDrawerTab('reporter')"><span class="">With reporter</span><span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-sfc-navy text-white">4</span></button><button class="pb-2.5 text-[13px] font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 transition" id="tab-btn-internal" onclick="switchDrawerTab('internal')"><svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg><span class="">Internal notes</span><span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">2</span></button></div><div class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50" id="tab-content-reporter"><div class="flex items-center justify-center my-1"><span class="px-2.5 py-0.5 text-[11px] font-medium text-slate-500 bg-white border border-slate-200 rounded-full shadow-2xs">Today · 31 Oct 2026</span></div><div class="flex items-start gap-2.5 justify-end max-w-full"><div class="flex-1 max-w-[85%] flex flex-col items-end"><div class="flex items-center gap-1.5 mb-1"><span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">SOC Analyst</span><span class="text-[12px] font-semibold text-sfc-navy">Jean-Paul Nguemo</span><span class="text-[10px] text-slate-400 font-mono">10:52 WAT</span></div><div class="bg-sfc-navy text-white rounded-2xl rounded-tr-sm p-3 text-[13px] shadow-sm leading-relaxed text-left">Hello, this is Jean-Paul from Security First Cameroon SOC. We have taken over your report regarding the unauthorized Orange Money activity. We are actively investigating.</div></div><div class="w-7 h-7 rounded-full bg-sfc-navy text-white font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">JN</div></div><div class="flex items-start gap-2.5 justify-end max-w-full"><div class="flex-1 max-w-[85%] flex flex-col items-end"><div class="flex items-center gap-1.5 mb-1"><span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">SOC Analyst</span><span class="text-[12px] font-semibold text-sfc-navy">Jean-Paul Nguemo</span><span class="text-[10px] text-slate-400 font-mono">10:55 WAT</span></div><div class="bg-sfc-navy text-white rounded-2xl rounded-tr-sm p-3 text-[13px] shadow-sm leading-relaxed text-left">In the meantime, could you confirm if your Orange Money account has been blocked or if you are still receiving SMS alerts on that device?</div></div><div class="w-7 h-7 rounded-full bg-sfc-navy text-white font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">JN</div></div><div class="flex items-start gap-2.5 max-w-full"><div class="w-7 h-7 rounded-full bg-slate-200 border border-slate-300 text-slate-700 font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">CR</div><div class="flex-1 max-w-[85%]"><div class="flex items-center gap-1.5 mb-1"><span class="text-[12px] font-semibold text-slate-800">Confidential reporter</span><span class="text-[10px] text-slate-500">(Kamdem Distribution)</span><span class="text-[10px] text-slate-400 font-mono">11:02 WAT</span></div><div class="bg-[#f1f5f9] text-slate-800 rounded-2xl rounded-tl-sm p-3 text-[13px] shadow-sm border border-slate-200/60 leading-relaxed"><p class="">Yes, I called Orange customer service, the account is blocked. Here is the SMS I received.</p><div class="mt-2.5 p-2 bg-white rounded-lg border border-slate-200 flex items-center justify-between gap-2 hover:bg-slate-50 transition cursor-pointer shadow-2xs group" onclick="triggerToast('Viewing Orange_SMS_screenshot.jpg...')"><div class="flex items-center gap-2 min-w-0"><div class="w-8 h-8 rounded bg-blue-50 text-blue-700 flex items-center justify-center flex-shrink-0 font-bold text-[10px] border border-blue-200"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="14" rx="2" width="18" x="3" y="5"></rect><circle cx="8.5" cy="10.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div><div class="truncate"><div class="text-[12px] font-medium text-slate-800 truncate group-hover:text-sfc-navy">Orange_SMS_screenshot.jpg</div><div class="text-[10px] text-slate-400">Image Attachment · Debit SMS</div></div></div><button class="px-2 py-1 text-[11px] font-semibold text-sfc-navy hover:underline">View</button></div></div></div></div><div class="flex items-start gap-2.5 justify-end max-w-full"><div class="flex-1 max-w-[85%] flex flex-col items-end"><div class="flex items-center gap-1.5 mb-1"><span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">SOC Analyst</span><span class="text-[12px] font-semibold text-sfc-navy">Jean-Paul Nguemo</span><span class="text-[10px] text-slate-400 font-mono">11:08 WAT</span></div><div class="bg-sfc-navy text-white rounded-2xl rounded-tr-sm p-3 text-[13px] shadow-sm leading-relaxed text-left">Thank you. We have logged the incident and contacted Orange Money Cameroon fraud desk directly to trace the transaction. Stand by for our callback.</div></div><div class="w-7 h-7 rounded-full bg-sfc-navy text-white font-bold text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">JN</div></div></div><div class="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FFFDF5] hidden" id="tab-content-internal"><div class="p-3 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-2 text-amber-900 text-[12px] font-semibold shadow-2xs"><svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" ry="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg><span class="">Internal notes · Not visible to the client (SFC staff only)</span></div><div class="bg-white rounded-xl border border-amber-200/80 p-3.5 shadow-2xs space-y-1.5"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-amber-200 text-amber-900 font-bold text-[10px] flex items-center justify-center">EM</div><span class="text-[12px] font-bold text-slate-800">Estelle Mbarga</span><span class="text-[10px] text-slate-400 font-mono">11:15 WAT</span></div><span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Lead Analyst</span></div><p class="text-[13px] text-slate-700 leading-relaxed">Same SMS sender number (+237 6 51 xx xx xx) seen at Bamenda Agro Cooperative yesterday (SFC-2026-001221). Flagged to MTN anti-fraud liaison.</p></div><div class="bg-white rounded-xl border border-amber-200/80 p-3.5 shadow-2xs space-y-1.5"><div class="flex items-center justify-between"><div class="flex items-center gap-2"><div class="w-6 h-6 rounded-full bg-amber-200 text-amber-900 font-bold text-[10px] flex items-center justify-center">YF</div><span class="text-[12px] font-bold text-slate-800">Yannick Fotso</span><span class="text-[10px] text-slate-400 font-mono">11:30 WAT</span></div><span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Fraud Operations</span></div><p class="text-[13px] text-slate-700 leading-relaxed">Carrier confirmed recipient wallet blocked with 180,000 FCFA remaining balance. Reversal procedure initiated.</p></div></div><div class="p-4 bg-white border-t border-slate-200 flex-shrink-0 space-y-3" id="drawer-composer-container"><div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="quick-replies-bar"><span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex-shrink-0 mr-1">Quick:</span><button class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition-colors flex-shrink-0 truncate" onclick="insertQuickReply('We have taken over your report')">We have taken over your report</button><button class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition-colors flex-shrink-0 truncate" onclick="insertQuickReply('Can you send a screenshot?')">Can you send a screenshot?</button><button class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition-colors flex-shrink-0 truncate" onclick="insertQuickReply('Your incident is resolved')">Your incident is resolved</button></div><form class="flex items-center gap-2" onsubmit="handleDrawerSend(event)"><button class="p-2 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded-full transition flex-shrink-0" onclick="triggerToast('Attach confirmation file or screenshot')" title="Attach file" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg></button><div class="flex-1 relative"><input autocomplete="off" class="w-full border border-slate-300 rounded-full px-4 py-2 text-[13px] focus:outline-none focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy placeholder:text-slate-400 text-slate-800 bg-slate-50/60 focus:bg-white transition" id="drawer-input-field" placeholder="Type a message to Confidential reporter..." type="text"></div><button aria-label="Send message" class="px-4 h-9 rounded-full bg-sfc-navy hover:bg-sfc-navyHover text-white flex items-center justify-center flex-shrink-0 text-[13px] font-semibold shadow-xs transition active:scale-95" id="drawer-send-btn" type="submit">Send</button></form><div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-0.5"><span></span><span class="text-slate-400">WAT Timezone (UTC+1)</span></div></div></aside>
+<!-- END: Slide-in Drawer Panel -->
+<!-- Interactive Client Behaviors -->
+<script>
+  let chatMode = 'public';
+
+  function setChatMode(mode) {
+    chatMode = mode;
+    const pubBtn = document.getElementById('mode-public-btn');
+    const intBtn = document.getElementById('mode-internal-btn');
+    const input = document.getElementById('drawer-input-field');
+
+    if (mode === 'internal') {
+      intBtn.className = 'px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-900 shadow-xs font-semibold transition';
+      pubBtn.className = 'px-2.5 py-0.5 rounded-full text-slate-500 hover:text-slate-800 transition';
+      input.placeholder = 'Write an internal SOC note (hidden from reporter)...';
+    } else {
+      pubBtn.className = 'px-2.5 py-0.5 rounded-full bg-white text-[#003366] shadow-xs font-semibold transition';
+      intBtn.className = 'px-2.5 py-0.5 rounded-full text-slate-500 hover:text-slate-800 transition';
+      input.placeholder = 'Type a message to reporter or /quick-reply...';
+    }
+  }
+
+  function toggleMessagesDrawer() {
+    const drawer = document.getElementById('messages-drawer');
+    const backdrop = document.getElementById('drawer-backdrop');
+
+    if (drawer.classList.contains('translate-x-0')) {
+      drawer.classList.remove('translate-x-0');
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      triggerToast('Messaging panel minimized');
+    } else {
+      drawer.classList.remove('translate-x-full');
+      drawer.classList.add('translate-x-0');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    }
+  }
+
+  function handleDrawerSend(e) {
+    e.preventDefault();
+    const input = document.getElementById('drawer-input-field');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const container = document.getElementById('chat-stream-container');
+    const typingIndicator = document.getElementById('typing-indicator-row');
+    const timeNow = new Date().toISOString().substring(11, 16) + ' UTC';
+    const isInternal = (chatMode === 'internal');
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'flex items-start gap-2.5 justify-end max-w-full';
+    msgDiv.innerHTML = `
+      <div class="flex-1 max-w-[82%] flex flex-col items-end">
+        <div class="flex items-center gap-1.5 mb-1">
+          <span class="text-[10px] ${isInternal ? 'text-amber-800 bg-amber-100 px-1 rounded border border-amber-300' : 'text-slate-500'} font-semibold uppercase tracking-wider">
+            ${isInternal ? 'Internal SOC Note' : 'Tier 3 Lead'}
+          </span>
+          <span class="text-[12px] font-semibold text-[#003366]">Alex Vance</span>
+        </div>
+        <div class="${isInternal ? 'bg-amber-50 border border-amber-300 text-amber-950' : 'bg-[#003366] text-white'} rounded-2xl rounded-tr-sm p-3 text-sm shadow-sm leading-relaxed text-left">
+          ${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>
+        <div class="text-[10px] text-slate-400 mt-1 pr-1 font-mono">
+          ${timeNow} · Sent
+        </div>
+      </div>
+      <div class="w-7 h-7 rounded-full bg-[#003366] text-white font-bold text-[11px] flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+        AV
+      </div>
+    `;
+
+    if (typingIndicator) {
+      container.insertBefore(msgDiv, typingIndicator);
+    } else {
+      container.appendChild(msgDiv);
+    }
+
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+    triggerToast(isInternal ? 'Internal SOC note posted' : 'Message dispatched to Sarah Jenkins');
+  }
+
+  function triggerToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.innerText = message;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    }, 3200);
+  }
+
+  function toggleActionsMenu() {
+    const menu = document.getElementById('actions-menu');
+    menu.classList.toggle('hidden');
+  }
+</script>
+</div>
+
+
+
+</body></html>

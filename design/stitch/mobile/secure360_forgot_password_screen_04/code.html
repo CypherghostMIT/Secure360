@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Secure360 - Forgot Password</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-container": "#799dd6",
+            "surface-bright": "#f9f9fe",
+            "tertiary-container": "#592300",
+            "on-primary-fixed-variant": "#1f477b",
+            "on-tertiary-fixed-variant": "#723610",
+            "on-background": "#1a1c1f",
+            "on-primary": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "surface-container-high": "#e8e8ed",
+            "surface-container-low": "#f4f3f8",
+            "border": "#e0e0e0",
+            "primary-fixed-dim": "#a7c8ff",
+            "on-primary-fixed": "#001b3c",
+            "secondary-fixed": "#dae4ee",
+            "surface-container-lowest": "#ffffff",
+            "secondary": "#566068",
+            "surface": "#f8f9fc",
+            "tertiary-fixed": "#ffdbca",
+            "primary": "#001e40",
+            "primary-container": "#003366",
+            "tertiary": "#381300",
+            "outline": "#737780",
+            "secondary-container": "#dae4ee",
+            "surface-tint": "#3a5f94",
+            "success": "#006633",
+            "on-tertiary": "#ffffff",
+            "outline-variant": "#c3c6d1",
+            "tertiary-fixed-dim": "#ffb690",
+            "on-surface": "#1a1c1f",
+            "background": "#ffffff",
+            "text-secondary": "#666666",
+            "on-tertiary-fixed": "#341100",
+            "surface-variant": "#e2e2e7",
+            "surface-dim": "#dad9de",
+            "secondary-fixed-dim": "#bec8d1",
+            "inverse-surface": "#2f3034",
+            "surface-container-highest": "#e2e2e7",
+            "on-surface-variant": "#43474f",
+            "on-tertiary-container": "#d8885c",
+            "primary-fixed": "#d5e3ff",
+            "inverse-primary": "#a7c8ff",
+            "on-secondary-fixed-variant": "#3e4850",
+            "on-secondary-fixed": "#131d24",
+            "text-primary": "#1e1e1e",
+            "danger": "#cc0000",
+            "on-secondary-container": "#5c666e",
+            "inverse-on-surface": "#f1f0f5",
+            "surface-container": "#eeedf2",
+            "on-error": "#ffffff",
+            "error": "#ba1a1a"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-xl": "2rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "margin": "1rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "caption": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full flex items-center justify-center bg-surface-dim font-body-md text-text-primary antialiased p-0 sm:p-4">
+<!-- Mobile Frame strictly 390x844 -->
+<main class="w-[390px] h-[844px] bg-background flex flex-col justify-between overflow-y-auto shadow-2xl relative">
+<!-- Top Content Area -->
+<div class="flex flex-col w-full">
+<!-- Top Navigation: Focused View Minimal Back Bar -->
+<header class="w-full pt-4 pb-2 px-4 flex items-center justify-between">
+<a aria-label="Return to login" class="flex items-center justify-center size-12 -ml-2 rounded-xl text-text-primary hover:bg-surface-container transition-colors" href="#login">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</a>
+<div class="text-caption font-semibold tracking-wider text-secondary uppercase">
+          Secure360
+        </div>
+<div class="size-10"></div>
+</header>
+<!-- Headings -->
+<section class="px-5 pt-3 pb-2">
+<h1 class="text-headline-lg font-bold text-text-primary leading-tight">
+          Forgot password?
+        </h1>
+<p class="text-body-md text-text-secondary mt-2 leading-relaxed">
+          Enter your work e-mail. If an account exists, we will send you a link to choose a new password.
+        </p>
+</section>
+<!-- Form Section -->
+<form class="px-5 pt-4 pb-2 flex flex-col gap-4" onsubmit="event.preventDefault();">
+<div class="flex flex-col gap-2">
+<label class="text-body-sm font-medium text-text-primary" for="work-email">
+            Work e-mail
+          </label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-text-secondary pointer-events-none text-[20px]">
+              mail
+            </span>
+<input class="w-full h-12 pl-11 pr-4 bg-background border border-border rounded-xl text-body-md text-text-primary placeholder:text-outline focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-colors" id="work-email" name="email" placeholder="name@company.cm" type="email" value="paul.nguema@douala-logistics.cm"/>
+</div>
+</div>
+<!-- Primary Action Button -->
+<button class="w-full h-12 bg-primary-container hover:bg-primary active:bg-primary text-on-primary font-medium text-body-md rounded-xl flex items-center justify-center transition-colors shadow-sm" type="submit">
+          Send link
+        </button>
+</form>
+<!-- Success State Card (Active Notification) -->
+<section class="px-5 pt-4 pb-2">
+<div class="bg-[#E8F5E9] border border-[#C8E6C9] rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-success shrink-0 text-[24px]" style="font-variation-settings: 'FILL' 1;">
+              check_circle
+            </span>
+<div class="flex flex-col">
+<h2 class="text-body-sm font-semibold text-text-primary">
+                Check your e-mail
+              </h2>
+<p class="text-body-sm text-text-primary mt-1 leading-snug">
+                If an account exists for this address, a link has been sent. It is valid for <span class="font-medium text-success">30 minutes</span>.
+              </p>
+</div>
+</div>
+<!-- Secondary Action Inside Card -->
+<a class="w-full h-12 mt-1 border border-primary-container bg-transparent hover:bg-primary-container/5 text-primary-container font-medium text-body-md rounded-xl flex items-center justify-center transition-colors" href="#login">
+            Back to sign in
+          </a>
+</div>
+</section>
+</div>
+<!-- Empty Spacer Footer (Replaces previous badge with clean spacer per constraints) -->
+<footer class="w-full py-6 flex items-center justify-center">
+<div class="w-12 h-1 bg-surface-variant rounded-full"></div>
+</footer>
+</main>
+</body></html>

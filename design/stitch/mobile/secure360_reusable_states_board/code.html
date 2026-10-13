@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure360 - Reusable States Board</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            sfc: {
+              blue: '#003366',
+              lightBlue: '#E6F0FA',
+              dark: '#1E1E1E',
+              gray: '#666666',
+              border: '#E0E0E0',
+              bg: '#F8F9FC',
+              danger: '#CC0000',
+              success: '#006633',
+              successBg: '#E8F5E9',
+              amber: '#B26A00',
+              amberBg: '#FFF8E1',
+              amberBorder: '#FFE082',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .45; }
+    }
+    .animate-skeleton {
+      animation: pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-[#1E1E1E] font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-8">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Header Section -->
+    <header class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#003366] text-white font-bold text-xs tracking-wider">
+            SFC
+          </span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#003366] bg-[#E6F0FA] px-2 py-0.5 rounded">
+            Secure360 Enterprise Design System
+          </span>
+        </div>
+        <h1 class="text-2xl font-bold text-[#003366]">Reusable Mobile States Board</h1>
+        <p class="text-sm text-[#666666] mt-0.5">Production system states & feedback patterns for non-technical employees (Cameroon SME & Administrations)</p>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs text-[#666666] bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-lg">
+        <div><span class="font-semibold text-slate-800">Primary:</span> #003366</div>
+        <span class="text-slate-300">|</span>
+        <div><span class="font-semibold text-slate-800">Touch Target:</span> ≥ 48px</div>
+        <span class="text-slate-300">|</span>
+        <div><span class="font-semibold text-slate-800">Card Radius:</span> 8px</div>
+      </div>
+    </header>
+
+    <!-- States Grid: 6 Distinct Component States -->
+    <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- 1. Offline Banner State -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#FFF8E1] text-[#B26A00] font-bold text-xs flex items-center justify-center border border-[#FFE082]">1</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Offline Banner</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-[#FFF8E1] text-[#B26A00] px-2 py-0.5 rounded-full border border-[#FFE082]">Connectivity</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper -->
+          <div class="w-full max-w-sm mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <!-- Simulated Top App Bar -->
+            <div class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="text-slate-700 text-lg">←</span>
+                <span class="text-sm font-bold text-[#1E1E1E]">My incidents</span>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+            </div>
+
+            <!-- COMPONENT: Offline Banner (Amber) -->
+            <div class="bg-[#FFF8E1] border-b border-[#FFE082] px-3.5 py-2.5 flex items-start gap-2.5 shadow-sm">
+              <svg class="w-4 h-4 text-[#B26A00] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829M6.343 6.343a9 9 0 000 12.728m0 0l2.829-2.829m-2.829 2.829L3 21m2.829-14.657a5 5 0 017.071 0M3 3l18 18" />
+              </svg>
+              <div class="text-xs text-[#B26A00] leading-snug">
+                <span class="font-bold">You're offline</span> · Your reports will be sent automatically.
+              </div>
+            </div>
+
+            <!-- Preview of list items underneath -->
+            <div class="p-3.5 space-y-2 opacity-80 bg-slate-50/50">
+              <div class="bg-white p-2.5 rounded-lg border border-[#E0E0E0] text-xs flex justify-between items-center">
+                <div>
+                  <div class="font-medium text-[#1E1E1E]">Suspicious SMS from bank</div>
+                  <div class="text-[11px] text-[#666666]">Saved offline · 09:20</div>
+                </div>
+                <span class="text-[10px] bg-[#FFF8E1] text-[#B26A00] px-2 py-0.5 rounded font-semibold">Queued</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-lg border border-[#E0E0E0] text-xs flex justify-between items-center">
+                <div>
+                  <div class="font-medium text-[#1E1E1E]">SIM card blocked unexpectedly</div>
+                  <div class="text-[11px] text-[#666666]">SFC-2026-001230 · Yesterday</div>
+                </div>
+                <span class="text-[10px] bg-[#E8F5E9] text-[#006633] px-2 py-0.5 rounded font-semibold">Sent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> Reassuring everyday language ("sent automatically"), zero technical error codes.
+        </div>
+      </section>
+
+      <!-- 2. Loading Skeleton State -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">2</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Loading Skeleton</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200">Pending</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper -->
+          <div class="w-full max-w-sm mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <!-- Simulated Header with Skeleton Search -->
+            <div class="p-3.5 border-b border-slate-100 bg-white space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="h-4 w-28 bg-slate-200 rounded animate-skeleton"></div>
+                <div class="h-5 w-8 bg-slate-200 rounded-full animate-skeleton"></div>
+              </div>
+              <div class="h-9 w-full bg-slate-100 rounded-lg border border-slate-200 animate-skeleton"></div>
+            </div>
+
+            <!-- COMPONENT: 3 Grey Skeleton Placeholder Cards -->
+            <div class="p-3.5 space-y-3 bg-[#F8F9FC]">
+              <!-- Skeleton Card 1 -->
+              <div class="bg-white p-3.5 rounded-lg border border-[#E0E0E0] shadow-sm animate-skeleton space-y-2.5">
+                <div class="flex justify-between items-center">
+                  <div class="h-3 w-28 bg-slate-300 rounded"></div>
+                  <div class="h-4 w-16 bg-slate-200 rounded"></div>
+                </div>
+                <div class="h-4 w-3/4 bg-slate-300 rounded"></div>
+                <div class="flex gap-2 pt-1">
+                  <div class="h-3 w-20 bg-slate-200 rounded"></div>
+                  <div class="h-3 w-14 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+
+              <!-- Skeleton Card 2 -->
+              <div class="bg-white p-3.5 rounded-lg border border-[#E0E0E0] shadow-sm animate-skeleton space-y-2.5" style="animation-delay: 150ms;">
+                <div class="flex justify-between items-center">
+                  <div class="h-3 w-24 bg-slate-300 rounded"></div>
+                  <div class="h-4 w-14 bg-slate-200 rounded"></div>
+                </div>
+                <div class="h-4 w-2/3 bg-slate-300 rounded"></div>
+                <div class="flex gap-2 pt-1">
+                  <div class="h-3 w-16 bg-slate-200 rounded"></div>
+                  <div class="h-3 w-20 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+
+              <!-- Skeleton Card 3 -->
+              <div class="bg-white p-3.5 rounded-lg border border-[#E0E0E0] shadow-sm animate-skeleton space-y-2.5" style="animation-delay: 300ms;">
+                <div class="flex justify-between items-center">
+                  <div class="h-3 w-32 bg-slate-300 rounded"></div>
+                  <div class="h-4 w-16 bg-slate-200 rounded"></div>
+                </div>
+                <div class="h-4 w-4/5 bg-slate-300 rounded"></div>
+                <div class="flex gap-2 pt-1">
+                  <div class="h-3 w-24 bg-slate-200 rounded"></div>
+                  <div class="h-3 w-12 bg-slate-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> Mimics exact 8px radius card structure and layout to reduce perceived latency.
+        </div>
+      </section>
+
+      <!-- 3. Empty State -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#E6F0FA] text-[#003366] font-bold text-xs flex items-center justify-center">3</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Empty State</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-[#E6F0FA] text-[#003366] px-2 py-0.5 rounded-full">Encouraging</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper -->
+          <div class="w-full max-w-sm mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <!-- Simulated Screen Header -->
+            <div class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+              <span class="text-sm font-bold text-[#1E1E1E]">My incidents (0)</span>
+              <span class="text-xs text-[#666666]">SFC Secure</span>
+            </div>
+
+            <!-- COMPONENT: Empty State of "My incidents" -->
+            <div class="p-6 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <!-- Shield Illustration / Icon Container -->
+              <div class="w-16 h-16 rounded-full bg-[#E6F0FA] flex items-center justify-center text-[#003366] mb-4 shadow-sm">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </div>
+
+              <!-- Content Copy (Zero-blame, reassuring) -->
+              <h3 class="text-lg font-bold text-[#1E1E1E] mb-1.5">No reports yet</h3>
+              <p class="text-xs text-[#666666] leading-relaxed max-w-[240px] mb-5">
+                If something looks suspicious, report it — it takes 2 minutes.
+              </p>
+
+              <!-- Primary Action Button (min 48px target) -->
+              <button class="w-full py-3 px-4 bg-[#003366] text-white font-medium text-sm rounded-lg hover:bg-[#002244] active:bg-[#001a33] transition-colors flex items-center justify-center gap-2 shadow-sm min-h-[48px]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Report an incident
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> Reassuring tone that builds confidence to report without hesitation or fear.
+        </div>
+      </section>
+
+      <!-- 4. Error State with Retry -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-red-100 text-[#CC0000] font-bold text-xs flex items-center justify-center">4</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Error State with Retry</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-red-50 text-[#CC0000] px-2 py-0.5 rounded-full border border-red-200">Failure Handling</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper -->
+          <div class="w-full max-w-sm mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+            <!-- Simulated Screen Header -->
+            <div class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+              <span class="text-sm font-bold text-[#1E1E1E]">My incidents</span>
+              <span class="text-xs text-red-500 font-medium">Sync issue</span>
+            </div>
+
+            <!-- COMPONENT: Error State -->
+            <div class="p-6 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <!-- Cloud-Off Icon Container -->
+              <div class="w-16 h-16 rounded-full bg-red-50 text-[#CC0000] flex items-center justify-center mb-4 border border-red-100">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18" />
+                </svg>
+              </div>
+
+              <!-- Error Copy -->
+              <h3 class="text-lg font-bold text-[#1E1E1E] mb-1.5">We couldn't load your reports</h3>
+              <p class="text-xs text-[#666666] leading-relaxed max-w-[240px] mb-5">
+                Check your connection and try again.
+              </p>
+
+              <!-- Try Again Button (min 48px target) -->
+              <button class="w-full py-3 px-4 bg-[#003366] text-white font-medium text-sm rounded-lg hover:bg-[#002244] active:bg-[#001a33] transition-colors flex items-center justify-center gap-2 shadow-sm min-h-[48px]">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Try again
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> Clear problem statement with immediate actionable recovery and calm messaging.
+        </div>
+      </section>
+
+      <!-- 5. Session Expired Dialog State -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-slate-800 text-white font-bold text-xs flex items-center justify-center">5</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Session Expired Dialog</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full border border-slate-200">Security Modal</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper with Modal Overlay -->
+          <div class="w-full max-w-sm mx-auto bg-slate-800/60 rounded-xl border border-slate-300 p-4 min-h-[352px] flex items-center justify-center relative backdrop-blur-sm shadow-inner">
+            
+            <!-- COMPONENT: Dialog Card -->
+            <div class="bg-white w-full rounded-xl border border-slate-200 p-5 shadow-xl text-center space-y-4">
+              <!-- Security Keyhole / Lock Icon -->
+              <div class="w-12 h-12 rounded-full bg-[#E6F0FA] text-[#003366] flex items-center justify-center mx-auto">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+
+              <!-- Dialog Copy -->
+              <div>
+                <h3 class="text-base font-bold text-[#1E1E1E] mb-1">Session expired</h3>
+                <p class="text-xs text-[#666666] leading-relaxed">
+                  For your security, please sign in again.
+                </p>
+              </div>
+
+              <!-- Primary Action Button (Sign in) -->
+              <button class="w-full py-3 px-4 bg-[#003366] text-white font-medium text-sm rounded-lg hover:bg-[#002244] active:bg-[#001a33] transition-colors flex items-center justify-center gap-1.5 shadow-sm min-h-[48px]">
+                Sign in
+                <span class="text-base">→</span>
+              </button>
+
+              <!-- Reassurance Footer Note -->
+              <div class="pt-1 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-[#006633] font-medium">
+                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Your saved reports are kept.</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> Relieves user anxiety with prominent reassurance that offline/draft work is safe.
+        </div>
+      </section>
+
+      <!-- 6. Toast Success State -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+        <div class="border-b border-slate-200 px-4 py-3 bg-slate-50/60 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-[#E8F5E9] text-[#006633] font-bold text-xs flex items-center justify-center border border-green-200">6</span>
+            <h2 class="text-sm font-bold text-[#1E1E1E]">Toast Success</h2>
+          </div>
+          <span class="text-[11px] font-medium bg-[#E8F5E9] text-[#006633] px-2 py-0.5 rounded-full border border-green-200">Feedback</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-center bg-[#F8F9FC]">
+          <!-- Mobile Screen Viewport Wrapper -->
+          <div class="w-full max-w-sm mx-auto bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex flex-col min-h-[352px] relative">
+            <!-- Simulated Screen Top -->
+            <div class="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between">
+              <span class="text-sm font-bold text-[#1E1E1E]">Home</span>
+              <span class="w-6 h-6 rounded-full bg-[#003366] text-white text-[10px] font-bold flex items-center justify-center">AK</span>
+            </div>
+
+            <!-- Page content mockup in background -->
+            <div class="p-4 space-y-3 opacity-60">
+              <div class="p-3 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-500">
+                Welcome back, Aimé
+              </div>
+              <div class="p-3 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-500">
+                Need to report something today?
+              </div>
+            </div>
+
+            <!-- COMPONENT: Toast Success (Green) Floating Overlay -->
+            <div class="absolute top-14 inset-x-3 z-10 transition-all duration-300">
+              <div class="bg-[#006633] text-white rounded-lg px-3.5 py-3 shadow-lg flex items-center justify-between border border-emerald-800">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div class="text-xs font-medium">
+                    <span class="font-bold">Report sent</span> · <span class="font-mono text-emerald-100">SFC-2026-001240</span>
+                  </div>
+                </div>
+                <button class="text-white/80 hover:text-white text-xs ml-2 p-1" title="Dismiss">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <!-- Toast Anatomy Callout below in viewport -->
+            <div class="mt-auto p-4 bg-slate-50 border-t border-slate-100 text-xs text-slate-600">
+              <div class="flex items-center gap-2 text-[11px] font-semibold text-[#006633]">
+                <span class="w-2 h-2 rounded-full bg-[#006633]"></span>
+                Toast Behavior:
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">
+                Appears for 4 seconds after report transmission, providing the Cameroonian tracking reference format directly.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-3 bg-white border-t border-slate-200 text-xs text-[#666666]">
+          <strong>Design Note:</strong> High-contrast green toast (`#006633`) pairing instant verification with reference code.
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Summary Matrix -->
+    <footer class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm text-xs text-[#666666] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-[#003366]">Secure360 UI Standards</span>
+        <span>·</span>
+        <span>Security First Cameroon (SFC Enterprise)</span>
+      </div>
+      <div class="flex items-center gap-4 text-[11px]">
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#B26A00]"></span> Amber: Connectivity / Notice</span>
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#006633]"></span> Green: Success / Confirmed</span>
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#CC0000]"></span> Red: Action Required</span>
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#003366]"></span> SFC Blue: Primary Action</span>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

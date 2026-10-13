@@ -1,0 +1,31 @@
+# Gitleaks configuration: default rules + project-specific secrets.
+title = "Secure360 gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "secure360-jwt-secret"
+description = "JWT signing secret assigned in code or config"
+regex = '''(?i)(jwt[_-]?secret|signing[_-]?key)\s*[:=]\s*['"][^'"\s]{16,}['"]'''
+keywords = ["jwt", "signing"]
+
+[[rules]]
+id = "secure360-database-url"
+description = "PostgreSQL connection string with a password"
+regex = '''postgres(?:ql)?://[^:\s]+:[^@\s]+@[^\s'"]+'''
+keywords = ["postgres"]
+
+[[rules]]
+id = "secure360-firebase-service-account"
+description = "Firebase / Google service account private key"
+regex = '''"private_key"\s*:\s*"-----BEGIN PRIVATE KEY-----'''
+keywords = ["private_key"]
+
+[allowlist]
+description = "Example files contain placeholders only"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)docs/.*\.md$''',
+]
+regexes = ['''CHANGE_ME''', '''<placeholder>''']

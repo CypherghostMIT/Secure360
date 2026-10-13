@@ -1,0 +1,43 @@
+# Weekly dependency updates, grouped to keep pull requests manageable for a single developer.
+# cooldown: wait 7 days after a release before proposing it (newly published versions are the riskiest).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'chore(deps)'
+    cooldown:
+      default-days: 7
+    groups:
+      dev-tooling:
+        dependency-type: development
+        update-types: [minor, patch]
+      runtime-patches:
+        dependency-type: production
+        update-types: [patch]
+    ignore:
+      # Expo pins React Native and many native modules: upgrade those with "npx expo install --fix", not Dependabot.
+      - dependency-name: react-native
+      - dependency-name: 'expo*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(ci)'
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: docker
+    directory: /infra
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: 'chore(infra)'
+    cooldown:
+      default-days: 7

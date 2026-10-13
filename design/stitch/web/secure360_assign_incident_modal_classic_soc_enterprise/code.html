@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SFC Incident Reporter - Incident Detail SFC-2026-001234 (Classic SOC Enterprise)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#ff9900',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+            'modal-heavy': '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg relative">
+<!-- Toast Notification Feedback -->
+<div class="fixed top-5 right-6 z-[60] transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none flex items-center gap-3 px-4 py-3 bg-sfc-navy text-white rounded-lg shadow-xl border border-blue-400/30" id="toast-notification">
+<div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div class="text-[13px] font-medium" id="toast-message">Incident state updated successfully.</div>
+</div>
+<!-- ==============================================
+     ACTIVE ASSIGN INCIDENT MODAL OVERLAY (Screen 1)
+     ============================================== -->
+<div aria-labelledby="assign-modal-title" aria-modal="true" class="fixed inset-0 z-50 flex items-center justify-center p-4" id="assign-incident-modal" role="dialog">
+<!-- Dimmed Backdrop -->
+<div class="fixed inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity" onclick="closeAssignModal()"></div>
+<!-- Centered Modal Container -->
+<div class="relative w-full max-w-lg bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-10 flex flex-col my-auto max-h-[92vh]">
+<!-- Modal Header -->
+<div class="px-6 py-5 border-b border-slate-200 flex items-start justify-between bg-white">
+<div>
+<h3 class="text-lg font-semibold text-slate-900 leading-tight" id="assign-modal-title">Assign incident</h3>
+<p class="text-xs text-slate-500 mt-1 font-normal">
+          Incident SFC-2026-001234 · Mobile Money fraud · Kamdem Distribution SARL
+        </p>
+</div>
+<button aria-label="Close dialog" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors focus:outline-none" onclick="closeAssignModal()" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+</button>
+</div>
+<!-- Modal Content -->
+<div class="p-6 space-y-4 overflow-y-auto bg-white">
+<!-- Quick action banner / Assign to me -->
+<div class="flex items-center justify-between bg-blue-50/60 border border-blue-200 rounded-lg p-3">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+            JN
+          </div>
+<div class="min-w-0 text-left">
+<div class="text-sm font-semibold text-sfc-navy leading-tight truncate">Jean-Paul Nguemo</div>
+<div class="text-xs text-slate-500 truncate">SOC Analyst (You)</div>
+</div>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-sfc-navy text-sfc-navy hover:bg-sfc-navy hover:text-white text-xs font-semibold shadow-xs transition-colors focus:outline-none" onclick="document.getElementById('analyst-jp').checked = true;" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+<circle cx="8.5" cy="7" r="4"></circle>
+<polyline points="17 11 19 13 23 9"></polyline>
+</svg>
+<span>Assign to me</span>
+</button>
+</div>
+<!-- Analyst Section -->
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Select an analyst</span>
+<span class="text-xs text-slate-500">Real-time team workload</span>
+</div>
+<div class="space-y-2.5" role="radiogroup">
+<!-- Radio 1: Jean-Paul Nguemo -->
+<label class="relative flex items-center justify-between p-3 rounded-lg border border-sfc-navy bg-sfc-primaryLight/40 cursor-pointer transition hover:bg-slate-50">
+<div class="flex items-center gap-3 min-w-0">
+<input checked="" class="w-4 h-4 text-sfc-navy border-gray-300 focus:ring-sfc-navy" id="analyst-jp" name="assigned_analyst" type="radio" value="Jean-Paul Nguemo"/>
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                JN
+              </div>
+<div class="min-w-0 text-left">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-slate-900">Jean-Paul Nguemo</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Recommended</span>
+</div>
+<div class="text-xs text-slate-500">SOC Analyst · <span class="font-medium text-emerald-700">3 open</span></div>
+</div>
+</div>
+<span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 hidden sm:inline-block">Low Load</span>
+</label>
+<!-- Radio 2: Estelle Mbarga -->
+<label class="relative flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white cursor-pointer transition hover:bg-slate-50">
+<div class="flex items-center gap-3 min-w-0">
+<input class="w-4 h-4 text-sfc-navy border-gray-300 focus:ring-sfc-navy" id="analyst-em" name="assigned_analyst" type="radio" value="Estelle Mbarga"/>
+<div class="w-8 h-8 rounded-full bg-slate-200 text-sfc-navy text-xs font-bold flex items-center justify-center flex-shrink-0">
+                EM
+              </div>
+<div class="min-w-0 text-left">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-slate-900">Estelle Mbarga</span>
+</div>
+<div class="text-xs text-slate-500">Incident Responder · <span class="font-medium text-slate-700">5 open</span></div>
+</div>
+</div>
+<span class="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 hidden sm:inline-block">Normal Load</span>
+</label>
+<!-- Radio 3: Yannick Fotso -->
+<label class="relative flex items-center justify-between p-3 rounded-lg border border-slate-200 bg-white cursor-pointer transition hover:bg-slate-50">
+<div class="flex items-center gap-3 min-w-0">
+<input class="w-4 h-4 text-sfc-navy border-gray-300 focus:ring-sfc-navy" id="analyst-yf" name="assigned_analyst" type="radio" value="Yannick Fotso"/>
+<div class="w-8 h-8 rounded-full bg-slate-200 text-sfc-navy text-xs font-bold flex items-center justify-center flex-shrink-0">
+                YF
+              </div>
+<div class="min-w-0 text-left">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-slate-900">Yannick Fotso</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">Heavy load</span>
+</div>
+<div class="text-xs text-slate-500">Triage Specialist · <span class="font-medium text-amber-800">7 open</span></div>
+</div>
+</div>
+<span class="text-xs font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 hidden sm:inline-block">High Load</span>
+</label>
+</div>
+</div>
+<!-- Form Field: Note for the analyst (internal) -->
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1.5" for="modal-notes">
+          Note for the analyst (internal) <span class="text-slate-400 font-normal">(Optional)</span>
+</label>
+<textarea class="w-full rounded-lg border border-slate-300 text-sm p-2.5 focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy placeholder:text-slate-400 resize-none shadow-sm" id="modal-notes" placeholder="Add instructions, initial findings or priority handover details..." rows="3"></textarea>
+</div>
+<!-- Reporter Notification Notice -->
+<div class="bg-slate-50 rounded-lg p-3 border border-slate-200">
+<label class="flex items-start gap-2.5 cursor-not-allowed select-none">
+<input checked="" class="mt-0.5 rounded border-slate-300 text-[#003366] bg-slate-100 h-4 w-4 cursor-not-allowed" disabled="" id="notify-reporter-notice" type="checkbox"/>
+<div class="min-w-0 flex-1">
+<span class="text-xs text-slate-600 leading-tight block">
+              The reporter will be notified that an analyst has taken over the report.
+            </span>
+</div>
+</label>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-end gap-3">
+<button class="px-4 py-2 rounded-md border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors focus:outline-none" onclick="closeAssignModal()" type="button">
+        Cancel
+      </button>
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-md bg-[#003366] hover:bg-[#002244] text-white text-sm font-medium shadow-sm transition-colors focus:outline-none" onclick="confirmAssignIncident()" type="button">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+<circle cx="8.5" cy="7" r="4"></circle>
+<polyline points="17 11 19 13 23 9"></polyline>
+</svg>
+<span>Assign</span>
+</button>
+</div>
+</div>
+</div>
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 shadow-sm border-r border-sfc-border" data-purpose="soc-sidebar">
+<div>
+<div class="p-4 border-b border-sfc-border">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-sfc-navy text-white flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-sm">
+<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+</div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[14px] font-bold text-sfc-navy leading-snug truncate tracking-tight">Secure360</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-sfc-primaryLight text-sfc-navy uppercase tracking-wider">SOC Enterprise</span>
+</div>
+</div>
+</div>
+</div>
+<nav aria-label="Sidebar Navigation" class="mt-4 px-2 space-y-1">
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-semibold rounded bg-slate-100 text-slate-700">4</span>
+</a>
+<a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-sfc-primaryLight text-sfc-navy text-[13px] font-semibold transition-colors" href="javascript:void(0)">
+<div class="absolute left-0 top-1 bottom-1 w-1 bg-sfc-navy rounded-r"></div>
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-sfc-danger text-white">24</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
+<span class="truncate">Statistics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" x2="8" y1="13" y2="13"></line><line x1="16" x2="8" y1="17" y2="17"></line></svg>
+<span class="truncate">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Organizations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<span class="truncate">Audit log</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<div class="p-3 border-t border-sfc-border space-y-2">
+<div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+          JN
+        </div>
+<div class="truncate">
+<p class="text-[12px] font-semibold text-sfc-textPrimary leading-tight truncate">Jean-Paul Nguemo</p>
+<p class="text-[10px] text-sfc-textMuted truncate">SOC Analyst</p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between z-20" data-purpose="top-header">
+<!-- Left: Breadcrumbs & Live WAT status -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 text-[13px]">
+<a class="font-medium text-slate-500 hover:text-sfc-navy transition-colors" href="javascript:void(0)">Incidents</a>
+<span class="text-slate-400">/</span>
+<span class="font-semibold text-sfc-navy font-mono">Incident SFC-2026-001234</span>
+</div>
+<div class="h-4 w-px bg-slate-200 hidden sm:block"></div>
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span>Live (WAT)</span>
+</div>
+</div>
+<!-- Right: Search, Notifications, FR | EN toggle, and Operator -->
+<div class="flex items-center gap-3">
+<div class="relative hidden md:block">
+<input class="w-48 h-8 pl-8 pr-3 text-[12px] bg-slate-50 border border-slate-200 rounded-md focus:bg-white focus:border-sfc-navy focus:outline-none" placeholder="Search..." type="text"/>
+<svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</div>
+<!-- Notification Bell -->
+<button aria-label="View notifications" class="relative p-1.5 rounded-full text-slate-500 hover:text-sfc-navy hover:bg-slate-100 transition focus:outline-none" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="absolute top-1 right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-sfc-danger text-[9px] font-bold text-white ring-2 ring-white">3</span>
+</button>
+<!-- Language Toggle FR | EN -->
+<div class="flex items-center text-[12px] font-semibold border border-slate-200 rounded-md overflow-hidden">
+<button class="px-2 py-1 bg-slate-100 text-slate-600 hover:text-sfc-navy" type="button">FR</button>
+<button class="px-2 py-1 bg-sfc-navy text-white" type="button">EN</button>
+</div>
+<div class="h-5 w-px bg-slate-200"></div>
+<!-- User Avatar -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs">
+        JN
+      </div>
+<span class="text-[12px] font-semibold text-slate-800 hidden lg:inline-block">Jean-Paul Nguemo</span>
+</div>
+</div>
+</header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Main Scrollable Content Area (Two Columns: 60% / 40%) -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg">
+<div class="max-w-[1440px] mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- ==============================================
+             LEFT COLUMN (60% -> lg:col-span-7 xl:col-span-7)
+             ============================================== -->
+<div class="lg:col-span-7 space-y-6">
+<!-- 1. Incident Header / Description Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="incident-description-card"><div class="flex items-start justify-between gap-4">
+<div>
+<span class="text-[11px] font-bold uppercase tracking-wider text-sfc-navy bg-sfc-primaryLight px-2.5 py-0.5 rounded">Mobile Money Fraud</span>
+<h3 class="text-[20px] font-bold text-sfc-textPrimary mt-2 leading-snug">
+      SIM Swap &amp; Unauthorized API Cash-Out (Kamdem Distribution SARL)
+    </h3>
+</div>
+<span class="inline-flex items-center px-2 py-1 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-semibold flex-shrink-0">
+    Financial Fraud Category
+  </span>
+</div>
+<div class="flex flex-wrap items-center gap-2 mt-4 text-[12px]">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-sfc-textPrimary font-medium border border-slate-200">
+<svg class="w-3.5 h-3.5 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<span class="">Reported: Today at 09:14 UTC <strong class="text-sfc-textMuted font-normal">(42m ago)</strong></span>
+</span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 text-sfc-textPrimary font-mono border border-slate-200">
+<span class="text-sfc-textMuted font-sans">Vector:</span> MTN MoMo Gateway API
+  </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 text-sfc-textPrimary font-mono border border-slate-200">
+<span class="text-sfc-textMuted font-sans">Target Account:</span> 237-677-449-012
+  </span>
+</div>
+<div class="mt-4 text-[13px] leading-relaxed text-sfc-textPrimary bg-[#fcfcfd] p-3.5 rounded-lg border border-slate-200/80">
+  At 09:14:22 UTC, multiple high-velocity automated transaction bursts were intercepted on corporate distribution account <code class="px-1 py-0.5 rounded bg-slate-200 font-mono text-[12px] text-sfc-navy">KAMDEM-MOMO-01</code>. The unauthorized withdrawal requests originated following an illegitimate SIM swap reported on operator lines. Temporary transaction hold applied across all connected sub-wallets.
+</div>
+<div class="mt-5 pt-4 border-t border-slate-100">
+<p class="text-[11px] font-semibold uppercase text-sfc-textMuted tracking-wider mb-2">Affected Assets Scope</p>
+<div class="flex flex-wrap gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-[12px] font-medium border border-blue-200">
+<svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="3"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>
+<span class="">Corporate MoMo Terminal (Douala Branch)</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-purple-800 text-[12px] font-medium border border-purple-200">
+<svg class="w-3.5 h-3.5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+<span class="">Merchant API Integration (MTN Gateway)</span>
+</span>
+</div>
+</div></section>
+<!-- 2. Evidence & Forensics Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="evidence-card">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<div>
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">Evidence &amp; Telemetry Attachments</h3>
+<p class="text-[12px] text-sfc-textMuted">Authenticated forensic exports and system captures</p>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+<span>4 Verified Attachments</span>
+</span>
+</div>
+<!-- Gallery Thumbnails -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+<div class="group relative bg-slate-50 rounded-lg p-2.5 border border-slate-200 hover:border-sfc-navy cursor-pointer transition shadow-sm hover:shadow-md">
+<div class="h-20 bg-slate-900 rounded flex flex-col justify-center p-2 text-left font-mono text-[9px] text-emerald-400 overflow-hidden select-none">
+<div class="truncate text-slate-400">Session ID: 94812-DLA</div>
+<div class="truncate text-amber-300">IP: 197.159.22.18</div>
+<div class="truncate text-rose-400 font-bold">Status: Suspicious Burst</div>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[11px] font-semibold text-sfc-textPrimary truncate group-hover:text-sfc-navy">API Access Log</span>
+</div>
+</div>
+<div class="group relative bg-slate-50 rounded-lg p-2.5 border border-slate-200 hover:border-sfc-navy cursor-pointer transition shadow-sm hover:shadow-md">
+<div class="h-20 bg-slate-900 rounded flex items-center justify-center p-2 text-cyan-400 overflow-hidden">
+<svg class="w-full h-12" viewbox="0 0 100 40">
+<path d="M0 25 L15 25 L20 5 L25 35 L30 25 L50 25 L55 8 L60 32 L65 25 L85 25 L90 10 L95 30 L100 25" fill="none" stroke="#38bdf8" stroke-width="2"></path>
+</svg>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[11px] font-semibold text-sfc-textPrimary truncate group-hover:text-sfc-navy">Traffic Volume Spike</span>
+</div>
+</div>
+<div class="group relative bg-slate-50 rounded-lg p-2.5 border border-slate-200 hover:border-sfc-navy cursor-pointer transition shadow-sm hover:shadow-md">
+<div class="h-20 bg-slate-900 rounded flex flex-col justify-center p-2 text-rose-400 font-mono text-[9px] overflow-hidden">
+<div class="text-rose-500 font-bold">[BLOCKED-REQUEST]</div>
+<div class="text-slate-300">Terminal: Douala-01</div>
+<div class="text-amber-400">SIM State: Replaced</div>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[11px] font-semibold text-sfc-textPrimary truncate group-hover:text-sfc-navy">Gateway Intercept</span>
+</div>
+</div>
+<div class="group relative bg-slate-50 rounded-lg p-2.5 border border-slate-200 hover:border-sfc-navy cursor-pointer transition shadow-sm hover:shadow-md">
+<div class="h-20 bg-slate-900 rounded flex flex-col items-center justify-center p-2 text-center overflow-hidden">
+<span class="px-2 py-0.5 rounded bg-blue-900/60 text-blue-200 font-mono text-[10px] font-bold border border-blue-400/40">MoMo Audit</span>
+<span class="text-[9px] text-slate-400 mt-1">Payload: Verified</span>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<span class="text-[11px] font-semibold text-sfc-textPrimary truncate group-hover:text-sfc-navy">Operator Notice</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. Timeline Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="timeline-card">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<div>
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">Incident Lifecycle &amp; Audit Timeline</h3>
+<p class="text-[12px] text-sfc-textMuted">End-to-end incident trajectory with linked verification steps</p>
+</div>
+<span class="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">Stage: In Progress (3 of 5)</span>
+</div>
+<div class="mt-6 relative pl-6 space-y-6">
+<div class="absolute left-[11px] top-2 bottom-4 w-0.5 bg-slate-200"></div>
+<!-- Step 1: Created -->
+<div class="relative flex items-start gap-4">
+<div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-100 flex items-center justify-center">
+<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+</div>
+<div class="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-bold text-sfc-textPrimary">Created</span>
+<span class="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">Completed</span>
+</div>
+<span class="text-[11px] font-mono text-sfc-textMuted">09:14 UTC</span>
+</div>
+<p class="text-[12px] text-sfc-textPrimary mt-1">Report submitted via Secure360 reporting portal by Aimé Kamga.</p>
+</div>
+</div>
+<!-- Step 2: Assigned -->
+<div class="relative flex items-start gap-4">
+<div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-100 flex items-center justify-center">
+<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="3" viewbox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+</div>
+<div class="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-bold text-sfc-textPrimary">Assigned</span>
+<span class="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">Completed</span>
+</div>
+<span class="text-[11px] font-mono text-sfc-textMuted">09:18 UTC</span>
+</div>
+<p class="text-[12px] text-sfc-textPrimary mt-1">Queued for technician assignment and initial response protocol.</p>
+</div>
+</div>
+<!-- Step 3: In Progress -->
+<div class="relative flex items-start gap-4">
+<div class="absolute -left-[21px] top-1 w-5 h-5 rounded-full bg-blue-600 ring-4 ring-blue-100 flex items-center justify-center animate-pulse">
+<span class="w-2 h-2 rounded-full bg-white"></span>
+</div>
+<div class="flex-1 bg-blue-50/60 border border-blue-200 rounded-lg p-3 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-bold text-sfc-navy">In Progress / Investigating</span>
+<span class="text-[10px] uppercase font-bold px-1.5 py-0.2 rounded bg-blue-200 text-blue-900">Current Phase</span>
+</div>
+<span class="text-[11px] font-mono text-blue-800 font-semibold">09:22 UTC</span>
+</div>
+<p class="text-[12px] text-sfc-textPrimary mt-1">Mobile Money gateway transactions paused. Sub-wallets secured.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Messages & Collaboration Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle flex flex-col" data-purpose="chat-card">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<div>
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">Incident Communication Stream</h3>
+<p class="text-[12px] text-sfc-textMuted">Live SOC collaboration feed with reporter and response team</p>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="">Live Sync Active</span>
+</span>
+</div>
+<!-- Message List -->
+<div class="mt-4 space-y-4 max-h-[360px] overflow-y-auto pr-1" id="messages-container">
+<!-- Message 1 (Reporter: Sarah Jenkins) -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                  SJ
+                </div>
+<div class="flex-1 max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[12px] font-bold text-sfc-textPrimary">Sarah Jenkins</span>
+<span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 uppercase">Reporter (IT SecOps)</span>
+<span class="text-[11px] text-sfc-textMuted font-mono">09:15 UTC</span>
+</div>
+<div class="bg-slate-100 text-sfc-textPrimary text-[13px] rounded-r-xl rounded-bl-xl p-3 border border-slate-200">
+                    Detected anomalous SMB spikes on DB-Core VLAN at 09:12. Initial alert sounded like automated scanner but outbound payloads match BlackCat IOCs.
+                  </div>
+</div>
+</div>
+<!-- Message 2 (Technician: Alex Vance) -->
+<div class="flex items-start gap-3 flex-row-reverse">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                  AV
+                </div>
+<div class="flex-1 max-w-[85%] text-right">
+<div class="flex items-center justify-end gap-2 mb-1">
+<span class="text-[11px] text-sfc-textMuted font-mono">09:20 UTC</span>
+<span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-blue-100 text-blue-900 uppercase">SOC Tier 3</span>
+<span class="text-[12px] font-bold text-sfc-textPrimary">Alex Vance</span>
+</div>
+<div class="bg-sfc-primaryLight text-sfc-navy text-[13px] rounded-l-xl rounded-br-xl p-3 border border-blue-200 text-left">
+                    Confirmed. I've initiated EDR network isolation on WKSTN-892 and dumped the parent process tree. Working on severing domain trust session for <code class="font-mono text-[11px] bg-white px-1 rounded text-sfc-navy">svc_db_sync</code>.
+                  </div>
+</div>
+</div>
+<!-- Message 3 (Reporter: Sarah Jenkins) -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+                  SJ
+                </div>
+<div class="flex-1 max-w-[85%]">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[12px] font-bold text-sfc-textPrimary">Sarah Jenkins</span>
+<span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 uppercase">Reporter (IT SecOps)</span>
+<span class="text-[11px] text-sfc-textMuted font-mono">09:32 UTC</span>
+</div>
+<div class="bg-slate-100 text-sfc-textPrimary text-[13px] rounded-r-xl rounded-bl-xl p-3 border border-slate-200">
+                    DBA team confirms replica database was unmounted cleanly. No data corruption observed on standby nodes.
+                  </div>
+</div>
+</div>
+</div>
+<!-- Chat Input Box -->
+<div class="mt-4 pt-3 border-t border-sfc-border">
+<form class="space-y-2" onsubmit="handleSendMessage(event)">
+<div class="relative">
+<textarea class="w-full rounded-md border-sfc-border text-[13px] p-2.5 pr-10 focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy placeholder:text-sfc-textMuted resize-none" id="chat-input-field" placeholder="Write an update or reply to reporter..." rows="2"></textarea>
+<button class="absolute right-2.5 bottom-2.5 p-1 text-slate-400 hover:text-sfc-navy rounded transition" onclick="triggerToast('Artifact attachment uploader ready')" title="Attach Evidence Artifact" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-2 cursor-pointer select-none text-[12px] text-sfc-textMuted">
+<input class="rounded border-gray-300 text-sfc-navy focus:ring-sfc-navy" id="internal-note-toggle" type="checkbox"/>
+<span class="">Post as Internal SOC Note</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-sfc-navy hover:bg-sfc-navyHover text-white text-[12px] font-semibold rounded-md shadow-sm transition" type="submit">
+<span class="">Send Message</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</form>
+</div>
+</section>
+</div>
+<!-- ==============================================
+             RIGHT COLUMN (40% -> lg:col-span-5 xl:col-span-5)
+             ============================================== -->
+<div class="lg:col-span-5 space-y-6">
+<!-- 1. Status Update Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="status-update-card">
+<h3 class="text-[16px] font-bold text-sfc-textPrimary pb-3 border-b border-sfc-border">Update Incident Status</h3>
+<form class="mt-4 space-y-4" onsubmit="handleStatusUpdate(event)">
+<!-- Status Selector Dropdown -->
+<div>
+<label class="block text-[12px] font-semibold text-sfc-textPrimary mb-1" for="status-selector">Workflow Status</label>
+<select class="w-full h-10 text-[13px] bg-slate-50 border border-sfc-border rounded-md px-3 font-medium text-sfc-textPrimary focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy" id="status-selector">
+<option selected="" value="Investigating">Investigating (Active)</option>
+<option value="Containment">Containment</option>
+<option value="Eradication">Eradication</option>
+<option value="Recovery">Recovery</option>
+<option value="Resolved">Resolved</option>
+<option value="Closed">Closed</option>
+</select>
+</div>
+<!-- Severity Selector Dropdown -->
+<div>
+<label class="block text-[12px] font-semibold text-sfc-textPrimary mb-1" for="severity-selector">Severity Rating</label>
+<select class="w-full h-10 text-[13px] bg-slate-50 border border-sfc-border rounded-md px-3 font-medium text-sfc-textPrimary focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy" id="severity-selector">
+<option selected="" value="Critical">Critical (P1 - 15m SLA)</option>
+<option value="High">High (P2 - 1h SLA)</option>
+<option value="Medium">Medium (P3 - 4h SLA)</option>
+<option value="Low">Low (P4 - 24h SLA)</option>
+</select>
+</div>
+<!-- Resolution Notes textarea -->
+<div>
+<label class="block text-[12px] font-semibold text-sfc-textPrimary mb-1" for="resolution-notes">Resolution &amp; Containment Notes</label>
+<textarea class="w-full rounded-md border-sfc-border text-[13px] p-2.5 focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy placeholder:text-sfc-textMuted resize-none" id="resolution-notes" placeholder="Detail mitigation steps, containment verification, or resolution summary..." rows="4"></textarea>
+</div>
+<!-- Notification Checkbox -->
+<div class="flex items-center gap-2">
+<input checked="" class="rounded border-gray-300 text-sfc-navy focus:ring-sfc-navy" id="notify-stakeholders" type="checkbox"/>
+<label class="text-[12px] text-sfc-textPrimary font-medium select-none cursor-pointer" for="notify-stakeholders">
+                  Notify reporter &amp; subscribed stakeholders via email/SMS
+                </label>
+</div>
+<!-- Primary Update Status Button -->
+<button class="w-full h-[42px] rounded-[8px] bg-sfc-navy hover:bg-sfc-navyHover text-white text-[13px] font-semibold shadow-sm transition-colors flex items-center justify-center gap-2" type="submit">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+<span class="">Update Status</span>
+</button>
+</form>
+</section>
+<!-- 2. Assignment Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="assignment-card">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">Technician Assignment</h3>
+<button class="text-[12px] font-semibold text-sfc-navy hover:underline flex items-center gap-1" onclick="openAssignModal()">
+<span class="">Quick Modal</span>
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+</button>
+</div>
+<!-- Current Assignee display -->
+<div class="mt-4 flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-sm shadow-xs ring-2 ring-blue-200" id="current-assignee-avatar">
+                  AV
+                </div>
+<div>
+<div class="text-[13px] font-bold text-sfc-textPrimary" id="current-assignee-name">Alex Vance</div>
+<div class="text-[11px] text-sfc-textMuted" id="current-assignee-role">Tier 3 Incident Lead</div>
+</div>
+</div>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+<span class="">Active now</span>
+</span>
+</div>
+<!-- Reassign Form -->
+<div class="mt-4 space-y-3">
+<div>
+<label class="block text-[12px] font-semibold text-sfc-textPrimary mb-1" for="reassign-analyst-select">Reassign On-Duty Analyst</label>
+<select class="w-full h-9 text-[13px] bg-slate-50 border border-sfc-border rounded-md px-3 text-sfc-textPrimary focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy" id="reassign-analyst-select">
+<option value="Elena Rostova">Elena Rostova (Principal SecOps)</option>
+<option value="Sarah Travis">Sarah Travis (Lead SecOps Analyst)</option>
+<option selected="" value="Alex Vance">Alex Vance (Tier 3 Lead)</option>
+<option value="Marcus Vance">Marcus Vance (Tier 2 Network IR)</option>
+<option value="Kevin Zhao">Kevin Zhao (Senior Analyst)</option>
+</select>
+</div>
+<div>
+<label class="block text-[12px] font-semibold text-sfc-textPrimary mb-1" for="escalation-tier-select">Escalation Tier</label>
+<select class="w-full h-9 text-[13px] bg-slate-50 border border-sfc-border rounded-md px-3 text-sfc-textPrimary focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy" id="escalation-tier-select">
+<option value="Tier 1">Tier 1 - Triage &amp; Ingestion</option>
+<option value="Tier 2">Tier 2 - Senior Analysis</option>
+<option selected="" value="Tier 3">Tier 3 - Threat Hunter &amp; Incident Lead (Active)</option>
+</select>
+</div>
+<button class="w-full mt-2 h-9 rounded-md border border-sfc-navy text-sfc-navy hover:bg-sfc-primaryLight text-[13px] font-semibold transition-colors flex items-center justify-center gap-1.5" onclick="openAssignModal()" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+<span class="">Open Assign Modal</span>
+</button>
+</div>
+</section>
+<!-- 3. Organization & Enclave Info Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="org-info-card"><div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">Organization Details</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+<svg class="w-3 h-3 text-blue-600" fill="currentColor" viewbox="0 0 20 20"><path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path></svg>
+<span class="">Verified Client</span>
+</span>
+</div>
+<div class="mt-4 space-y-3 text-[13px]">
+<div class="flex items-center justify-between py-1 border-b border-slate-100">
+<span class="text-sfc-textMuted text-[12px]">Organization Name</span>
+<span class="font-bold text-sfc-textPrimary">Kamdem Distribution SARL</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b border-slate-100">
+<span class="text-sfc-textMuted text-[12px]">SLA Tier</span>
+<span class="font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[11px]">Enterprise Priority (15m P1 SLA)</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b border-slate-100">
+<span class="text-sfc-textMuted text-[12px]">Primary Reporter</span>
+<span class="font-medium text-sfc-textPrimary">Aimé Kamga (Finance Director)</span>
+</div>
+<div class="flex items-center justify-between py-1 border-b border-slate-100">
+<span class="text-sfc-textMuted text-[12px]">Contact Mobile</span>
+<span class="font-mono text-[12px] font-semibold text-sfc-textPrimary">+237 677 449 012</span>
+</div>
+<div class="pt-2">
+<span class="text-sfc-textMuted text-[12px] block mb-1">Account Identifier</span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 text-sfc-navy font-mono text-[11px] border border-slate-200 font-semibold w-full truncate">
+<span class="">Merchant ID: KD-DLA-MOMO-88219</span>
+</span>
+</div>
+</div></section>
+<!-- 4. Quick Actions Card -->
+<section class="bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="quick-actions-card">
+<h3 class="text-[16px] font-bold text-sfc-textPrimary pb-3 border-b border-sfc-border">Response &amp; Remediation Tools</h3>
+<div class="mt-4 space-y-2.5">
+<button class="w-full h-10 rounded-md bg-white border border-sfc-navy text-sfc-navy hover:bg-sfc-primaryLight text-[13px] font-semibold transition-colors flex items-center justify-center gap-2" onclick="triggerToast('Compiling executive incident PDF summary...')" type="button">
+<svg class="w-4 h-4 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<span>Generate PDF Report</span>
+</button>
+<button class="w-full h-10 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-300 text-sfc-textPrimary text-[13px] font-semibold transition-colors flex items-center justify-center gap-2" onclick="triggerToast('Notification alert sent to reporter Aimé Kamga')" type="button">
+<svg class="w-4 h-4 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+<span>Send Notification Alert</span>
+</button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Evidence Preview Modal -->
+<div class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" id="evidence-modal">
+<div class="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+<div class="flex items-center justify-between pb-3 border-b border-sfc-border">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<h4 class="text-[16px] font-bold text-sfc-textPrimary" id="modal-title">Evidence Artifact</h4>
+</div>
+<button class="text-slate-400 hover:text-slate-600 p-1 rounded-md" onclick="closeEvidenceModal()">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="mt-4">
+<span class="text-[11px] font-semibold text-sfc-navy uppercase tracking-wider bg-sfc-primaryLight px-2 py-0.5 rounded" id="modal-category">Artifact Category</span>
+<div class="mt-3 p-4 bg-slate-900 text-emerald-400 rounded-lg font-mono text-[12px] leading-relaxed break-all select-all" id="modal-content">
+        Inspection payload data...
+      </div>
+</div>
+<div class="mt-5 flex justify-end gap-2">
+<button class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-sfc-textPrimary text-[12px] font-semibold rounded-md transition" onclick="copyModalContent()">Copy Data</button>
+<button class="px-4 py-1.5 bg-sfc-navy hover:bg-sfc-navyHover text-white text-[12px] font-semibold rounded-md transition" onclick="closeEvidenceModal()">Close</button>
+</div>
+</div>
+</div>
+<!-- Host Isolation Confirmation Modal -->
+<div class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4" id="isolation-modal">
+<div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-rose-200">
+<div class="flex items-center gap-3 text-rose-600 mb-3">
+<div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+<svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+</div>
+<div>
+<h4 class="text-[16px] font-bold text-sfc-textPrimary">Execute Host Network Isolation?</h4>
+<p class="text-[12px] text-sfc-textMuted">Target: WKSTN-892, srv-fin-db01.corp</p>
+</div>
+</div>
+<p class="text-[13px] text-slate-600 leading-normal">
+      This emergency containment action severs all TCP/UDP traffic except EDR command telemetry. Standby replicas will take over active transactional queues.
+    </p>
+<div class="mt-5 flex items-center justify-end gap-2.5">
+<button class="px-3.5 py-2 text-[13px] font-semibold text-slate-700 hover:bg-slate-100 rounded-md transition" onclick="closeIsolationModal()">Cancel</button>
+<button class="px-4 py-2 text-[13px] font-semibold bg-sfc-danger hover:bg-red-700 text-white rounded-md transition shadow-sm" onclick="confirmHostIsolation()">Confirm EDR Isolation</button>
+</div>
+</div>
+</div>
+<!-- BEGIN: Interactive Client Behaviors -->
+<script>
+  function toggleActionsMenu() {
+    const menu = document.getElementById('actions-menu');
+    menu.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = document.querySelector('#actions-dropdown-wrapper button');
+    const menu = document.getElementById('actions-menu');
+    if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  function triggerToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.innerText = message;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    }, 3600);
+  }
+
+  /* Assign Incident Modal Controls */
+  const techProfiles = {
+    'Elena Rostova': {
+      role: 'Principal SecOps Analyst',
+      avatar: 'ER',
+      count: 2,
+      max: 10,
+      statusText: 'Low Load',
+      pillClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      barClass: 'bg-emerald-500',
+      percent: 20
+    },
+    'Sarah Travis': {
+      role: 'Lead SecOps Analyst',
+      avatar: 'ST',
+      count: 3,
+      max: 10,
+      statusText: 'Optimal Load',
+      pillClass: 'bg-blue-50 text-blue-700 border-blue-200',
+      barClass: 'bg-blue-500',
+      percent: 30
+    },
+    'Alex Vance': {
+      role: 'Tier 3 Incident Lead',
+      avatar: 'AV',
+      count: 5,
+      max: 10,
+      statusText: 'Normal Load',
+      pillClass: 'bg-slate-100 text-slate-700 border-slate-200',
+      barClass: 'bg-slate-500',
+      percent: 50
+    },
+    'Marcus Vance': {
+      role: 'Tier 2 Network IR',
+      avatar: 'MV',
+      count: 8,
+      max: 10,
+      statusText: 'Heavy Load - Warning',
+      pillClass: 'bg-amber-50 text-amber-900 border-amber-300',
+      barClass: 'bg-amber-500',
+      percent: 80
+    },
+    'Kevin Zhao': {
+      role: 'Senior SOC Analyst',
+      avatar: 'KZ',
+      count: 1,
+      max: 10,
+      statusText: 'Available',
+      pillClass: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      barClass: 'bg-emerald-500',
+      percent: 10
+    }
+  };
+
+  function onTechnicianSelectChange(techName) {
+    const profile = techProfiles[techName] || techProfiles['Elena Rostova'];
+    const capText = document.getElementById('tech-capacity-text');
+    const barFill = document.getElementById('tech-bar-fill');
+    const statusPill = document.getElementById('tech-status-pill');
+    const techDot = document.getElementById('tech-dot');
+
+    capText.innerHTML = `Capacity: <strong>${profile.count}/${profile.max}</strong> incidents`;
+    barFill.style.width = `${profile.percent}%`;
+    barFill.className = `h-full rounded-full transition-all duration-300 ${profile.barClass}`;
+    statusPill.innerText = profile.statusText;
+    statusPill.className = `font-semibold px-1.5 py-0.5 rounded text-[10px] border ${profile.pillClass}`;
+
+    if (profile.percent >= 75) {
+      techDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+    } else if (profile.percent <= 30) {
+      techDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+    } else {
+      techDot.className = 'w-2 h-2 rounded-full bg-blue-500';
+    }
+  }
+
+  function openAssignModal() {
+    const modal = document.getElementById('assign-incident-modal');
+    modal.classList.remove('hidden');
+    // Ensure correct initial metric
+    const techSelect = document.getElementById('technician-select');
+    onTechnicianSelectChange(techSelect.value);
+  }
+
+  function closeAssignModal() {
+    const modal = document.getElementById('assign-incident-modal');
+    modal.classList.add('hidden');
+  }
+
+  function confirmAssignIncident() {
+    const techSelect = document.getElementById('technician-select');
+    const selectedName = techSelect.value;
+    const profile = techProfiles[selectedName] || techProfiles['Elena Rostova'];
+
+    // Update assignment section in underlying page
+    document.getElementById('current-assignee-name').innerText = selectedName;
+    document.getElementById('current-assignee-role').innerText = profile.role;
+    document.getElementById('current-assignee-avatar').innerText = profile.avatar;
+
+    const selectInline = document.getElementById('reassign-analyst-select');
+    if (selectInline) {
+      selectInline.value = selectedName;
+    }
+
+    // Update timeline step actor
+    const timelineCurrentActor = document.getElementById('timeline-current-actor');
+    if (timelineCurrentActor) {
+      timelineCurrentActor.innerText = `${selectedName} (${profile.role})`;
+    }
+
+    closeAssignModal();
+    triggerToast(`Incident assigned to ${selectedName} • Detail updated`);
+  }
+
+  function handleStatusUpdate(e) {
+    e.preventDefault();
+    const newStatus = document.getElementById('status-selector').value;
+    const newSeverity = document.getElementById('severity-selector').value;
+
+    const statusBadge = document.getElementById('header-status-badge');
+    statusBadge.innerText = `● ${newStatus}`;
+
+    if (newStatus === 'Investigating') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]';
+    } else if (newStatus === 'Containment') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f3e8ff] text-[#7c3aed] border border-[#d8b4fe]';
+    } else if (newStatus === 'Eradication' || newStatus === 'Recovery') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#eff6ff] text-[#2563eb] border border-[#bfdbfe]';
+    } else if (newStatus === 'Resolved' || newStatus === 'Closed') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#dcfce7] text-[#006633] border border-[#bbf7d0]';
+    }
+
+    const sevBadge = document.getElementById('header-severity-badge');
+    sevBadge.innerText = `● ${newSeverity}`;
+    if (newSeverity === 'Critical') {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#fee2e2] text-[#cc0000] border border-[#fca5a5]';
+    } else if (newSeverity === 'High') {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]';
+    } else {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300';
+    }
+
+    triggerToast(`Incident updated to ${newStatus} [${newSeverity}]`);
+  }
+
+  function handleSendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input-field');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const isInternal = document.getElementById('internal-note-toggle').checked;
+    const container = document.getElementById('messages-container');
+    const timeNow = new Date().toISOString().substring(11, 16) + ' UTC';
+    const currentName = document.getElementById('current-assignee-name').innerText || 'Alex Vance';
+    const profile = techProfiles[currentName] || { avatar: 'AV', role: 'SOC Tier 3' };
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'flex items-start gap-3 flex-row-reverse';
+    msgDiv.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-sfc-navy text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+        ${profile.avatar}
+      </div>
+      <div class="flex-1 max-w-[85%] text-right">
+        <div class="flex items-center justify-end gap-2 mb-1">
+          <span class="text-[11px] text-sfc-textMuted font-mono">${timeNow}</span>
+          <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isInternal ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-blue-100 text-blue-900'} uppercase">
+            ${isInternal ? 'Internal SOC Note' : 'SOC Tier 3'}
+          </span>
+          <span class="text-[12px] font-bold text-sfc-textPrimary">${currentName}</span>
+        </div>
+        <div class="${isInternal ? 'bg-amber-50/80 border border-amber-300 text-amber-950' : 'bg-sfc-primaryLight border border-blue-200 text-sfc-navy'} text-[13px] rounded-l-xl rounded-br-xl p-3 text-left">
+          ${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+    input.value = '';
+    triggerToast(isInternal ? 'Internal SOC note saved' : 'Message dispatched to response stream');
+  }
+
+  function copyHashToClipboard() {
+    const hash = document.getElementById('forensic-hash').innerText;
+    navigator.clipboard.writeText(hash).then(() => {
+      triggerToast('SHA-256 hash copied to clipboard');
+    });
+  }
+
+  function copyText(val, toastMsg) {
+    navigator.clipboard.writeText(val).then(() => {
+      triggerToast(toastMsg || 'Copied!');
+    });
+  }
+
+  function openEvidenceModal(title, content, category) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerText = content;
+    document.getElementById('modal-category').innerText = category;
+    document.getElementById('evidence-modal').classList.remove('hidden');
+  }
+
+  function closeEvidenceModal() {
+    document.getElementById('evidence-modal').classList.add('hidden');
+  }
+
+  function copyModalContent() {
+    const content = document.getElementById('modal-content').innerText;
+    navigator.clipboard.writeText(content).then(() => {
+      triggerToast('Evidence details copied to clipboard');
+    });
+  }
+
+  function triggerHostIsolationModal() {
+    document.getElementById('isolation-modal').classList.remove('hidden');
+  }
+
+  function closeIsolationModal() {
+    document.getElementById('isolation-modal').classList.add('hidden');
+  }
+
+  function confirmHostIsolation() {
+    closeIsolationModal();
+    triggerToast('🚨 EDR Host Isolation triggered for WKSTN-892 & DB-Core');
+  }
+
+  // Auto-initialize default modal load indicator on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    onTechnicianSelectChange('Elena Rostova');
+  });
+</script>
+<!-- END: Interactive Client Behaviors -->
+</body></html>

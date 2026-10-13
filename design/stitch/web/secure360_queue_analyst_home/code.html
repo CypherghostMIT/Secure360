@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-primary": "#ffffff", "tertiary": "#381300", "surface-container-highest": "#e5e2e1", "secondary": "#566068", "danger": "#cc0000", "surface": "#ffffff", "on-background": "#1b1b1c", "surface-variant": "#e5e2e1", "on-surface": "#1b1b1c", "on-surface-variant": "#43474f", "on-secondary-fixed-variant": "#3e4850", "on-secondary-container": "#5c666e", "error": "#ba1a1a", "surface-container-high": "#eae7e7", "outline": "#737780", "inverse-primary": "#a7c8ff", "inverse-surface": "#303030", "tertiary-container": "#592300", "surface-tint": "#3a5f94", "on-error": "#ffffff", "primary-fixed": "#d5e3ff", "primary": "#001e40", "primary-container": "#003366", "on-primary-fixed": "#001b3c", "primary-fixed-dim": "#a7c8ff", "surface-container": "#f0eded", "on-primary-fixed-variant": "#1f477b", "border": "#e0e0e0", "success": "#006633", "text-primary": "#1e1e1e", "text-secondary": "#666666", "surface-container-lowest": "#ffffff", "on-primary-container": "#799dd6", "error-container": "#ffdad6", "secondary-container": "#dae4ee", "on-tertiary-fixed": "#341100", "surface-container-low": "#f6f3f2", "background": "#f8f9fc", "surface-bright": "#fcf9f8", "tertiary-fixed": "#ffdbca", "on-tertiary": "#ffffff", "secondary-fixed-dim": "#bec8d1", "surface-dim": "#dcd9d9", "on-error-container": "#93000a", "outline-variant": "#c3c6d1", "on-tertiary-container": "#d8885c", "tertiary-fixed-dim": "#ffb690", "on-secondary-fixed": "#131d24", "on-tertiary-fixed-variant": "#723610", "inverse-on-surface": "#f3f0ef", "secondary-fixed": "#dae4ee", "on-secondary": "#ffffff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-lg": "1.25rem", "space-xl": "1.5rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-md": "1rem", "margin": "1.5rem", "space-xs": "0.25rem" }, "fontFamily": { "body-md": ["Inter"], "headline-lg": ["Inter"], "label-md": ["Inter"], "caption": ["Inter"], "label-table-header": ["Inter"], "headline-md": ["Inter"], "body-sm": ["Inter"], "headline-sm": ["Inter"] }, "fontSize": { "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "700" }], "label-md": ["14px", { "lineHeight": "20px", "fontWeight": "500" }], "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-table-header": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }], "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface border-r border-border z-30 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 flex items-center px-space-md border-b border-border gap-space-sm"><img alt="SFC Emblem" class="w-8 h-8 rounded-full object-cover shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1VSJ_H_lzCxksgXrclCzX6FbaCm4usbeCbnNxdUV8m8NPu-Pb3eIm5yVtIFkZqTJybVpWsET689qS1ko6ZH6-Xf-UVvU8TcHRVkcrlU4oFi-BVeRIAW0k3ciTXCDW7mmFex22UzRaH6p7k-7vVL6nJ1ngnrJhso4WqGDK8OwJZifczmdfeNVJBtk661k3IQ7SBrpgQKTF3_IOw8azj7NPeeWISEg6ki-ptpSWmP7U1Rn18k2PCCW2oZi5FVfTF042C5TA9QoMbvhZ8"/><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary tracking-tight truncate leading-tight">Secure360</span><span class="font-caption text-caption text-text-secondary truncate tracking-tight">Security First Cameroon</span></div></div><nav class="flex flex-col py-space-sm px-space-xs gap-0.5" data-active-classes="bg-secondary-container text-primary font-label-md"><a aria-current="page" class="flex items-center justify-between px-space-sm py-2 rounded transition-colors bg-secondary-container text-primary font-label-md" data-path="queue" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">inbox</span><span>Queue</span></div><span class="bg-error text-on-error font-caption text-caption px-1.5 py-0.5 rounded-full font-semibold leading-none">4</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="incidents" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">warning</span><span>Incidents</span></div><span class="bg-surface-container-highest text-on-surface font-caption text-caption px-1.5 py-0.5 rounded-full font-semibold leading-none">24</span></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="statistics" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">query_stats</span><span>Statistics</span></div></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="reports" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">description</span><span>Reports</span></div></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="organizations" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span>Organizations</span></div></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="users" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">group</span><span>Users</span></div></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="audit-log" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">history</span><span>Audit log</span></div></a><a class="flex items-center px-space-sm py-2 rounded text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md" data-path="settings" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">settings</span><span>Settings</span></div></a></nav></div><div class="border-t border-border p-space-sm bg-surface"><div class="flex items-center gap-space-sm p-1.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer"><div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary text-on-primary font-label-md text-label-md shrink-0">JN<span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-success ring-2 ring-surface"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-md text-label-md text-text-primary truncate leading-tight">Jean-Paul Nguemo</span><span class="font-caption text-caption text-text-secondary truncate leading-tight">SOC Analyst</span></div><span class="material-symbols-outlined text-outline text-[18px]">unfold_more</span></div></div></aside><div class="pl-60 min-h-screen flex flex-col bg-background"><header class="fixed top-0 left-60 right-0 h-16 bg-surface border-b border-border z-20 flex items-center justify-between px-margin shadow-[0_1px_3px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-sm font-label-md text-label-md"><span class="text-text-secondary">Queue</span><span class="text-outline text-xs">/</span><span class="text-text-primary font-semibold">Triage Stream</span></div><div class="flex items-center gap-space-md"><div class="relative hidden xl:flex items-center w-80"><span class="material-symbols-outlined absolute left-3 text-outline text-[18px]">search</span><input class="w-full h-9 pl-9 pr-3 font-body-sm text-body-sm bg-surface border border-border rounded focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container text-text-primary placeholder:text-text-secondary transition-all" placeholder="Search ticket ID SFC-2026-XXXXXX, org, reporter..." type="text"/></div><div class="flex items-center gap-1.5 px-2 py-1 rounded bg-[#e6f4ea] text-success border border-[#b7e1cd]"><span class="w-2 h-2 rounded-full bg-success animate-pulse"></span><span class="font-caption text-caption font-semibold leading-none">Live (WAT)</span></div><div class="flex items-center rounded border border-border bg-surface-container-low p-0.5 font-caption text-caption font-semibold"><button class="px-2 py-0.5 rounded bg-surface text-primary shadow-sm">FR</button><span class="text-outline px-0.5">|</span><button class="px-2 py-0.5 rounded text-text-secondary hover:text-text-primary">EN</button></div><button class="relative p-1.5 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-4 h-4 rounded-full bg-danger text-on-error font-caption text-[10px] font-bold flex items-center justify-center leading-none">3</span></button><div class="h-5 w-px bg-border"></div><div class="flex items-center gap-space-sm pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-border" src="https://lh3.googleusercontent.com/aida/AEtjO1VSJ_H_lzCxksgXrclCzX6FbaCm4usbeCbnNxdUV8m8NPu-Pb3eIm5yVtIFkZqTJybVpWsET689qS1ko6ZH6-Xf-UVvU8TcHRVkcrlU4oFi-BVeRIAW0k3ciTXCDW7mmFex22UzRaH6p7k-7vVL6nJ1ngnrJhso4WqGDK8OwJZifczmdfeNVJBtk661k3IQ7SBrpgQKTF3_IOw8azj7NPeeWISEg6ki-ptpSWmP7U1Rn18k2PCCW2oZi5FVfTF042C5TA9QoMbvhZ8"/><button class="p-1.5 rounded text-on-surface-variant hover:text-danger hover:bg-surface-container-low transition-colors" title="Sign out"><span class="material-symbols-outlined text-[20px]">logout</span></button></div></div></header><main class="relative pt-16 w-full flex-1 flex flex-col"><div class="max-w-[1248px] w-full mx-auto p-margin flex-1 flex flex-col"><div class="flex flex-col w-full gap-space-lg select-none">
+<!-- 1. Top Alert Strip (Dismissible Crimson Alert) -->
+<div class="flex items-center justify-between px-space-md py-2.5 rounded-lg bg-[#FDECEC] border border-[#CC0000]/20 text-[#CC0000] shadow-sm transition-all duration-200" id="urgentAlertStrip">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-[20px] shrink-0 text-[#CC0000] animate-pulse">crisis_alert</span>
+<p class="font-body-sm text-body-sm text-[#CC0000] truncate">
+<strong class="font-semibold">1 critical incident waiting for 18 min</strong> — SFC-2026-001234 · Mobile Money fraud · Kamdem Distribution SARL
+      </p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="h-8 px-3 rounded bg-white border border-[#CC0000]/40 text-[#CC0000] font-label-md text-caption font-semibold hover:bg-[#FDECEC] transition-colors shadow-xs" onclick="handleQuickOpen('SFC-2026-001234')">
+        Open
+      </button>
+<button class="h-8 w-8 flex items-center justify-center rounded text-[#CC0000]/70 hover:text-[#CC0000] hover:bg-[#CC0000]/10 transition-colors" onclick="document.getElementById('urgentAlertStrip').style.display='none'" title="Dismiss banner">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- 2. KPI Cards Row (4 Columns) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Card 1: New, not assigned -->
+<div class="bg-surface rounded-xl border border-border p-space-md shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-text-secondary">New, not assigned</span>
+<span class="w-2.5 h-2.5 rounded-full bg-danger ring-4 ring-[#FDECEC]"></span>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-text-primary">4</span>
+<span class="font-caption text-caption text-danger font-semibold">+2 vs last hr</span>
+</div>
+<div class="mt-2 flex items-center justify-between pt-2 border-t border-surface-container-high font-caption text-caption text-text-secondary">
+<span>Incoming triage stream</span>
+<span class="material-symbols-outlined text-[16px] text-outline">move_to_inbox</span>
+</div>
+</div>
+<!-- Card 2: My open incidents -->
+<div class="bg-surface rounded-xl border border-border p-space-md shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-text-secondary">My open incidents</span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-text-primary">6</span>
+<span class="font-caption text-caption text-text-secondary">Active caseload</span>
+</div>
+<div class="mt-2 flex items-center justify-between pt-2 border-t border-surface-container-high font-caption text-caption text-text-secondary">
+<span class="truncate">Jean-Paul Nguemo</span>
+<span class="material-symbols-outlined text-[16px] text-outline">assignment_ind</span>
+</div>
+</div>
+<!-- Card 3: SLA at risk -->
+<div class="bg-surface rounded-xl border border-border p-space-md shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-text-secondary">SLA at risk</span>
+<span class="px-1.5 py-0.5 rounded font-caption text-[11px] font-bold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">WARNING</span>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-[#B26A00]">2</span>
+<span class="font-caption text-caption text-[#B26A00] font-medium">&lt; 30 min remaining</span>
+</div>
+<div class="mt-2 flex items-center justify-between pt-2 border-t border-surface-container-high font-caption text-caption text-text-secondary">
+<span>Requires immediate triage</span>
+<span class="material-symbols-outlined text-[16px] text-[#B26A00]">timer</span>
+</div>
+</div>
+<!-- Card 4: Resolved today -->
+<div class="bg-surface rounded-xl border border-border p-space-md shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-text-secondary">Resolved today</span>
+<span class="px-1.5 py-0.5 rounded font-caption text-[11px] font-bold bg-[#EAF5EE] text-[#006633] border border-[#006633]/20">75% OF TARGET</span>
+</div>
+<div class="mt-3 flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg text-[#006633]">9</span>
+<span class="font-caption text-caption text-text-secondary">Shift target: 12</span>
+</div>
+<div class="mt-2 flex items-center justify-between pt-2 border-t border-surface-container-high font-caption text-caption text-text-secondary">
+<span>Avg close: 24 min</span>
+<span class="material-symbols-outlined text-[16px] text-success">check_circle</span>
+</div>
+</div>
+</div>
+<!-- 3. Main Content Split Layout (~70% Table / ~30% Sidebar) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter items-start">
+<!-- Left Column (8 cols): Queue Table -->
+<div class="xl:col-span-8 bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+<!-- Table Header Bar -->
+<div class="px-space-md py-3.5 border-b border-border flex flex-wrap items-center justify-between gap-3 bg-surface">
+<div class="flex items-center gap-space-sm min-w-0">
+<h2 class="font-headline-sm text-headline-sm text-text-primary tracking-tight">Waiting for assignment</h2>
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#EAF5EE] text-[#006633] border border-[#006633]/20 font-caption text-[11px] font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#006633] animate-ping"></span>
+            Live (real-time stream)
+          </span>
+<span class="px-2 py-0.5 rounded bg-surface-container text-text-secondary font-caption text-caption font-semibold">
+            4 incidents
+          </span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-caption text-caption text-text-secondary hidden sm:inline">
+            Sorted by: <span class="text-text-primary font-medium">Severity (High to Low), then waiting time</span>
+</span>
+<button class="p-1.5 rounded hover:bg-surface-container-low text-text-secondary hover:text-text-primary transition-colors border border-border" id="refreshQueueBtn" onclick="simulateRefresh()" title="Refresh queue">
+<span class="material-symbols-outlined text-[18px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Enterprise Table View -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="queueTable">
+<thead>
+<tr class="h-10 bg-surface-container-low border-b border-border text-text-secondary font-label-table-header text-label-table-header">
+<th class="px-space-md font-semibold">REFERENCE</th>
+<th class="px-space-md font-semibold">TITLE</th>
+<th class="px-space-md font-semibold">ORGANIZATION</th>
+<th class="px-space-md font-semibold">CATEGORY</th>
+<th class="px-space-md font-semibold">SEVERITY</th>
+<th class="px-space-md font-semibold">REPORTED</th>
+<th class="px-space-md font-semibold">SLA TIMER</th>
+<th class="px-space-md font-semibold text-right">ACTION</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border font-body-md text-body-md text-text-primary">
+<!-- Row 1 -->
+<tr class="h-12 hover:bg-[#e6f0fa] transition-colors group cursor-pointer" data-row-ref="SFC-2026-001234" tabindex="0">
+<td class="px-space-md font-mono text-body-sm font-semibold text-primary-container whitespace-nowrap">
+                SFC-2026-001234
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<div class="flex items-center gap-1.5">
+<span class="font-medium text-text-primary">Mobile Money fraud</span>
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-caption text-[11px] font-medium" title="Confidential reporter requested anonymous handling">
+<span class="material-symbols-outlined text-[12px]">lock</span>
+                    Confidential
+                  </span>
+</div>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                Kamdem Distribution SARL
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-text-primary font-caption text-caption border border-border">
+                  Fraud &amp; scams
+                </span>
+</td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">
+                  Critical
+                </span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                10:42 WAT
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-caption text-[11px] font-bold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">
+<span class="material-symbols-outlined text-[13px] animate-spin">alarm</span>
+                  00:12:00 left
+                </span>
+</td>
+<td class="px-space-md text-right whitespace-nowrap">
+<button class="h-8 px-3 rounded bg-primary-container text-on-primary font-label-md text-caption font-medium hover:bg-primary transition-colors shadow-xs" onclick="event.stopPropagation(); assignTicket('SFC-2026-001234', this)">
+                  Assign to me
+                </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-12 hover:bg-[#e6f0fa] transition-colors group cursor-pointer" data-row-ref="SFC-2026-001240" tabindex="0">
+<td class="px-space-md font-mono text-body-sm font-semibold text-primary-container whitespace-nowrap">
+                SFC-2026-001240
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="font-medium text-text-primary">Sudden loss of mobile network (suspected SIM swap)</span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                Kamdem Distribution SARL
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-text-primary font-caption text-caption border border-border">
+                  My phone
+                </span>
+</td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">
+                  Critical
+                </span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                09:12 WAT
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-caption text-[11px] font-bold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">
+<span class="material-symbols-outlined text-[13px]">alarm</span>
+                  00:27:00 left
+                </span>
+</td>
+<td class="px-space-md text-right whitespace-nowrap">
+<button class="h-8 px-3 rounded bg-primary-container text-on-primary font-label-md text-caption font-medium hover:bg-primary transition-colors shadow-xs" onclick="event.stopPropagation(); assignTicket('SFC-2026-001240', this)">
+                  Assign to me
+                </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-12 hover:bg-[#e6f0fa] transition-colors group cursor-pointer" data-row-ref="SFC-2026-001238" tabindex="0">
+<td class="px-space-md font-mono text-body-sm font-semibold text-primary-container whitespace-nowrap">
+                SFC-2026-001238
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="font-medium text-text-primary">Phishing e-mail with fake invoice</span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                Office Régional des Archives du Centre
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-text-primary font-caption text-caption border border-border">
+                  E-mail or SMS
+                </span>
+</td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">
+                  Moderate
+                </span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                08:55 WAT
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-caption text-[11px] font-medium bg-surface-container-high text-text-secondary border border-border">
+<span class="material-symbols-outlined text-[13px]">schedule</span>
+                  6 h left
+                </span>
+</td>
+<td class="px-space-md text-right whitespace-nowrap">
+<button class="h-8 px-3 rounded bg-primary-container text-on-primary font-label-md text-caption font-medium hover:bg-primary transition-colors shadow-xs" onclick="event.stopPropagation(); assignTicket('SFC-2026-001238', this)">
+                  Assign to me
+                </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-12 hover:bg-[#e6f0fa] transition-colors group cursor-pointer" data-row-ref="SFC-2026-001236" tabindex="0">
+<td class="px-space-md font-mono text-body-sm font-semibold text-primary-container whitespace-nowrap">
+                SFC-2026-001236
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="font-medium text-text-primary">Computer very slow after opening an attachment</span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                ONG Santé Pour Tous
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-text-primary font-caption text-caption border border-border">
+                  My computer
+                </span>
+</td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-semibold bg-[#FDF0E7] text-[#D35400] border border-[#D35400]/20">
+                  High
+                </span>
+</td>
+<td class="px-space-md text-body-sm text-text-secondary whitespace-nowrap">
+                08:30 WAT
+              </td>
+<td class="px-space-md whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-caption text-[11px] font-semibold bg-[#FDF0E7] text-[#D35400] border border-[#D35400]/20">
+<span class="material-symbols-outlined text-[13px]">warning</span>
+                  1 h 10 left
+                </span>
+</td>
+<td class="px-space-md text-right whitespace-nowrap">
+<button class="h-8 px-3 rounded bg-primary-container text-on-primary font-label-md text-caption font-medium hover:bg-primary transition-colors shadow-xs" onclick="event.stopPropagation(); assignTicket('SFC-2026-001236', this)">
+                  Assign to me
+                </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Quick Triage Sub-Bar / Status Info -->
+<div class="px-space-md py-2.5 bg-surface-container-low border-t border-border flex items-center justify-between text-caption font-caption text-text-secondary">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-success">verified_user</span>
+          Automatic priority routing enabled via Cameroon CSIRT baseline taxonomy
+        </span>
+<span>Showing 4 of 4 waiting incidents</span>
+</div>
+</div>
+<!-- Right Column (4 cols): Stacked Cards -->
+<div class="xl:col-span-4 flex flex-col gap-space-lg">
+<!-- Card A: My assigned incidents -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-space-md">
+<div class="flex items-center justify-between pb-3 border-b border-border">
+<div>
+<h3 class="font-headline-sm text-body-md font-semibold text-text-primary">My assigned incidents</h3>
+<p class="font-caption text-caption text-text-secondary">6 in progress (5 recent shown)</p>
+</div>
+<span class="h-6 px-2 rounded-full bg-secondary-container text-primary font-caption text-caption font-semibold flex items-center">
+            Active: 6
+          </span>
+</div>
+<!-- 5 Item List -->
+<div class="mt-3 divide-y divide-border/60">
+<!-- Item 1 -->
+<div class="py-2.5 first:pt-1 last:pb-1 flex flex-col gap-1 hover:bg-surface-container-low px-1.5 rounded transition-colors cursor-pointer" onclick="handleQuickOpen('SFC-2026-001229')">
+<div class="flex items-center justify-between gap-2">
+<span class="font-mono font-semibold text-caption text-primary-container">SFC-2026-001229</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">
+                In progress
+              </span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-text-primary truncate">Unauthorised Orange Money withdrawal</p>
+<span class="font-caption text-caption text-text-secondary truncate">Kamdem Distribution SARL</span>
+</div>
+<!-- Item 2 -->
+<div class="py-2.5 flex flex-col gap-1 hover:bg-surface-container-low px-1.5 rounded transition-colors cursor-pointer" onclick="handleQuickOpen('SFC-2026-001225')">
+<div class="flex items-center justify-between gap-2">
+<span class="font-mono font-semibold text-caption text-primary-container">SFC-2026-001225</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F0EEF9] text-[#5B4B9A] border border-[#5B4B9A]/20">
+                Assigned
+              </span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-text-primary truncate">WhatsApp business account takeover attempt</p>
+<span class="font-caption text-caption text-text-secondary truncate">Bamenda Agro Cooperative</span>
+</div>
+<!-- Item 3 -->
+<div class="py-2.5 flex flex-col gap-1 hover:bg-surface-container-low px-1.5 rounded transition-colors cursor-pointer" onclick="handleQuickOpen('SFC-2026-001221')">
+<div class="flex items-center justify-between gap-2">
+<span class="font-mono font-semibold text-caption text-primary-container">SFC-2026-001221</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">
+                In progress
+              </span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-text-primary truncate">Suspicious PDF attachment signed by DGI</p>
+<span class="font-caption text-caption text-text-secondary truncate">Garoua Transport Express</span>
+</div>
+<!-- Item 4 -->
+<div class="py-2.5 flex flex-col gap-1 hover:bg-surface-container-low px-1.5 rounded transition-colors cursor-pointer" onclick="handleQuickOpen('SFC-2026-001218')">
+<div class="flex items-center justify-between gap-2">
+<span class="font-mono font-semibold text-caption text-primary-container">SFC-2026-001218</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">
+                In progress
+              </span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-text-primary truncate">Fraudulent SMS pretending to be MTN MoMo</p>
+<span class="font-caption text-caption text-text-secondary truncate">ONG Santé Pour Tous</span>
+</div>
+<!-- Item 5 -->
+<div class="py-2.5 flex flex-col gap-1 hover:bg-surface-container-low px-1.5 rounded transition-colors cursor-pointer" onclick="handleQuickOpen('SFC-2026-001214')">
+<div class="flex items-center justify-between gap-2">
+<span class="font-mono font-semibold text-caption text-primary-container">SFC-2026-001214</span>
+<span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#F0EEF9] text-[#5B4B9A] border border-[#5B4B9A]/20">
+                Assigned
+              </span>
+</div>
+<p class="font-body-sm text-body-sm font-medium text-text-primary truncate">Repeated lockouts on administrative portal</p>
+<span class="font-caption text-caption text-text-secondary truncate">Office Régional des Archives du Centre</span>
+</div>
+</div>
+<div class="mt-3 pt-3 border-t border-border flex justify-end">
+<a class="font-label-md text-caption text-primary-container hover:underline inline-flex items-center gap-1 font-semibold" href="#">
+            View all 6 assigned incidents
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card B: Today's Intake Chart -->
+<div class="bg-surface rounded-xl border border-border shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-space-md">
+<div class="flex items-center justify-between pb-2 border-b border-border">
+<div>
+<h3 class="font-headline-sm text-body-md font-semibold text-text-primary">Today's Intake Velocity</h3>
+<p class="font-caption text-caption text-text-secondary">Incoming reports per hour (WAT)</p>
+</div>
+<div class="text-right">
+<span class="font-body-sm font-bold text-text-primary">21 reports</span>
+<span class="block font-caption text-[11px] text-text-secondary">Peak: 7 at 10:00</span>
+</div>
+</div>
+<!-- Inline Clean SVG Hourly Chart -->
+<div class="mt-4 relative">
+<svg aria-label="Hourly reports distribution chart" class="w-full h-36 overflow-visible" viewbox="0 0 320 140">
+<!-- Gridlines -->
+<line stroke="#E0E0E0" stroke-dasharray="3,3" stroke-width="1" x1="28" x2="310" y1="20" y2="20"></line>
+<line stroke="#E0E0E0" stroke-dasharray="3,3" stroke-width="1" x1="28" x2="310" y1="55" y2="55"></line>
+<line stroke="#E0E0E0" stroke-dasharray="3,3" stroke-width="1" x1="28" x2="310" y1="90" y2="90"></line>
+<line stroke="#B0B0B0" stroke-width="1" x1="28" x2="310" y1="120" y2="120"></line>
+<!-- Y-Axis labels -->
+<text fill="#666666" font-family="Inter" font-size="10" text-anchor="end" x="22" y="24">8</text>
+<text fill="#666666" font-family="Inter" font-size="10" text-anchor="end" x="22" y="59">5</text>
+<text fill="#666666" font-family="Inter" font-size="10" text-anchor="end" x="22" y="94">2</text>
+<text fill="#666666" font-family="Inter" font-size="10" text-anchor="end" x="22" y="123">0</text>
+<!-- Bars for 06:00 to 14:00 (9 intervals: 06h:1, 07h:1, 08h:3, 09h:4, 10h:7, 11h:3, 12h:1, 13h:1, 14h:0) -->
+<!-- 06:00 (val: 1, y: 105) -->
+<rect fill="#DAE4EE" height="15" rx="2" width="16" x="36" y="105"></rect>
+<!-- 07:00 (val: 1, y: 105) -->
+<rect fill="#DAE4EE" height="15" rx="2" width="16" x="66" y="105"></rect>
+<!-- 08:00 (val: 3, y: 78) -->
+<rect fill="#799DD6" height="42" rx="2" width="16" x="96" y="78"></rect>
+<!-- 09:00 (val: 4, y: 64) -->
+<rect fill="#799DD6" height="56" rx="2" width="16" x="126" y="64"></rect>
+<!-- 10:00 (Peak val: 7, y: 28) -->
+<rect fill="#003366" height="92" rx="2" width="16" x="156" y="28"></rect>
+<text fill="#003366" font-family="Inter" font-size="10" font-weight="700" text-anchor="middle" x="164" y="22">7</text>
+<!-- 11:00 (val: 3, y: 78) -->
+<rect fill="#799DD6" height="42" rx="2" width="16" x="186" y="78"></rect>
+<!-- 12:00 (val: 1, y: 105) -->
+<rect fill="#DAE4EE" height="15" rx="2" width="16" x="216" y="105"></rect>
+<!-- 13:00 (val: 1, y: 105) -->
+<rect fill="#DAE4EE" height="15" rx="2" width="16" x="246" y="105"></rect>
+<!-- 14:00 (val: 0, subtle marker) -->
+<rect fill="#E0E0E0" height="2" rx="1" width="16" x="276" y="118"></rect>
+<!-- Trend Polyline -->
+<polyline fill="none" opacity="0.6" points="44,105 74,105 104,78 134,64 164,28 194,78 224,105 254,105 284,119" stroke="#003366" stroke-linecap="round" stroke-width="1.5"></polyline>
+<!-- X-Axis labels -->
+<text fill="#666666" font-family="Inter" font-size="9" text-anchor="middle" x="44" y="134">06h</text>
+<text fill="#666666" font-family="Inter" font-size="9" text-anchor="middle" x="104" y="134">08h</text>
+<text fill="#003366" font-family="Inter" font-size="9" font-weight="600" text-anchor="middle" x="164" y="134">10h</text>
+<text fill="#666666" font-family="Inter" font-size="9" text-anchor="middle" x="224" y="134">12h</text>
+<text fill="#666666" font-family="Inter" font-size="9" text-anchor="middle" x="284" y="134">14h</text>
+</svg>
+</div>
+<div class="mt-2 flex items-center justify-between text-caption font-caption text-text-secondary pt-2 border-t border-border">
+<span>Cameroon Business Hours (08:00 - 17:00 WAT)</span>
+<span class="inline-flex items-center gap-1 font-medium text-success">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span> Normal inflow
+          </span>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. Keyboard Shortcut Hint Bar -->
+<div class="mt-2 mb-1 flex justify-center">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface/90 border border-border shadow-xs font-caption text-caption text-text-secondary select-none">
+<span class="text-base leading-none">⌨️</span>
+<span class="font-semibold text-text-primary">Shortcuts:</span>
+<span class="inline-flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 text-[11px] font-mono font-semibold text-text-primary bg-surface-container rounded border border-border shadow-2xs">J</kbd>/<kbd class="px-1.5 py-0.5 text-[11px] font-mono font-semibold text-text-primary bg-surface-container rounded border border-border shadow-2xs">K</kbd> navigate
+      </span>
+<span class="text-outline/60">·</span>
+<span class="inline-flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 text-[11px] font-mono font-semibold text-text-primary bg-surface-container rounded border border-border shadow-2xs">A</kbd> assign to me
+      </span>
+<span class="text-outline/60">·</span>
+<span class="inline-flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 text-[11px] font-mono font-semibold text-text-primary bg-surface-container rounded border border-border shadow-2xs">Enter</kbd> open ticket
+      </span>
+<span class="text-outline/60">·</span>
+<span class="inline-flex items-center gap-1">
+<kbd class="px-1.5 py-0.5 text-[11px] font-mono font-semibold text-text-primary bg-surface-container rounded border border-border shadow-2xs">?</kbd> all shortcuts
+      </span>
+</div>
+</div>
+</div>
+<script>
+  // Simple SOC Queue UX Interactions
+  let activeRowIndex = 0;
+  const rows = document.querySelectorAll('#queueTable tbody tr');
+
+  function highlightRow(index) {
+    rows.forEach((row, idx) => {
+      if (idx === index) {
+        row.classList.add('bg-[#e6f0fa]');
+        row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        row.classList.remove('bg-[#e6f0fa]');
+      }
+    });
+  }
+
+  // Row selection handler
+  rows.forEach((row, index) => {
+    row.addEventListener('click', () => {
+      activeRowIndex = index;
+      highlightRow(activeRowIndex);
+    });
+  });
+
+  // Assign Ticket Action
+  function assignTicket(ref, btn) {
+    btn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Assigning...';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span> Assigned';
+      btn.className = "h-8 px-3 rounded bg-[#EAF5EE] text-[#006633] font-label-md text-caption font-semibold border border-[#006633]/20";
+    }, 600);
+  }
+
+  function handleQuickOpen(ref) {
+    alert("Navigating to Incident Dossier: " + ref + " [SECURE-SOC-WAT]");
+  }
+
+  function simulateRefresh() {
+    const icon = document.querySelector('#refreshQueueBtn span');
+    icon.classList.add('animate-spin');
+    setTimeout(() => {
+      icon.classList.remove('animate-spin');
+    }, 800);
+  }
+
+  // Keyboard navigation listener (J, K, A, Enter)
+  document.addEventListener('keydown', (e) => {
+    // Avoid intercepting if an input is active
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+
+    if (e.key === 'j' || e.key === 'J') {
+      if (activeRowIndex < rows.length - 1) {
+        activeRowIndex++;
+        highlightRow(activeRowIndex);
+      }
+    } else if (e.key === 'k' || e.key === 'K') {
+      if (activeRowIndex > 0) {
+        activeRowIndex--;
+        highlightRow(activeRowIndex);
+      }
+    } else if (e.key === 'a' || e.key === 'A') {
+      const activeRow = rows[activeRowIndex];
+      if (activeRow) {
+        const btn = activeRow.querySelector('button');
+        const ref = activeRow.getAttribute('data-row-ref');
+        if (btn && ref) assignTicket(ref, btn);
+      }
+    } else if (e.key === 'Enter') {
+      const activeRow = rows[activeRowIndex];
+      if (activeRow) {
+        const ref = activeRow.getAttribute('data-row-ref');
+        if (ref) handleQuickOpen(ref);
+      }
+    }
+  });
+</script></div></main></div></body></html>

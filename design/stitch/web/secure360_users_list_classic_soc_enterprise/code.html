@@ -1,0 +1,940 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Users · Secure360 Security First Cameroon</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#e67e22',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              mediumLight: '#fef3c7',
+              mediumBorder: '#fde68a',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+    .custom-checkbox:checked {
+      background-color: #003366;
+      border-color: #003366;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366 / #002244) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 shadow-sm border-r border-sfc-border" data-purpose="soc-sidebar">
+<div>
+<!-- Brand Lockup -->
+<div class="p-4 border-b border-sfc-border">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-[#003366] text-white flex items-center justify-center font-bold text-[15px] flex-shrink-0 shadow-sm">
+          S360
+        </div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[15px] font-bold text-[#003366] leading-tight truncate tracking-tight">Secure360</h1>
+<p class="text-[11px] text-sfc-textMuted font-medium truncate mt-0.5">Security First Cameroon</p>
+</div>
+</div>
+</div>
+<!-- Navigation Items in strict order -->
+<nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1">
+<!-- 1. Queue (badge 4) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#queue">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] font-bold rounded-full bg-slate-100 text-slate-700">4</span>
+</a>
+<!-- 2. Incidents (badge 24) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#incidents">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-sfc-danger text-white">24</span>
+</a>
+<!-- 3. Statistics -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#statistics">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Statistics</span>
+</a>
+<!-- 4. Reports -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#reports">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Reports</span>
+</a>
+<!-- 5. Organizations -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#organizations">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Organizations</span>
+</a>
+<!-- 6. Users (ACTIVE) -->
+<a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-[#e6f0fa] text-[#003366] text-[13px] font-semibold transition-colors group" href="#users">
+<div class="absolute left-0 top-1.5 bottom-1.5 w-1 bg-[#003366] rounded-r"></div>
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Users</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-semibold rounded bg-[#003366] text-white">128</span>
+</a>
+<!-- 7. Audit log -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#audit-log">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Audit log</span>
+</a>
+<!-- 8. Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-sfc-textPrimary hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#settings">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Sidebar Bottom: Jean-Paul Nguemo profile snippet -->
+<div class="p-3 border-t border-sfc-border bg-slate-50"><div class="flex items-center justify-between p-1.5 rounded-lg"><div class="flex items-center gap-2.5 min-w-0"><div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">RE</div><div class="truncate"><p class="text-[12px] font-semibold text-sfc-textPrimary leading-tight truncate">Rodrigue Essomba</p><p class="text-[10px] text-sfc-textMuted truncate">Admin · Security First Cameroon</p></div></div><button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-200 rounded transition" title="Sign Out"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div></div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between z-20" data-purpose="top-header">
+<!-- Left: Breadcrumbs & Page Title -->
+<div class="flex items-center gap-4 min-w-0">
+<div>
+<nav class="flex items-center gap-1.5 text-[11px] text-sfc-textMuted">
+<span class="">Users</span>
+<span class="">/</span>
+<span class="text-sfc-textPrimary font-medium">User Directory</span>
+</nav>
+<h2 class="text-[20px] font-bold text-[#003366] tracking-tight leading-none mt-0.5">Users</h2>
+</div>
+<div class="h-6 w-px bg-sfc-border hidden md:block"></div>
+<!-- Global Search -->
+<div class="relative w-[260px] hidden md:block">
+<span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</span>
+<input class="w-full h-8 pl-8 pr-2.5 text-[12px] bg-slate-50 border border-sfc-border rounded text-sfc-textPrimary placeholder:text-sfc-textMuted focus:outline-none focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy transition" placeholder="Search by name, email, org..." type="text">
+</div>
+</div>
+<!-- Right: Live WAT indicator, summary badge, Notifications, FR|EN toggle, user icon, Export CSV & + Add user -->
+<div class="flex items-center gap-3">
+<!-- Live (WAT) Indicator -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<span class="">● Live (WAT)</span>
+</div>
+<!-- Summary metric badge -->
+<span class="hidden xl:inline-flex items-center px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-[12px] font-medium border border-slate-200">
+      128 users · 2-step on for 94%
+    </span>
+<!-- Notification Bell -->
+<button class="p-1.5 text-slate-500 hover:text-sfc-navy hover:bg-slate-100 rounded transition" title="Notifications">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Language Toggle FR | EN -->
+<div class="inline-flex items-center text-[11px] font-semibold bg-slate-100 border border-slate-200 rounded px-1.5 py-1 gap-1 text-slate-600">
+<span class="text-sfc-navy cursor-pointer">FR</span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-400 cursor-pointer hover:text-sfc-navy">EN</span>
+</div>
+<!-- Jean-Paul Nguemo User Icon -->
+<div class="w-7 h-7 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-[11px]" title="Rodrigue Essomba">RE</div>
+<div class="h-5 w-px bg-sfc-border"></div>
+<!-- Secondary: Export CSV -->
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-white border border-sfc-border hover:bg-slate-50 text-sfc-textPrimary text-[12px] font-medium shadow-sm transition" onclick="alert('Exporting Users Directory (CSV)...')">
+<svg class="w-3.5 h-3.5 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Export CSV</span>
+</button>
+<!-- Primary Action: + Add user -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded bg-[#003366] hover:bg-[#002244] text-white text-[12px] font-semibold shadow-sm transition" onclick="triggerAddUserModal()">
+<svg class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+<span class="">+ Add user</span>
+</button>
+</div>
+</header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Sticky Filter Bar (56px, white background, bottom border #e0e0e0) -->
+<div class="h-14 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between gap-3 z-10" data-purpose="table-filter-bar">
+<div class="flex items-center gap-2.5 flex-wrap">
+<!-- Search Input -->
+<div class="relative w-[260px]">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</span>
+<input class="w-full h-8 pl-8 pr-3 text-[12px] bg-slate-50 border border-sfc-border rounded text-sfc-textPrimary placeholder:text-sfc-textMuted focus:outline-none focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy transition" id="user-search" placeholder="Search users by name, e-mail..." type="text">
+</div>
+<!-- Role Filter -->
+<div class="relative">
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-role-select" onchange="applyFilters()">
+<option value="All">All Roles</option>
+<option value="User">User</option>
+<option value="Manager">Manager</option>
+<option value="Technician">Technician</option>
+<option value="Admin">Admin</option>
+</select>
+</div>
+<!-- Organization Filter -->
+<div class="relative">
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-org-select" onchange="applyFilters()">
+<option value="All">All Organizations</option>
+<option value="Kamdem Distribution SARL">Kamdem Distribution SARL</option>
+<option value="Office Régional des Archives du Centre">Office Régional des Archives du Centre</option>
+<option value="ONG Santé Pour Tous">ONG Santé Pour Tous</option>
+<option value="Bamenda Agro Cooperative">Bamenda Agro Cooperative</option>
+<option value="Security First Cameroon">Security First Cameroon</option>
+</select>
+</div>
+<!-- Status Filter -->
+<div class="relative">
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-status-select" onchange="applyFilters()">
+<option value="All">All Statuses</option>
+<option value="Active">Active</option>
+<option value="Inactive">Inactive</option>
+</select>
+</div>
+<!-- 2-step Filter -->
+<div class="relative">
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-2step-select" onchange="applyFilters()">
+<option value="All">All 2-step</option>
+<option value="On">On</option>
+<option value="Off">Off</option>
+</select>
+</div>
+<!-- Reset / Clear Filters -->
+<button class="h-8 inline-flex items-center gap-1 px-2 text-[12px] font-medium text-sfc-textMuted hover:text-sfc-danger transition rounded hover:bg-slate-100" id="btn-clear-filters" onclick="clearAllFilters()">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+<span class="">Reset Filters</span>
+</button>
+</div>
+<!-- Right Status Indicator -->
+<div class="flex items-center gap-2">
+<span class="text-[12px] text-sfc-textMuted font-medium" id="saved-views-pill">
+      Showing <span class="font-semibold text-sfc-textPrimary">8</span> of <span class="font-semibold text-sfc-textPrimary">128</span> users
+    </span>
+</div>
+</div>
+<!-- END: Sticky Filter Bar -->
+<!-- BEGIN: Main Scrollable Content Area (1248px content container) -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg">
+<div class="max-w-[1248px] mx-auto space-y-4">
+<!-- DATA TABLE CARD (12px border radius, subtle border) -->
+<div class="bg-white rounded-[12px] border border-sfc-border shadow-card-subtle overflow-hidden flex flex-col justify-between" data-purpose="users-datatable-card">
+<!-- Skeleton Loading Simulation Container (hidden by default) -->
+<div class="hidden p-6 space-y-3.5 animate-pulse" id="skeleton-container">
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+<div class="h-12 bg-slate-100/80 rounded w-full"></div>
+</div>
+<!-- Empty State Simulation Container (hidden by default) -->
+<div class="hidden py-16 px-6 text-center" id="empty-state-container">
+<div class="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-sfc-navy mb-4 ring-8 ring-slate-50">
+<svg class="w-8 h-8 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-[18px] font-bold text-sfc-textPrimary">No users found</h3>
+<p class="text-[13px] text-sfc-textMuted mt-1 max-w-md mx-auto">No enterprise users match your current filter parameters or search queries.</p>
+<div class="mt-6 flex items-center justify-center gap-3">
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-[#003366] hover:bg-[#002244] text-white text-[13px] font-semibold rounded-lg shadow-sm transition" onclick="triggerAddUserModal()">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+<span class="">+ Add User</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-sfc-border hover:bg-slate-50 text-sfc-textPrimary text-[13px] font-medium rounded-lg transition" onclick="clearAllFilters()">
+<span class="">Reset Filters</span>
+</button>
+</div>
+</div>
+<!-- Actual Users Table Container -->
+<div class="overflow-x-auto" id="table-scroll-container">
+<table class="w-full text-left border-collapse" id="users-table">
+<thead>
+<tr class="h-11 bg-[#f6f8fb] border-b border-sfc-border text-[11px] font-semibold uppercase tracking-wider text-sfc-textMuted select-none">
+<th class="py-2.5 px-4 min-w-[200px]">Name</th>
+<th class="py-2.5 px-4 w-[210px]">E-mail</th>
+<th class="py-2.5 px-4 w-[110px]">Role</th>
+<th class="py-2.5 px-4 w-[210px]">Organization</th>
+<th class="py-2.5 px-4 w-[90px]">2-step</th>
+<th class="py-2.5 px-4 w-[140px]">Last sign-in</th>
+<th class="py-2.5 px-4 w-[95px]">Status</th>
+<th class="py-2.5 px-4 w-[80px] text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-sfc-border text-[13px]" id="user-rows"><!-- 1. Aimé Kamga -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="aime.kamga@kamdem-distribution.cm" data-name="Aimé Kamga" data-org="Kamdem Distribution SARL" data-role="User" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1001')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-sfc-navy text-xs flex-shrink-0">
+        AK
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Aimé Kamga</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">aime.kamga@kamdem-distribution.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('aime.kamga@kamdem-distribution.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+      User
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Kamdem Distribution SARL</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Today, 10:42 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1001')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 2. Paul Ndoumou -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="p.ndoumou@kamdem-distribution.cm" data-name="Paul Ndoumou" data-org="Kamdem Distribution SARL" data-role="Manager" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1002')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#f3e8ff] border border-[#d8b4fe] flex items-center justify-center font-bold text-purple-700 text-xs flex-shrink-0">
+        PN
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Paul Ndoumou</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">p.ndoumou@kamdem-distribution.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('p.ndoumou@kamdem-distribution.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+      Manager
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Kamdem Distribution SARL</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Today, 08:15 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1002')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 3. Christelle Biya -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="c.biya@archivescentre.gov.cm" data-name="Christelle Biya" data-org="Office Régional des Archives du Centre" data-role="Manager" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1003')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#f3e8ff] border border-[#d8b4fe] flex items-center justify-center font-bold text-purple-700 text-xs flex-shrink-0">
+        CB
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Christelle Biya</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">c.biya@archivescentre.gov.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('c.biya@archivescentre.gov.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+      Manager
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Office Régional des Archives du Centre</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Yesterday, 16:30 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1003')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 4. Brice Etoundi -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="b.etoundi@santepourtous.cm" data-name="Brice Etoundi" data-org="ONG Santé Pour Tous" data-role="User" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1004')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-sfc-navy text-xs flex-shrink-0">
+        BE
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Brice Etoundi</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">b.etoundi@santepourtous.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('b.etoundi@santepourtous.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+      User
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">ONG Santé Pour Tous</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">12/10/2026, 09:45 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1004')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 5. Grace Ayuk -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="grace.ayuk@bamendacoop.cm" data-name="Grace Ayuk" data-org="Bamenda Agro Cooperative" data-role="User" data-status="Active" data-twostep="Off" onclick="navigateToDetail('USR-1005')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs flex-shrink-0">
+        GA
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Grace Ayuk</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">grace.ayuk@bamendacoop.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('grace.ayuk@bamendacoop.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+      User
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Bamenda Agro Cooperative</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Off
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">04/10/2026, 11:20 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1005')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 6. Jean-Paul Nguemo -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="jp.nguemo@securityfirst.cm" data-name="Jean-Paul Nguemo" data-org="Security First Cameroon" data-role="Technician" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1006')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#e6f0fa] border border-[#bfdbfe] flex items-center justify-center font-bold text-sfc-navy text-xs flex-shrink-0">
+        JN
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Jean-Paul Nguemo</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">jp.nguemo@securityfirst.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('jp.nguemo@securityfirst.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+      Technician
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Security First Cameroon</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Just now</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1006')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 7. Estelle Mbarga -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="e.mbarga@securityfirst.cm" data-name="Estelle Mbarga" data-org="Security First Cameroon" data-role="Technician" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1007')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center font-bold text-blue-700 text-xs flex-shrink-0">
+        EM
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Estelle Mbarga</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">e.mbarga@securityfirst.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('e.mbarga@securityfirst.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+      Technician
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Security First Cameroon</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Today, 09:12 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1007')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr>
+<!-- 8. Rodrigue Essomba -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer user-row odd:bg-white even:bg-[#f9fafc]" data-email="r.essomba@securityfirst.cm" data-name="Rodrigue Essomba" data-org="Security First Cameroon" data-role="Admin" data-status="Active" data-twostep="On" onclick="navigateToDetail('USR-1008')">
+<td class="py-2.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+        RE
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate">Rodrigue Essomba</div>
+</div>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center gap-1.5 font-mono text-[12px] text-slate-700">
+<span class="truncate">r.essomba@securityfirst.cm</span>
+<button class="text-slate-400 hover:text-sfc-navy p-1 rounded hover:bg-slate-100" onclick="copyEmail('r.essomba@securityfirst.cm')" title="Copy Email">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="13" rx="2" width="13" x="9" y="9"></rect><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path></svg>
+</button>
+</div>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#003366] text-white">
+      Admin
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Security First Cameroon</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> On
+    </span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] whitespace-nowrap">Yesterday, 18:05 WAT</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
+    </span>
+</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<div class="flex items-center justify-end gap-1">
+<button class="p-1.5 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="editUser('USR-1008')" title="View / Edit User">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+</button>
+</div>
+</td>
+</tr></tbody>
+</table>
+</div>
+<!-- BEGIN: Bottom Pagination & Controls -->
+<div class="px-5 py-3.5 bg-[#fcfcfd] border-t border-sfc-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-sfc-textMuted select-none">
+<!-- Left: Showing range & per page -->
+<div class="flex items-center gap-3">
+<span class="">Showing <strong class="text-sfc-textPrimary font-semibold" id="pagination-start">1</strong>-<strong class="text-sfc-textPrimary font-semibold" id="pagination-end">8</strong> of <strong class="text-sfc-textPrimary font-semibold" id="pagination-total">128</strong> users</span>
+<span class="text-slate-300">|</span>
+<div class="flex items-center gap-1.5">
+<span class="">Per page:</span>
+<select class="h-7 text-[12px] font-medium bg-white border border-sfc-border rounded px-2 py-0 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" onchange="alert('Page size updated')">
+<option selected="">10 per page</option>
+<option>20 per page</option>
+<option>50 per page</option>
+</select>
+</div>
+</div>
+<!-- Right: Page Jump input & Numbered pagination buttons (1 of 16) -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="">Page</span>
+<input class="h-7 w-12 text-center text-[12px] font-semibold border border-sfc-border rounded bg-white text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" max="16" min="1" type="number" value="1">
+<span class="">of 16</span>
+</div>
+<div class="inline-flex items-center gap-1">
+<button class="h-7 px-2.5 border border-sfc-border rounded bg-white text-sfc-textPrimary disabled:opacity-40 disabled:cursor-not-allowed font-medium transition" disabled="">
+        Previous
+      </button>
+<button class="h-7 w-7 rounded bg-sfc-navy text-white font-semibold text-center leading-7 shadow-xs">
+        1
+      </button>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+        2
+      </button>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+        3
+      </button>
+<span class="px-1 text-slate-400">...</span>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+        16
+      </button>
+<button class="h-7 px-2.5 border border-sfc-border rounded bg-white text-sfc-textPrimary hover:bg-slate-100 font-medium transition">
+        Next
+      </button>
+</div>
+</div>
+</div>
+<!-- END: Bottom Pagination & Controls -->
+</div>
+<!-- END: DATA TABLE CARD -->
+</div>
+</main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Interactive Client Behaviors -->
+<script>
+  // Row Click to Detail (W15)
+  function navigateToDetail(userId) {
+    console.log('Navigating to User Detail (W15):', userId);
+    alert('Navigating to User Detail view for ' + userId + ' (W15 Admin View)');
+  }
+
+  function triggerAddUserModal() {
+    console.log('Connecting to User Form (W16)');
+    alert('Opening "+ Add User" Modal (Screen W16): Configure credentials, organizational tenant, RBAC role assignment, and multi-factor authentication (2FA).');
+  }
+
+  function editUser(userId) {
+    alert('Edit settings and permissions for user ' + userId);
+  }
+
+  function confirmSuspend(userName) {
+    if (confirm('Are you sure you want to suspend access for "' + userName + '"? Active sessions and API tokens will be revoked.')) {
+      alert('User "' + userName + '" suspended successfully.');
+    }
+  }
+
+  function copyEmail(email) {
+    navigator.clipboard?.writeText(email);
+    alert('Copied to clipboard: ' + email);
+  }
+
+  // Filtering functionality
+  function applyFilters() {
+    const searchVal = (document.getElementById('user-search')?.value || '').toLowerCase().trim();
+    const roleVal = document.getElementById('filter-role-select')?.value || 'All';
+    const orgVal = document.getElementById('filter-org-select')?.value || 'All';
+    const statusVal = document.getElementById('filter-status-select')?.value || 'All';
+
+    const rows = document.querySelectorAll('.user-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const rowName = row.getAttribute('data-name') || '';
+      const rowEmail = row.getAttribute('data-email') || '';
+      const rowOrg = row.getAttribute('data-org') || '';
+      const rowRole = row.getAttribute('data-role') || '';
+      const rowStatus = row.getAttribute('data-status') || '';
+      const rowText = (row.innerText + ' ' + rowEmail + ' ' + rowOrg).toLowerCase();
+
+      const matchesSearch = !searchVal || rowText.includes(searchVal);
+      const matchesRole = (roleVal === 'All') || (rowRole === roleVal);
+      const matchesOrg = (orgVal === 'All') || (rowOrg === orgVal);
+      const matchesStatus = (statusVal === 'All') || (rowStatus === statusVal);
+
+      if (matchesSearch && matchesRole && matchesOrg && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const pill = document.getElementById('saved-views-pill');
+    const emptyState = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const skeleton = document.getElementById('skeleton-container');
+    const paginationStart = document.getElementById('pagination-start');
+    const paginationEnd = document.getElementById('pagination-end');
+    const paginationTotal = document.getElementById('pagination-total');
+
+    skeleton.classList.add('hidden');
+
+    if (visibleCount === 0) {
+      emptyState.classList.remove('hidden');
+      tableScroll.classList.add('hidden');
+      if (pill) pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>0 Users registered</span>';
+      if (paginationStart) paginationStart.innerText = '0';
+      if (paginationEnd) paginationEnd.innerText = '0';
+      if (paginationTotal) paginationTotal.innerText = '0';
+    } else {
+      emptyState.classList.add('hidden');
+      tableScroll.classList.remove('hidden');
+      if (pill) pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>${visibleCount === 10 ? '128' : visibleCount} Users registered • 94% 2FA Enforced</span>`;
+      if (paginationStart) paginationStart.innerText = '1';
+      if (paginationEnd) paginationEnd.innerText = visibleCount;
+      if (paginationTotal) paginationTotal.innerText = visibleCount === 10 ? '128' : visibleCount;
+    }
+  }
+
+  function clearAllFilters() {
+    const search = document.getElementById('user-search');
+    if (search) search.value = '';
+    const roleSelect = document.getElementById('filter-role-select');
+    if (roleSelect) roleSelect.value = 'All';
+    const orgSelect = document.getElementById('filter-org-select');
+    if (orgSelect) orgSelect.value = 'All';
+    const statusSelect = document.getElementById('filter-status-select');
+    if (statusSelect) statusSelect.value = 'All';
+
+    showNormalTableState();
+  }
+
+  // Interactive View Mode State Toggles
+  function updateToggleButtons(activeId) {
+    const buttons = ['btn-state-normal', 'btn-state-skeleton', 'btn-state-empty'];
+    buttons.forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      if (id === activeId) {
+        btn.className = 'text-[11px] font-semibold px-2.5 py-1 rounded bg-white text-sfc-navy shadow-sm transition border border-slate-200';
+      } else {
+        btn.className = 'text-[11px] font-medium px-2.5 py-1 rounded text-sfc-textMuted hover:text-sfc-textPrimary transition';
+      }
+    });
+  }
+
+  function showNormalTableState() {
+    updateToggleButtons('btn-state-normal');
+    const skeleton = document.getElementById('skeleton-container');
+    const empty = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+
+    skeleton.classList.add('hidden');
+    empty.classList.add('hidden');
+    tableScroll.classList.remove('hidden');
+    applyFilters();
+  }
+
+  function showSkeletonState() {
+    updateToggleButtons('btn-state-skeleton');
+    const skeleton = document.getElementById('skeleton-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const empty = document.getElementById('empty-state-container');
+
+    empty.classList.add('hidden');
+    tableScroll.classList.add('hidden');
+    skeleton.classList.remove('hidden');
+  }
+
+  function showEmptyState() {
+    updateToggleButtons('btn-state-empty');
+    const empty = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const skeleton = document.getElementById('skeleton-container');
+    const pill = document.getElementById('saved-views-pill');
+
+    skeleton.classList.add('hidden');
+    tableScroll.classList.add('hidden');
+    empty.classList.remove('hidden');
+    if (pill) pill.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span><span>0 Users registered</span>';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('user-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+  });
+</script>
+
+
+</body></html>

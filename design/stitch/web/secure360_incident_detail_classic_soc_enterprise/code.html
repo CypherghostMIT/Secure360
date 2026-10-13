@@ -1,0 +1,608 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Secure360 - Incident SFC-2026-001234 (Security First Cameroon)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#ff9900',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- Toast Notification Feedback -->
+<div class="fixed top-5 right-6 z-50 transform transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none flex items-center gap-3 px-4 py-3 bg-sfc-navy text-white rounded-lg shadow-xl border border-blue-400/30" id="toast-notification">
+<div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div class="text-[13px] font-medium" id="toast-message">Incident state updated successfully.</div>
+</div>
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-[#E0E0E0] shadow-sm" data-purpose="soc-sidebar">
+<div>
+<!-- Brand & Subtitle -->
+<div class="p-4 border-b border-[#E0E0E0]">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-md bg-white border border-slate-200 p-1 flex items-center justify-center flex-shrink-0 shadow-xs overflow-hidden">
+<img alt="Secure360 Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPyDfexPg7Y6EH4cm64NLyEgJe5fZWObNExP0cuvX2yWIXuvlVlEdeRitVFULSvsZ2s6tvxGcbOyQA6wNEglTt0SC0hYP7FQg7OZWc3-X191zoU5ZjgZbVnaTeJ22nChv18J8xrBRQdk_RfGfTWaDeNHu2ZpdGqtRyoGpSr44Q8drpiyigDtU7lpGTUctwtZkc4LZs2jWzKjaSXhmcU31vOtMhnz5H8ny7PLmkFk1emfKQpdHxvAT08jsut--QmDVz-Ko">
+</div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[15px] font-bold text-[#003366] leading-snug truncate tracking-tight">Secure360</h1>
+<p class="text-[11px] font-medium text-slate-500 truncate">Security First Cameroon</p>
+</div>
+</div>
+</div>
+<!-- Main Navigation Menu -->
+<nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1">
+<!-- 1. Queue (badge 4) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<div class="flex items-center gap-2.5 truncate">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.2 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700 border border-slate-200">4</span>
+</a>
+<!-- 2. Incidents (ACTIVE item with SFC Blue tint & badge 24) -->
+<a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-[#e6f0fa] text-[#003366] text-[13px] font-semibold transition-colors" href="javascript:void(0)">
+<div class="absolute left-0 top-1 bottom-1 w-1 bg-[#003366] rounded-r"></div>
+<div class="flex items-center gap-2.5 truncate">
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-[#cc0000] text-white">24</span>
+</a>
+<!-- 3. Statistics -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Statistics</span>
+</a>
+<!-- 4. Reports -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Reports</span>
+</a>
+<!-- 5. Organizations -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Organizations</span>
+</a>
+<!-- 6. Users -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Users</span>
+</a>
+<!-- 7. Audit log -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Audit log</span>
+</a>
+<!-- 8. Settings -->
+<a class="flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-700 hover:text-[#003366] hover:bg-slate-100 text-[13px] font-medium transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<!-- User Profile at bottom: Jean-Paul Nguemo, SOC Analyst -->
+<div class="p-3 border-t border-[#E0E0E0]">
+<div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200/80">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="relative flex-shrink-0">
+<div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs">
+            JN
+          </div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div class="truncate">
+<p class="text-[12px] font-semibold text-slate-900 leading-tight truncate">Jean-Paul Nguemo</p>
+<p class="text-[11px] text-slate-500 truncate">SOC Analyst</p>
+</div>
+</div>
+<button class="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded transition-colors" title="Sign out">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-[#E0E0E0] px-6 flex items-center justify-between z-20" data-purpose="top-header">
+<!-- Left: Back link, Breadcrumb, Badges, SLA indicator -->
+<div class="flex items-center gap-3.5 flex-wrap">
+<a class="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#003366] hover:underline transition-colors" href="javascript:void(0)">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="">Incidents</span>
+</a>
+<div class="h-4 w-px bg-slate-300 hidden sm:block"></div>
+<div class="flex items-center gap-2">
+<h2 class="text-[18px] font-bold text-slate-900 tracking-tight">Incident SFC-2026-001234</h2>
+</div>
+<!-- Status Badge (Assigned in soft purple badge) -->
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20" id="header-status-badge">In progress</span>
+<!-- Severity Badge (Critical in crimson badge) -->
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20" id="header-severity-badge">
+      Critical
+    </span>
+<!-- SLA Indicator -->
+<div class="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+<span class="">Acknowledged · resolution target 13:42 <strong class="font-semibold text-slate-900">(2 h 18 left)</strong></span>
+</div>
+</div>
+<!-- Right: Actions bar -->
+<div class="flex items-center gap-2">
+<!-- Primary Button: Start work (moves to In progress) -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-[6px] bg-[#003366] hover:bg-[#002244] text-white text-sm font-medium shadow-xs transition-colors" onclick="triggerToast('Status changed: Work commenced on SFC-2026-001234')" title="Moves to In progress">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+<span class="">Start work</span>
+</button>
+<!-- Secondary: Re-qualify severity -->
+<button class="hidden sm:inline-flex items-center px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors" onclick="triggerToast('Re-qualify severity opened')">
+      Re-qualify severity
+    </button>
+<!-- Secondary: Reassign -->
+<button class="hidden md:inline-flex items-center px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors" onclick="triggerToast('Reassignment dialog opened')">
+      Reassign
+    </button>
+<!-- Secondary: Generate PDF -->
+<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-700 text-sm font-medium transition-colors" onclick="triggerToast('Generating official SFC PDF dossier...')">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<span class="">Generate PDF</span>
+</button>
+<!-- Overflow Button: ••• -->
+<button aria-label="More actions" class="p-2 rounded-[6px] bg-white border border-[#E0E0E0] hover:bg-slate-50 text-slate-600 transition-colors" onclick="triggerToast('More incident options')">
+<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg>
+</button>
+</div>
+</header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Main Scrollable Content Area (Two Columns: 60% / 40%) -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg"><div class="max-w-[1248px] mx-auto">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+<!-- ==============================================
+         LEFT COLUMN (~65% -> lg:col-span-8)
+         ============================================== -->
+<div class="lg:col-span-8 space-y-6">
+<!-- Card 1: Report -->
+<section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="incident-report-card">
+<!-- Category & Title -->
+<div class="flex items-start justify-between gap-4">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200">
+<span class="">Fraud &amp; scams</span>
+<span class="text-amber-400">›</span>
+<span class="">Mobile Money fraud</span>
+</div>
+<h3 class="text-xl font-bold text-slate-900 mt-2 leading-snug">
+              Mobile Money fraud
+            </h3>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-medium text-slate-600">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+<span class="">Confidential reporter 🔒</span>
+</span>
+</div>
+<!-- Organization & Reporter Header Info -->
+<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 text-sm">
+<div class="flex items-center gap-2">
+<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Organization:</span>
+<span class="font-semibold text-slate-900">Kamdem Distribution SARL</span>
+</div>
+<div class="flex items-center gap-2"><span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Reporter:</span><span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200"><svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path></svg>Confidential reporter</span></div>
+</div>
+<!-- Metadata Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mt-3 pt-3 border-t border-slate-100 text-xs">
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+<span class="text-slate-500 block mb-0.5">Reported</span>
+<span class="font-semibold text-slate-900">14/09/2026 10:42 WAT</span>
+</div>
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+<span class="text-slate-500 block mb-0.5">Location</span>
+<span class="font-semibold text-slate-900">Akwa office, Douala</span>
+</div>
+<div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+<span class="text-slate-500 block mb-0.5">Device</span>
+<span class="font-semibold text-slate-900">Work phone (Samsung Galaxy A15)</span>
+</div>
+</div>
+<!-- Authentic Plain Language Employee Description -->
+<div class="mt-4">
+<label class="text-xs font-semibold text-slate-600 uppercase tracking-wide block mb-1.5">Report Narrative</label>
+<div class="text-sm leading-relaxed text-slate-800 bg-[#fcfcfd] p-4 rounded-lg border border-slate-200/80">"I received an SMS claiming to be from Orange Money stating that my corporate account was temporarily blocked due to a KYC compliance check. A few minutes later, an unknown caller (+237 6 51 xx xx xx) phoned me asking me to approve a confirmation popup to prevent account deactivation. Shortly after, an unauthorized transfer of 25,000 FCFA was debited from our business cash float account towards an unknown number."</div>
+</div>
+<!-- Reporter's Answers Section -->
+<div class="mt-5 pt-4 border-t border-slate-100">
+<p class="text-xs font-semibold uppercase text-slate-500 tracking-wide mb-2.5">Reporter's answers</p>
+<div class="flex flex-wrap items-center gap-2.5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-300"><span class="w-2 h-2 rounded-full bg-[#cc0000]"></span><span class="">Money lost: Yes (25,000 FCFA)</span></span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="">Shared a code: No</span>
+</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="">Others affected: No</span>
+</span>
+<div class="ml-auto flex items-center gap-1.5 text-xs font-bold text-[#cc0000]">
+<svg class="w-4 h-4 text-[#cc0000]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg>
+<span class="">Initial severity computed: Critical</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 2: Evidence (2 attachments) -->
+<section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="evidence-card">
+<div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]">
+<div>
+<h3 class="text-base font-bold text-slate-900">Evidence (2 attachments)</h3>
+<p class="text-xs text-slate-500">Captured media submitted by reporter</p>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+            2 Files Verified
+          </span>
+</div>
+<!-- Attachments Thumbnails -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+<!-- Thumbnail 1 -->
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:border-slate-300 transition-colors shadow-xs">
+<div class="h-32 bg-white border border-slate-200 rounded flex flex-col justify-center items-center p-3 text-center overflow-hidden">
+<div class="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center mb-2">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+</div>
+<p class="text-xs font-semibold text-slate-800 truncate w-full">SMS_alert_screenshot.jpg</p>
+<span class="text-[11px] text-slate-500">1.4 MB · JPEG Image</span>
+</div>
+<div class="mt-2.5 flex items-center justify-between">
+<span class="text-xs font-medium text-slate-700 truncate">SMS phishing prompt received</span>
+<div class="flex items-center gap-1.5">
+<button class="px-2 py-1 rounded text-xs font-semibold text-[#003366] hover:bg-[#e6f0fa] transition-colors" onclick="triggerToast('Opening SMS_alert_screenshot.jpg preview')">Open</button>
+<button class="px-2 py-1 rounded text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors" onclick="triggerToast('Downloading SMS_alert_screenshot.jpg')">Download</button>
+</div>
+</div>
+</div>
+<!-- Thumbnail 2 -->
+<div class="bg-slate-50 border border-slate-200 rounded-lg p-3 hover:border-slate-300 transition-colors shadow-xs"><div class="h-32 bg-white border border-slate-200 rounded flex flex-col justify-center items-center p-3 text-center overflow-hidden"><div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mb-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div><p class="text-xs font-semibold text-slate-800 truncate w-full">Orange_Money_debit_notification.png</p><span class="text-[11px] text-slate-500">850 KB · PNG Statement</span></div><div class="mt-2.5 flex items-center justify-between"><span class="text-xs font-medium text-slate-700 truncate">Orange Money debit statement</span><div class="flex items-center gap-1.5"><button class="px-2 py-1 rounded text-xs font-semibold text-[#003366] hover:bg-[#e6f0fa] transition-colors" onclick="triggerToast('Opening Orange_Money_debit_notification.png preview')">Open</button><button class="px-2 py-1 rounded text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-colors" onclick="triggerToast('Downloading Orange_Money_debit_notification.png')">Download</button></div></div></div>
+</div>
+</section>
+</div>
+<!-- ==============================================
+         RIGHT COLUMN (~35% -> lg:col-span-4)
+         ============================================== -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Card 1: Timeline -->
+<section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm" data-purpose="timeline-card">
+<div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]">
+<h3 class="text-base font-bold text-slate-900">Timeline</h3>
+<span class="text-xs font-medium px-2 py-0.5 rounded bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">Phase: In progress</span>
+</div>
+<div class="mt-5 relative pl-6 space-y-5 text-xs">
+<!-- Continuous vertical rule -->
+<div class="absolute left-[11px] top-2 bottom-3 w-0.5 bg-slate-200"></div>
+<!-- Step 1: Completed -->
+<div class="relative flex items-start gap-3">
+<div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white">
+<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+</div>
+<div><p class="font-semibold text-slate-900">10:42 WAT · Reported</p><p class="text-slate-500 mt-0.5">Submitted by Confidential reporter via Secure360 mobile app</p></div>
+</div>
+<!-- Step 2: Completed -->
+<div class="relative flex items-start gap-3">
+<div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white">
+<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+</div>
+<div>
+<p class="font-semibold text-slate-900">10:51 WAT · Assigned</p>
+<p class="text-slate-500 mt-0.5">Assigned to Jean-Paul Nguemo (SOC Analyst)</p>
+</div>
+</div>
+<!-- Step 3: Completed -->
+<div class="relative flex items-start gap-3">
+<div class="absolute -left-[19px] top-1 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-50 flex items-center justify-center text-white">
+<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+</div>
+<div><p class="font-semibold text-slate-900">10:52 WAT · Message sent to reporter</p><p class="text-slate-500 mt-0.5">Direct acknowledgment and Orange Money freeze dispatch</p></div>
+</div>
+<!-- Step 4: Pending / Greyed -->
+<div class="relative flex items-start gap-3 opacity-60">
+<div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div>
+<div>
+<p class="font-semibold text-slate-600">Work commenced (In progress)</p>
+<p class="text-slate-400 mt-0.5">Awaiting analyst Start work trigger</p>
+</div>
+</div>
+<!-- Step 5: Pending / Greyed -->
+<div class="relative flex items-start gap-3 opacity-60">
+<div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div>
+<div><p class="font-semibold text-slate-600">Mitigation &amp; Recovery</p><p class="text-slate-400 mt-0.5">Orange Money wallet freeze and reversal</p></div>
+</div>
+<!-- Step 6: Pending / Greyed -->
+<div class="relative flex items-start gap-3 opacity-40">
+<div class="absolute -left-[18px] top-1 w-3.5 h-3.5 rounded-full bg-slate-300 ring-4 ring-slate-100"></div>
+<div>
+<p class="font-semibold text-slate-600">Resolved &amp; Closed</p>
+<p class="text-slate-400 mt-0.5">Final post-incident summary and closure</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 2: Conversation -->
+<section class="bg-white rounded-[12px] border border-[#E0E0E0] p-6 shadow-sm flex flex-col" data-purpose="conversation-card">
+<div class="flex items-center justify-between pb-3 border-b border-[#E0E0E0]">
+<h3 class="text-base font-bold text-slate-900">Conversation</h3>
+<span class="text-xs text-slate-500 font-medium">3 Messages</span>
+</div>
+<!-- Two Tabs: With reporter (active) & Internal notes (yellow-tinted) -->
+<div class="mt-3 flex items-center border-b border-slate-200 text-xs font-semibold">
+<button class="px-3.5 py-2 border-b-2 border-[#003366] text-[#003366] -mb-px flex items-center gap-1.5" id="tab-btn-reporter" onclick="switchConvTab('reporter')">
+<span class="">With reporter</span>
+<span class="px-1.5 py-0.2 rounded-full bg-[#003366]/10 text-[#003366] text-[10px]">3</span>
+</button>
+<button class="px-3.5 py-2 text-slate-500 hover:text-slate-800 -mb-px flex items-center gap-1.5" id="tab-btn-internal" onclick="switchConvTab('internal')">
+<span class="">Internal notes</span>
+<span class="px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">Staff only</span>
+</button>
+</div>
+<!-- Internal Note Notice Banner (toggleable or default contextual reminder) -->
+<div class="mt-3 p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2" id="internal-notes-banner">
+<svg class="w-4 h-4 text-amber-700 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="11" rx="2" width="18" x="3" y="11"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>
+<span class="">🔒 Only SFC staff can see notes — hidden from client reporter</span>
+</div>
+<!-- Message Stream (3 realistic messages) -->
+<div class="mt-4 space-y-3.5 max-h-[340px] overflow-y-auto pr-1" id="messages-container">
+<!-- Message 1: Reporter Aimé Kamga (10:42) -->
+<div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-full bg-slate-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">CR</div><div class="flex-1 max-w-[88%]"><div class="flex items-center gap-1.5 mb-1 text-xs"><span class="font-bold text-slate-900">Confidential reporter</span><span class="text-[10px] font-medium text-slate-400">10:42 WAT</span></div><div class="bg-slate-100 text-slate-800 text-xs rounded-r-lg rounded-bl-lg p-3 border border-slate-200 leading-relaxed">"Please help urgently, our cash float was debited 25,000 FCFA without authorization!"</div></div></div>
+<!-- Message 2: Jean-Paul Nguemo (SOC Analyst) (10:52) -->
+<div class="flex items-start gap-2.5 flex-row-reverse"><div class="w-7 h-7 rounded-full bg-[#003366] text-white font-bold text-xs flex items-center justify-center flex-shrink-0">JN</div><div class="flex-1 max-w-[88%] text-right"><div class="flex items-center justify-end gap-1.5 mb-1 text-xs"><span class="text-[10px] font-medium text-slate-400">10:52 WAT</span><span class="font-bold text-[#003366]">Jean-Paul Nguemo</span><span class="text-[10px] font-semibold text-slate-500">(SOC Analyst)</span></div><div class="bg-[#e6f0fa] text-[#003366] text-xs rounded-l-lg rounded-br-lg p-3 border border-blue-200 text-left leading-relaxed">"Hello, this is Jean-Paul from SFC. We are actively contacting Orange Money Cameroon anti-fraud desk to freeze the recipient account. Please do not accept any new USSD prompts."</div></div></div>
+<!-- Message 3: Reporter Aimé Kamga (10:55) -->
+<div class="flex items-start gap-2.5"><div class="w-7 h-7 rounded-full bg-slate-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0">CR</div><div class="flex-1 max-w-[88%]"><div class="flex items-center gap-1.5 mb-1 text-xs"><span class="font-bold text-slate-900">Confidential reporter</span><span class="text-[10px] font-medium text-slate-400">10:55 WAT</span></div><div class="bg-slate-100 text-slate-800 text-xs rounded-r-lg rounded-bl-lg p-3 border border-slate-200 leading-relaxed">"Understood. The suspicious number that called me was +237 6 51 88 92 10. Thank you for acting quickly."</div></div></div>
+</div>
+<!-- Composer Box -->
+<div class="mt-4 pt-3 border-t border-[#E0E0E0]">
+<form class="space-y-2" onsubmit="handleSendMessage(event)">
+<div class="relative">
+<textarea class="w-full rounded-md border border-[#E0E0E0] text-xs p-2.5 pr-10 focus:border-[#003366] focus:ring-1 focus:ring-[#003366] placeholder:text-slate-400 resize-none" id="chat-input-field" placeholder="Reply to reporter..." rows="2"></textarea>
+<button class="absolute right-2.5 bottom-2.5 p-1 text-slate-400 hover:text-[#003366] rounded transition" onclick="triggerToast('Attach file uploader opened')" title="Attach file" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-1.5 cursor-pointer select-none text-[11px] text-slate-600">
+<input class="rounded border-gray-300 text-[#003366] focus:ring-[#003366]" id="internal-note-toggle" onchange="toggleInternalMode()" type="checkbox">
+<span class="">Post as internal note</span>
+</label>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#003366] hover:bg-[#002244] text-white text-xs font-semibold rounded-[6px] shadow-xs transition" type="submit">
+<span class="">Send</span>
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</form>
+</div>
+</section>
+</div>
+</div>
+</div></main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Evidence Preview Modal -->
+<!-- Host Isolation Confirmation Modal -->
+<!-- BEGIN: Interactive Client Behaviors -->
+<script>
+  function toggleActionsMenu() {
+    const menu = document.getElementById('actions-menu');
+    menu.classList.toggle('hidden');
+  }
+
+  document.addEventListener('click', function(e) {
+    const btn = document.querySelector('#actions-dropdown-wrapper button');
+    const menu = document.getElementById('actions-menu');
+    if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  function triggerToast(message) {
+    const toast = document.getElementById('toast-notification');
+    const msgEl = document.getElementById('toast-message');
+    msgEl.innerText = message;
+
+    toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    toast.classList.add('opacity-100', 'translate-y-0');
+
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-y-0');
+      toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-100px]');
+    }, 3200);
+  }
+
+  function handleStatusUpdate(e) {
+    e.preventDefault();
+    const newStatus = document.getElementById('status-selector').value;
+    const newSeverity = document.getElementById('severity-selector').value;
+    const notes = document.getElementById('resolution-notes').value;
+
+    const statusBadge = document.getElementById('header-status-badge');
+    statusBadge.innerText = `● ${newStatus}`;
+
+    if (newStatus === 'Investigating') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]';
+    } else if (newStatus === 'Containment') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#f3e8ff] text-[#7c3aed] border border-[#d8b4fe]';
+    } else if (newStatus === 'Eradication' || newStatus === 'Recovery') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#eff6ff] text-[#2563eb] border border-[#bfdbfe]';
+    } else if (newStatus === 'Resolved' || newStatus === 'Closed') {
+      statusBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#dcfce7] text-[#006633] border border-[#bbf7d0]';
+    }
+
+    const sevBadge = document.getElementById('header-severity-badge');
+    sevBadge.innerText = `● ${newSeverity}`;
+    if (newSeverity === 'Critical') {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#fee2e2] text-[#cc0000] border border-[#fca5a5]';
+    } else if (newSeverity === 'High') {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-[#ffedd5] text-[#c2410c] border border-[#fed7aa]';
+    } else {
+      sevBadge.className = 'inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300';
+    }
+
+    triggerToast(`Incident updated to ${newStatus} [${newSeverity}]`);
+  }
+
+  function handleReassign() {
+    const select = document.getElementById('reassign-analyst-select');
+    const name = select.value;
+    document.getElementById('current-assignee-name').innerText = name;
+    triggerToast(`Incident SFC-2026-001234 reassigned to ${name}`);
+  }
+
+  function handleSendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input-field');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const isInternal = document.getElementById('internal-note-toggle').checked;
+    const container = document.getElementById('messages-container');
+    const timeNow = new Date().toISOString().substring(11, 16) + ' UTC';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'flex items-start gap-3 flex-row-reverse';
+    msgDiv.innerHTML = `
+      <div class="w-8 h-8 rounded-full bg-sfc-navy text-white font-bold text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+        AV
+      </div>
+      <div class="flex-1 max-w-[85%] text-right">
+        <div class="flex items-center justify-end gap-2 mb-1">
+          <span class="text-[11px] text-sfc-textMuted font-mono">${timeNow}</span>
+          <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isInternal ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-blue-100 text-blue-900'} uppercase">
+            ${isInternal ? 'Internal SOC Note' : 'SOC Tier 3'}
+          </span>
+          <span class="text-[12px] font-bold text-sfc-textPrimary">Alex Vance</span>
+        </div>
+        <div class="${isInternal ? 'bg-amber-50/80 border border-amber-300 text-amber-950' : 'bg-sfc-primaryLight border border-blue-200 text-sfc-navy'} text-[13px] rounded-l-xl rounded-br-xl p-3 text-left">
+          ${text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}
+        </div>
+      </div>
+    `;
+
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
+    input.value = '';
+    triggerToast(isInternal ? 'Internal SOC note saved' : 'Message dispatched to response stream');
+  }
+
+  function copyHashToClipboard() {
+    const hash = document.getElementById('forensic-hash').innerText;
+    navigator.clipboard.writeText(hash).then(() => {
+      triggerToast('SHA-256 hash copied to clipboard');
+    });
+  }
+
+  function copyText(val, toastMsg) {
+    navigator.clipboard.writeText(val).then(() => {
+      triggerToast(toastMsg || 'Copied!');
+    });
+  }
+
+  function openEvidenceModal(title, content, category) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-content').innerText = content;
+    document.getElementById('modal-category').innerText = category;
+    document.getElementById('evidence-modal').classList.remove('hidden');
+  }
+
+  function closeEvidenceModal() {
+    document.getElementById('evidence-modal').classList.add('hidden');
+  }
+
+  function copyModalContent() {
+    const content = document.getElementById('modal-content').innerText;
+    navigator.clipboard.writeText(content).then(() => {
+      triggerToast('Evidence details copied to clipboard');
+    });
+  }
+
+  function triggerHostIsolationModal() {
+    document.getElementById('isolation-modal').classList.remove('hidden');
+  }
+
+  function closeIsolationModal() {
+    document.getElementById('isolation-modal').classList.add('hidden');
+  }
+
+  function confirmHostIsolation() {
+    closeIsolationModal();
+    triggerToast('🚨 EDR Host Isolation triggered for WKSTN-892 & DB-Core');
+  }
+</script>
+<!-- END: Interactive Client Behaviors -->
+
+
+</body></html>

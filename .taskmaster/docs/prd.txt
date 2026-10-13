@@ -1,0 +1,143 @@
+# Secure360 — Product Requirements Document (build phase, weeks S5–S13)
+
+Source of truth: specification v1.1 (SFC Incident Reporter), L1 Needs Analysis v1.1 (Decision Record D1–D9),
+L2 Architecture v1.0, L3 UI/UX Mockups v1.0 — all in docs/reference/. Project rules: AGENTS.md.
+This PRD only covers what remains to be built. Each task must name the requirement ids it serves.
+
+<context>
+# Overview
+Secure360 is a cybersecurity incident reporting and tracking platform for client organisations of Security First
+Cameroon (SFC), a managed SOC provider. Employees of client organisations report incidents (phishing, fraudulent
+SMS, Mobile Money fraud, SIM swap, malware, account takeover…) from an Android app in under two minutes, even
+offline. SFC analysts triage, assign, communicate and resolve incidents on a web dashboard. Client managers see
+their organisation's statistics. Data is hosted in Cameroon (Law 2024/017).
+
+# Core Features
+- Authentication (BF01): e-mail + password, TOTP 2FA (±1 step, replay-protected), JWT access 1 h, refresh 7 d rotated
+  with reuse detection, password reset, forced password change at first login, Admin-created accounts only.
+- Incident reporting (BF02–BF05, BF18): 9 category groups / 34 categories (L1 Table 12, with SIM swap MOB-02);
+  guided severity from 3 yes/no questions computed server-side (L1 D3); description; up to 5 photos (2 MiB each,
+  EXIF stripped, encrypted at rest); confidential reporting (reporter stored, hidden from managers and staff — D1).
+- Offline mode (BF10, BNF08 — Must): encrypted local queue with idempotency keys; reports sent automatically.
+- Tracking and history (BF06, BF09): status timeline NEW → ASSIGNED → IN_PROGRESS → RESOLVED → CLOSED, reopen, auto-close after 7 days.
+- Notifications (BF07, BNF14, BNF16): push via FCM in < 5 s with no personal data in payloads; in-app notification centre.
+- Messaging (BF08): conversation per incident; internal notes visible to SFC staff only.
+- Dashboards and statistics (BF11, BF12, BF16): user, manager and executive views; ≥ 5 charts; Redis-cached stats.
+- Technician web dashboard (BF13): live queue, SLA timers, assign, re-qualify severity, resolve.
+- PDF reports (BF14): per incident (synchronous) and per period (asynchronous job).
+- Administration (BF15): organisations and users, 2FA reset, deactivation; audit log (BNF19).
+- In-app guide (BF17); bilingual French/English with runtime switch (BNF07).
+
+# User Experience
+Personas: Aimé (non-technical employee, Android, weak network), Christelle (client IT manager, mobile + web),
+Jean-Paul (SFC analyst, web, dense real-time console), Paul (CEO, one-minute summary). Screens: L3 mobile M01–M21,
+web W01–W23 (design/renders). Journeys: spec §7.1 (report) and §7.2 (handle). Plain language, never blaming.
+</context>
+
+<PRD>
+# Technical Architecture
+- Monorepo (npm workspaces): apps/api (Node.js 24, Express 5, TypeScript, Prisma, PostgreSQL 16, Redis 8, BullMQ, ws,
+  Pino, PDFKit, sharp, Firebase Admin), apps/mobile (Expo SDK 57, Expo Router, Redux Toolkit + RTK Query, MMKV,
+  SecureStore, NativeWind, react-native-firebase), apps/web (React 19, Vite, TanStack Query v5, Zustand, React
+  Router v7, shadcn/ui, Tailwind v4, Recharts), packages/shared (Zod schemas, types, error codes, category codes,
+  i18n keys, design tokens), infra (Docker Compose, Nginx, Prometheus, Grafana, backup).
+- API layers: Router → Controller → Service → Repository. Modular monolith with two runtime roles: api (×2 replicas
+  behind Nginx least_conn) and worker (outbox relay, BullMQ consumers, scheduled jobs).
+- Tenant isolation: PostgreSQL Row-Level Security, forced; one interactive Prisma transaction per tenant-scoped
+  request setting app.org_id, app.user_id, app.role via set_config(..., true); roles s360_owner, s360_app,
+  s360_worker, s360_metrics; fail closed.
+- Data model: L2 §7.2 (organizations, users, incidents, incident_categories, incident_status_history,
+  incident_messages, attachments, notifications, audit_logs, refresh_tokens, password_reset_tokens, device_tokens,
+  outbox_events, idempotency_keys, report_jobs, incident_reference_counters). References SFC-YYYY-NNNNNN.
+- Events: transactional outbox → relay (500 ms, SKIP LOCKED) → BullMQ queues (notify.push, notify.email,
+  reports.pdf, audit.write, maintenance) and Redis Pub/Sub thin real-time events (rt:*); WebSocket /ws with
+  single-use ticket auth.
+- API conventions: /v1, response envelope {success, data, message} / {success:false, error:{code,message,details}},
+  cursor pagination, Idempotency-Key on mobile writes, optimistic concurrency (version) on incident PATCH,
+  OpenAPI generated from Zod schemas. Endpoint catalogue: L2 Table 6. Error codes: L2 Table 7.
+- Security: Zod .strict() everywhere, DTO mappers, bcrypt 12, AES-256-GCM for TOTP secrets and attachments,
+  Docker secrets, rate limits (L2 Table 5), Nginx TLS 1.2+, OWASP Mobile Top 10 (L2 Table 18), cert pinning and
+  root detection in release builds, Hermes, no console logs.
+- Observability: Pino with request id, prom-client metrics, Prometheus + Grafana alerts (L2 Table 23).
+- Design tokens: severity text colours #8F5600 (Moderate, offline banner) and #B34700 (High) for WCAG AA.
+
+# Development Roadmap
+Phase S5 — Backend foundation and authentication (deliverable towards L4)
+- Monorepo workspaces, shared package, TypeScript project references, Docker Compose for PostgreSQL 16 + Redis 8.
+- Prisma schema for the L2 data model; migrations including RLS policies, forced RLS, database roles and grants;
+  category seed (34 categories, labels fr/en, default severities); fictitious seed data (5 organisations, personas).
+- Platform kernel: config with Docker secrets, Pino logger, request id, error handler + envelope, Zod validation
+  middleware, withTenant(), audit enqueue, crypto helpers, Redis client, rate limiter.
+- Auth module: login, verify-2fa, refresh rotation with family reuse detection, logout, forgot/reset password,
+  first-login password change, 2FA setup/enable/disable, session version invalidation.
+- Tests: unit tests for auth; integration tests for RLS per role and other tenant (CI service containers).
+- Spike O8: measure interactive-transaction overhead under load.
+
+Phase S6 — Incidents, uploads, messaging, notifications
+- Incidents module: create (idempotent, guided severity server-side, reference counter), list (cursor, filters),
+  detail, PATCH with state machine and version check, history, soft delete (Admin), DTO masking for confidential reports.
+- Attachments: memory upload, magic bytes, sharp re-encode, AES-256-GCM storage, authorised streaming.
+- Messaging with internal notes; notifications centre; device token registry.
+- Outbox table and relay, BullMQ queues and consumers (push via FCM with thin payloads, e-mail via SMTP, audit writes).
+- WebSocket gateway with ticket auth and Redis Pub/Sub fan-out.
+- Unit and integration tests reaching ≥ 60 % coverage on critical modules.
+
+Phase S7 — Complete backend (L4) and Swagger (L5)
+- Statistics endpoints with Redis cache and per-organisation version keys; SLA timers and breach job.
+- PDF reports: synchronous incident PDF, asynchronous period reports (report_jobs).
+- Organisations and users administration; audit log endpoints; health endpoints; Prometheus metrics.
+- OpenAPI 3.0 generated from Zod schemas; Swagger UI; full test pass; backend consistency review.
+
+Phase S8 — Mobile foundation (towards L6/L7)
+- Expo SDK 57 app with Expo Router route groups (auth/app/tabs/report), design tokens from packages/shared,
+  NativeWind, i18n fr/en, development build.
+- Day 1 checks: react-native-firebase messaging and react-native-mmkv v4 on SDK 57 (O2); pinning and root
+  detection libraries (O1).
+- Secure session: SecureStore tokens, Axios client with single-flight refresh, login, 2FA, first login, forgot
+  password; encrypted MMKV persistence for Redux with versioned migrations.
+
+Phase S9 — Reporting, tracking, messaging on mobile
+- Report flow M08a–M11b with guided questions, confidential toggle, photo compression.
+- Offline mutation queue: idempotency keys, exponential backoff with jitter, dependsOn (upload after create),
+  NEEDS_USER state; connectivity triggers.
+- My incidents, incident detail timeline, conversation, notifications centre, push handling and deep links.
+
+Phase S10 — Complete mobile application
+- Home, manager dashboard, executive summary, my statistics, profile, security settings (biometric step-up),
+  language switch, help guide, states (offline, loading, empty, error, session expired). Release build hardening:
+  Hermes, R8, no source maps, console stripped, pinning, root detection. APK < 50 MB via per-ABI builds.
+
+Phase S11 — Web dashboard (L8)
+- Vite app, same-origin /api/v1, auth with in-memory access token and HttpOnly refresh cookie, CSP.
+- Queue with live updates and SLA timers, incidents list with URL filters, incident detail with conversation and
+  internal notes, assign / re-qualify / resolve modals, statistics (≥ 5 charts), reports, organisations, users,
+  audit log, settings, client manager view, keyboard shortcuts, interface states.
+
+Phase S12 — Testing, hardening, deployment, APK (L6, L9, L10)
+- Performance tests (BNF01), load test 500 concurrent users (BNF09), push latency (BNF14), OWASP Mobile checklist
+  (≥ 8/10), SUS test with ≥ 5 users (BNF13), security review of all critical modules.
+- Production Docker Compose on the SFC host: Nginx TLS (Let's Encrypt), two API replicas, worker, PostgreSQL, Redis,
+  Prometheus, Grafana, exporters, backup job with restore test; rolling deployment via GitHub Actions.
+- EAS build of the demo APK.
+
+Phase S13 — Documentation and defence (L11–L14)
+- Mobile user manual (fr/en), administrator manual, internship report, defence presentation.
+
+# Logical Dependency Chain
+1. Repository foundation and shared package before any app code.
+2. Database schema + RLS + roles before any repository code; auth before every protected endpoint.
+3. Incidents API before uploads, messaging and notifications; outbox before push, e-mail and real-time.
+4. Complete, documented API before mobile and web features that call it (mobile auth can start on the S5 API).
+5. Mobile secure session and offline queue before reporting screens.
+6. Web auth before dashboard features. Hardening and deployment after feature completion; documents last.
+
+# Risks and Mitigations
+- Scope creep (critical): only build what this PRD and the specification list; new ideas go to a backlog file.
+- Native module compatibility with Expo SDK 57: verify on the first day of S8 with a development build.
+- Single 4 GB server: respect the L2 memory budget; PDFKit only (no headless browser).
+- RLS mistakes: integration tests per role and per tenant run in CI on every PR.
+- Offline sync complexity: idempotency keys, server-authoritative model, dedicated tests.
+
+# Appendix
+Build checklist carried over from L1–L3: docs/BUILD_CHECKLIST.md.
+</PRD>

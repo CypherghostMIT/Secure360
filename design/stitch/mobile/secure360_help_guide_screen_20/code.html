@@ -1,0 +1,341 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Secure360 — Help &amp; guide</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-container": "#5c666e",
+            "secondary-fixed-dim": "#bec8d1",
+            "error-container": "#ffdad6",
+            "danger": "#cc0000",
+            "on-primary-container": "#799dd6",
+            "inverse-surface": "#2f3034",
+            "surface-container-low": "#f4f3f8",
+            "tertiary-fixed-dim": "#ffb690",
+            "surface-container-highest": "#e2e2e7",
+            "inverse-on-surface": "#f1f0f5",
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#1a1c1f",
+            "on-tertiary-fixed": "#341100",
+            "on-primary-fixed": "#001b3c",
+            "on-secondary": "#ffffff",
+            "border": "#e0e0e0",
+            "primary": "#001e40",
+            "inverse-primary": "#a7c8ff",
+            "secondary": "#566068",
+            "primary-fixed-dim": "#a7c8ff",
+            "text-secondary": "#666666",
+            "on-secondary-fixed-variant": "#3e4850",
+            "outline-variant": "#c3c6d1",
+            "primary-container": "#003366",
+            "tertiary-container": "#592300",
+            "surface-container-high": "#e8e8ed",
+            "on-error-container": "#93000a",
+            "on-primary-fixed-variant": "#1f477b",
+            "tertiary-fixed": "#ffdbca",
+            "error": "#ba1a1a",
+            "success": "#006633",
+            "tertiary": "#381300",
+            "surface-container": "#eeedf2",
+            "on-background": "#1a1c1f",
+            "surface-tint": "#3a5f94",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f9f9fe",
+            "text-primary": "#1e1e1e",
+            "on-tertiary-fixed-variant": "#723610",
+            "surface": "#f8f9fc",
+            "secondary-container": "#dae4ee",
+            "on-primary": "#ffffff",
+            "primary-fixed": "#d5e3ff",
+            "on-secondary-fixed": "#131d24",
+            "on-tertiary-container": "#d8885c",
+            "surface-variant": "#e2e2e7",
+            "outline": "#737780",
+            "on-surface-variant": "#43474f",
+            "surface-dim": "#dad9de",
+            "background": "#ffffff",
+            "secondary-fixed": "#dae4ee",
+            "on-error": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "sans": ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased flex justify-center min-h-screen">
+<!-- Mobile Container (390px responsive) -->
+<main class="w-full max-w-[430px] min-h-screen bg-surface flex flex-col shadow-sm pb-10">
+<!-- 1. Pinned Top App Bar -->
+<header class="sticky top-0 z-30 flex items-center justify-between bg-surface-container-lowest/95 backdrop-blur-sm border-b border-outline-variant/40 px-4 py-3 h-16">
+<button aria-label="Go back" class="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-surface-container-high transition-colors text-primary focus:outline-none focus:ring-2 focus:ring-primary" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center text-center">
+<h1 class="text-primary text-[18px] font-bold leading-tight">Help &amp; guide</h1>
+<span class="text-secondary text-[12px] font-medium">Secure360 Guide</span>
+</div>
+<div class="w-10 flex justify-end">
+<span class="material-symbols-outlined text-secondary text-[22px]">help</span>
+</div>
+</header>
+<div class="px-4 py-4 flex flex-col gap-4">
+<!-- 2. Top Alert Card (Urgent Contact) -->
+<section class="bg-error-container/30 border border-danger/30 rounded-lg p-3.5 flex flex-col gap-3 shadow-none">
+<div class="flex items-start gap-3">
+<div class="p-2 rounded-lg bg-error-container text-danger flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">call</span>
+</div>
+<div class="flex-1">
+<p class="text-danger text-[12px] font-bold uppercase tracking-wider">Immediate Assistance</p>
+<p class="text-on-surface font-bold text-[15px] leading-snug mt-0.5">Urgent? Call SFC: +237 6 99 00 00 00</p>
+<p class="text-secondary text-[13px] leading-tight mt-1">24/7 security hotline for urgent incident response in Cameroon</p>
+</div>
+</div>
+<a class="w-full flex items-center justify-center gap-2 h-11 bg-danger hover:bg-danger/90 text-surface-container-lowest font-semibold text-[14px] rounded-lg transition-colors shadow-sm" href="tel:+237699000000">
+<span class="material-symbols-outlined text-[18px]">call</span>
+<span class="">Call SFC Now</span>
+</a>
+</section>
+<!-- 3. Search Bar -->
+<section class="relative">
+<label class="sr-only" for="search-input">Search the guide</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-secondary text-[22px] pointer-events-none">search</span>
+<input class="w-full h-12 pl-11 pr-4 bg-surface-container-lowest border border-outline-variant/80 rounded-lg text-on-surface placeholder:text-secondary text-[15px] focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm" id="search-input" placeholder="Search the guide" type="search">
+</div>
+</section>
+<!-- 4. Expandable Sections (Accordion Cards) -->
+<section class="flex flex-col gap-3" id="guide-accordion">
+<!-- Section 1: How to report in 3 steps -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all" open="">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">assignment_turned_in</span>
+<span class="text-on-surface font-semibold text-[15px]">How to report in 3 steps</span>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-3.5">
+<div class="grid grid-cols-1 gap-2">
+<div class="flex items-center gap-2.5 p-2.5 bg-surface-container-low rounded-lg border border-outline-variant/30">
+<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary text-[12px] font-bold">1</span>
+<span class="text-on-surface text-[14px] font-medium">Choose what happened</span>
+</div>
+<div class="flex items-center gap-2.5 p-2.5 bg-surface-container-low rounded-lg border border-outline-variant/30">
+<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary text-[12px] font-bold">2</span>
+<span class="text-on-surface text-[14px] font-medium">Answer 3 questions</span>
+</div>
+<div class="flex items-center gap-2.5 p-2.5 bg-surface-container-low rounded-lg border border-outline-variant/30">
+<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary text-[12px] font-bold">3</span>
+<span class="text-on-surface text-[14px] font-medium">Add a photo if you can</span>
+</div>
+</div>
+<div class="flex items-center gap-2 p-2.5 bg-surface-bright rounded-lg text-secondary text-[13px] border border-outline-variant/40">
+<span class="material-symbols-outlined text-primary text-[18px]">schedule</span>
+<span class="">Takes less than 2 minutes. You don't need any technical knowledge.</span>
+</div>
+</div>
+</details>
+<!-- Section 2: What do the groups mean? -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">category</span>
+<span class="text-on-surface font-semibold text-[15px]">What do the groups mean?</span>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-2.5 divide-y divide-outline-variant/20">
+<div class="pt-2 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">sms</span> E-mail or SMS
+              </span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Suspicious message, fake links, or someone asking for money.</span>
+</div>
+<div class="pt-2.5 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">payments</span> Fraud &amp; scams
+              </span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Mobile Money scams, impersonation, or fake invoices.</span>
+</div>
+<div class="pt-2.5 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">smartphone</span> My phone
+              </span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Sudden network loss, SIM swap, or strange screen activity.</span>
+</div>
+<div class="pt-2.5 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">computer</span> My computer
+              </span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Screen locked, weird popups, or unknown files downloaded.</span>
+</div>
+<div class="pt-2.5 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px]">badge</span> My accounts &amp; passwords</span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Trouble signing in, unexpected password resets.</span>
+</div>
+<div class="pt-2.5 flex flex-col">
+<span class="text-primary font-semibold text-[14px] flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">more_horiz</span> Something else
+              </span>
+<span class="text-secondary text-[13px] pl-5 mt-0.5">Anything unusual that worries you.</span>
+</div>
+</div>
+</details>
+<!-- Section 3: Mobile Money or SIM swap -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-danger text-[22px]">sim_card_alert</span>
+<div class="flex items-center gap-2">
+<span class="text-on-surface font-semibold text-[15px]">Mobile Money or SIM swap</span>
+<span class="bg-error-container text-danger text-[11px] font-bold px-1.5 py-0.5 rounded">Important</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-3">
+<p class="text-on-surface text-[14px] leading-relaxed">
+              Call your operator's customer service at once to block your SIM and Mobile Money account. Never share your PIN. Change your passwords if your phone lost network suddenly.
+            </p>
+<div class="p-3 bg-secondary-container/40 rounded-lg border border-outline-variant/40 flex flex-col gap-1.5">
+<span class="text-[12px] font-bold text-primary uppercase tracking-wide">Operator hotlines in Cameroon:</span>
+<div class="text-[13px] text-on-surface font-medium flex flex-wrap gap-x-3 gap-y-1">
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>MTN Cameroon: <strong class="text-primary">822</strong></span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>Orange Cameroun: <strong class="text-primary">950</strong></span>
+<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span>CAMTEL: <strong class="text-primary">825</strong></span>
+</div>
+</div>
+</div>
+</details>
+<!-- Section 4: No internet? -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">wifi_off</span>
+<span class="text-on-surface font-semibold text-[15px]">No internet?</span>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-2">
+<p class="text-on-surface font-medium text-[14px]">You can still report. The app sends it automatically later.</p>
+<p class="text-secondary text-[13px] leading-relaxed">
+              Your report is saved securely on your phone until you reconnect to Wi-Fi or mobile data. No action is lost.
+            </p>
+</div>
+</details>
+<!-- Section 5: Confidential reports -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">verified_user</span>
+<span class="text-on-surface font-semibold text-[15px]">Confidential reports</span>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-2.5">
+<div class="flex items-start gap-2.5">
+<span class="material-symbols-outlined text-success text-[20px] shrink-0 mt-0.5">shield</span>
+<div class="text-[14px] text-on-surface leading-relaxed">
+<p class="font-medium text-primary">Zero-blame, strictly protected reporting.</p>
+<p class="text-secondary text-[13px] mt-1">Your manager will not see your name. SFC analysts handle your report without your name to ensure full trust and psychological safety.</p>
+</div>
+</div>
+</div>
+</details>
+<!-- Section 6: Urgency levels -->
+<details class="group bg-surface-container-lowest border border-outline-variant/60 rounded-lg shadow-sm transition-all">
+<summary class="flex items-center justify-between p-4 cursor-pointer select-none list-none">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">priority_high</span>
+<span class="text-on-surface font-semibold text-[15px]">Urgency levels</span>
+</div>
+<span class="material-symbols-outlined text-secondary transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-4 pb-4 pt-1 border-t border-surface-container/80 flex flex-col gap-3">
+<div class="flex items-start gap-2.5">
+<span class="w-3 h-3 rounded-full bg-success shrink-0 mt-1"></span>
+<div>
+<p class="text-[14px] font-bold text-on-surface">Low</p>
+<p class="text-secondary text-[13px]">A suspicious message you ignored or general doubt.</p>
+</div>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="w-3 h-3 rounded-full bg-[#B26A00] shrink-0 mt-1"></span>
+<div>
+<p class="text-[14px] font-bold text-on-surface">Moderate</p>
+<p class="text-secondary text-[13px]">You clicked a link or received repeated scam attempts.</p>
+</div>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="w-3 h-3 rounded-full bg-[#D35400] shrink-0 mt-1"></span>
+<div>
+<p class="text-[14px] font-bold text-on-surface">High</p>
+<p class="text-secondary text-[13px]">Money sent, password disclosed, or device acting strangely.</p>
+</div>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="w-3 h-3 rounded-full bg-danger shrink-0 mt-1"></span>
+<div>
+<p class="text-[14px] font-bold text-danger">Critical</p>
+<p class="text-secondary text-[13px]">SIM blocked without request, active unauthorized transactions, or total system lockout.</p>
+</div>
+</div>
+</div>
+</details>
+</section>
+<!-- 5. Footer / Need More Help -->
+<footer class="mt-4 bg-surface-container-lowest border border-outline-variant/60 rounded-lg p-4 flex flex-col gap-3 text-center items-center shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">support_agent</span>
+</div>
+<div>
+<h2 class="text-on-surface font-bold text-[15px]">Still need help?</h2>
+<p class="text-secondary text-[13px] mt-0.5">Our team in Douala is here to assist you.</p>
+</div>
+<a class="w-full flex items-center justify-center gap-2 h-11 bg-primary hover:bg-primary-container text-on-primary font-semibold text-[14px] rounded-lg transition-colors" href="tel:+237699000000"><span class="material-symbols-outlined text-[18px]">call</span>
+<span class="">Call SFC: +237 6 99 00 00 00</span></a>
+<p class="text-[11px] text-secondary tracking-wide">
+          Secure360 by Security First Cameroon · Douala, Cameroon
+        </p>
+</footer>
+</div>
+</main>
+
+
+</body></html>

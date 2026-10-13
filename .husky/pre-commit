@@ -1,0 +1,12 @@
+# 1) Secret scan of staged changes — blocks the commit if a secret is found.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "✖ gitleaks is not installed. Install it (see docs/WORKFLOW.md §2) — commits are blocked without it."
+  exit 1
+fi
+# gitleaks >= 8.19 uses "git --pre-commit --staged"; older versions use "protect --staged".
+gitleaks git --pre-commit --staged --redact --no-banner 2>/dev/null \
+  || gitleaks protect --staged --redact --no-banner \
+  || { echo "✖ gitleaks found a possible secret in your staged changes. Remove it, rotate it if it was real."; exit 1; }
+
+# 2) Lint + format only the staged files (fast).
+npx lint-staged

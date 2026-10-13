@@ -1,0 +1,2 @@
+# Last local gate before code reaches GitHub: types and unit tests must pass.
+npm run typecheck && npm test

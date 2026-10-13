@@ -1,0 +1,474 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary-container":"#003366","text-secondary":"#666666","on-primary-fixed":"#001b3c","background":"#f8f9fc","surface-container":"#f0eded","outline-variant":"#c3c6d1","surface-dim":"#dcd9d9","primary":"#001e40","on-error":"#ffffff","on-tertiary":"#ffffff","inverse-primary":"#a7c8ff","surface-bright":"#fcf9f8","on-surface-variant":"#43474f","on-primary-fixed-variant":"#1f477b","error":"#ba1a1a","surface-tint":"#3a5f94","surface-container-low":"#f6f3f2","on-secondary-container":"#5c666e","outline":"#737780","inverse-surface":"#303030","on-error-container":"#93000a","surface-container-lowest":"#ffffff","on-tertiary-fixed-variant":"#723610","secondary-fixed-dim":"#bec8d1","surface-variant":"#e5e2e1","inverse-on-surface":"#f3f0ef","surface":"#ffffff","tertiary-fixed-dim":"#ffb690","tertiary":"#381300","tertiary-container":"#592300","tertiary-fixed":"#ffdbca","success":"#006633","border":"#e0e0e0","on-secondary":"#ffffff","on-surface":"#1b1b1c","danger":"#cc0000","on-secondary-fixed":"#131d24","on-primary-container":"#799dd6","surface-container-highest":"#e5e2e1","secondary":"#566068","on-tertiary-container":"#d8885c","secondary-fixed":"#dae4ee","on-secondary-fixed-variant":"#3e4850","secondary-container":"#dae4ee","text-primary":"#1e1e1e","on-primary":"#ffffff","primary-fixed":"#d5e3ff","primary-fixed-dim":"#a7c8ff","error-container":"#ffdad6","on-tertiary-fixed":"#341100","surface-container-high":"#eae7e7","on-background":"#1b1b1c"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{gutter:"1.5rem","space-xl":"1.5rem","space-xs":"0.25rem","space-sm":"0.5rem","space-md":"1rem","space-lg":"1.25rem",margin:"1.5rem"},fontFamily:{"label-table-header":["Inter"],"label-md":["Inter"],"headline-sm":["Inter"],caption:["Inter"],"body-sm":["Inter"],"headline-md":["Inter"],"headline-lg":["Inter"],"body-md":["Inter"]},fontSize:{"label-table-header":["12px",{lineHeight:"16px",letterSpacing:"0.05em",fontWeight:"600"}],"label-md":["14px",{lineHeight:"20px",fontWeight:"500"}],"headline-sm":["20px",{lineHeight:"28px",fontWeight:"600"}],caption:["12px",{lineHeight:"16px",fontWeight:"400"}],"body-sm":["13px",{lineHeight:"18px",fontWeight:"400"}],"headline-md":["24px",{lineHeight:"32px",fontWeight:"700"}],"headline-lg":["28px",{lineHeight:"36px",fontWeight:"700"}],"body-md":["14px",{lineHeight:"20px",fontWeight:"400"}]}}}};</script></head><body class="bg-background text-on-surface font-body-md text-body-md antialiased"><aside class="fixed left-0 top-0 h-screen w-60 bg-surface border-r border-border z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-16 px-space-md border-b border-border flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-bold tracking-tight shrink-0">S</div><div class="flex flex-col min-w-0 leading-tight"><span class="font-headline-sm text-label-md font-semibold text-text-primary truncate">Secure360</span><span class="font-caption text-caption text-text-secondary truncate">Client Portal</span></div></div><div class="px-space-md py-space-sm"><span class="font-label-table-header text-label-table-header uppercase text-text-secondary tracking-wider">Navigation</span></div><nav class="px-space-sm flex flex-col gap-1" data-active-classes="bg-primary-container text-on-primary font-semibold"><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg transition-colors bg-primary-container text-on-primary font-semibold" data-path="overview" href="#"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="">Overview</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="incidents" href="#"><span class="material-symbols-outlined text-[20px]">warning</span><span class="">Incidents</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="statistics" href="#"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="">Statistics</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="reports" href="#"><span class="material-symbols-outlined text-[20px]">description</span><span class="">Reports</span></a><a class="flex items-center gap-space-sm px-space-md py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors font-label-md text-label-md" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">settings</span><span class="">Settings</span></a></nav></div><div class="p-space-md border-t border-border bg-surface-bright"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-full bg-secondary-container text-on-secondary-fixed font-label-md text-label-md font-semibold flex items-center justify-center shrink-0 border border-border">CB</div><div class="flex flex-col min-w-0"><span class="font-label-md text-label-md text-text-primary font-medium truncate">Christelle Biya</span><span class="font-caption text-caption text-text-secondary truncate">Manager</span><span class="font-caption text-caption text-outline truncate" title="Office Régional des Archives du Centre">ORAC</span></div></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-16 bg-surface border-b border-border z-40 flex items-center justify-between px-space-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-md min-w-0"><div class="flex flex-col min-w-0 leading-tight"><span class="font-label-md text-label-md font-semibold text-text-primary truncate">Office Régional des Archives du Centre</span><div class="flex items-center gap-1 font-caption text-caption text-text-secondary truncate"><span class="">Client Dashboard</span><span class="material-symbols-outlined text-[14px]">chevron_right</span><span class="text-primary-container font-medium">Overview</span></div></div></div><div class="flex items-center gap-space-md shrink-0"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-3 text-[18px] text-text-secondary">search</span><input class="h-9 pl-9 pr-3 w-64 rounded-lg border border-border bg-background text-text-primary font-body-sm text-body-sm focus:outline-none focus:border-primary-container transition-colors" placeholder="Search incidents, reports..." type="text"></div><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#e6f4ea] text-success font-caption text-caption font-semibold"><span class="w-2 h-2 rounded-full bg-success animate-pulse"></span><span class="">Live (WAT)</span></div><div class="h-4 w-px bg-border"></div><div class="flex items-center gap-1 font-caption text-caption font-medium text-text-secondary"><button class="hover:text-primary-container transition-colors" type="button">FR</button><span class="">|</span><button class="text-primary-container font-semibold transition-colors" type="button">EN</button></div><button aria-label="Notifications" class="relative p-1.5 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-surface-container" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-danger"></span></button><div class="h-4 w-px bg-border"></div><div class="flex items-center gap-space-sm pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover border border-border" src="https://lh3.googleusercontent.com/aida/AEtjO1VSJ_H_lzCxksgXrclCzX6FbaCm4usbeCbnNxdUV8m8NPu-Pb3eIm5yVtIFkZqTJybVpWsET689qS1ko6ZH6-Xf-UVvU8TcHRVkcrlU4oFi-BVeRIAW0k3ciTXCDW7mmFex22UzRaH6p7k-7vVL6nJ1ngnrJhso4WqGDK8OwJZifczmdfeNVJBtk661k3IQ7SBrpgQKTF3_IOw8azj7NPeeWISEg6ki-ptpSWmP7U1Rn18k2PCCW2oZi5FVfTF042C5TA9QoMbvhZ8"><div class="hidden xl:flex flex-col text-right leading-tight"><span class="font-caption text-caption font-semibold text-text-primary">ORAC</span><span class="font-caption text-caption text-text-secondary">Secure ID #4092</span></div></div></div></header><main class="w-full pt-16 bg-background min-h-screen px-space-xl py-space-xl"><div class="flex flex-col w-full">
+<!-- Sub-bar: Client Scope & Quick Breadcrumb -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-6 gap-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-secondary-container text-on-secondary-fixed font-caption text-caption font-semibold">
+<span class="material-symbols-outlined text-[14px]">account_balance</span>
+          ORAC • Yaoundé Central Station
+        </span>
+<span class="text-text-secondary font-caption text-caption">• Zone WAT (UTC+1)</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-text-primary tracking-tight">Organization Overview</h1>
+<p class="font-body-md text-body-md text-text-secondary">Cybersecurity monitoring &amp; incident response status for your organization</p>
+</div>
+<!-- Actions Group -->
+<div class="flex items-center gap-3 self-start md:self-auto">
+<!-- Period Selector Dropdown -->
+<div class="relative inline-flex items-center">
+<button class="h-10 px-3.5 bg-surface text-text-primary font-label-md text-label-md rounded-[6px] shadow-sm flex items-center gap-2 hover:bg-surface-container transition-colors" id="periodBtn" type="button">
+<span class="material-symbols-outlined text-[18px] text-text-secondary">calendar_today</span>
+<span class="">October 2026</span>
+<span class="material-symbols-outlined text-[16px] text-text-secondary">expand_more</span>
+</button>
+</div>
+<!-- Export PDF Report CTA -->
+<button class="h-10 px-4 bg-primary-container text-on-primary rounded-[6px] font-label-md text-label-md flex items-center gap-2 hover:bg-primary shadow-sm transition-all duration-150 active:scale-[0.98]" type="button">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+<span class="">Export monthly PDF report</span>
+</button>
+</div>
+</div>
+<!-- Operational Alert Strip -->
+
+<!-- KPI Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+<!-- Card 1: Reported this month -->
+<div class="bg-surface p-5 rounded-[6px] shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary-container"></div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-md text-label-md text-text-secondary font-medium">Reported this month</span>
+<div class="w-8 h-8 rounded bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[32px] text-text-primary font-bold tracking-tight">18</span>
+<span class="inline-flex items-center gap-0.5 text-success font-caption text-caption font-semibold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+          +3
+        </span>
+</div>
+<p class="font-caption text-caption text-text-secondary mt-1">vs 15 in September 2026</p>
+</div>
+<!-- Card 2: Open -->
+<div class="bg-surface p-5 rounded-[6px] shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#b26a00]"></div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-md text-label-md text-text-secondary font-medium">Open</span>
+<div class="w-8 h-8 rounded bg-[#fef5e7] flex items-center justify-center text-[#b26a00]">
+<span class="material-symbols-outlined text-[18px]">pending_actions</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[32px] text-text-primary font-bold tracking-tight">5</span>
+<span class="font-caption text-caption text-[#b26a00] font-medium bg-[#fef5e7] px-1.5 py-0.5 rounded">Active</span>
+</div>
+<p class="font-caption text-caption text-text-secondary mt-1">Under active triage by SFC SOC</p>
+</div>
+<!-- Card 3: Critical -->
+<div class="bg-surface p-5 rounded-[6px] shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-danger"></div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-md text-label-md text-text-secondary font-medium">Critical</span>
+<div class="w-8 h-8 rounded bg-[#fdecec] flex items-center justify-center text-danger">
+<span class="material-symbols-outlined text-[18px]">emergency</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[32px] text-danger font-bold tracking-tight">1</span>
+<span class="font-caption text-caption text-danger font-semibold bg-[#fdecec] px-2 py-0.5 rounded">P1 Escalation</span>
+</div>
+<p class="font-caption text-caption text-text-secondary mt-1">Immediate priority response</p>
+</div>
+<!-- Card 4: SLA Met -->
+<div class="bg-surface p-5 rounded-[6px] shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-md text-label-md text-text-secondary font-medium">Resolved within SLA</span>
+<div class="w-8 h-8 rounded bg-[#eaf5ee] flex items-center justify-center text-success">
+<span class="material-symbols-outlined text-[18px]">speed</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-[32px] text-text-primary font-bold tracking-tight">92%</span>
+<span class="font-caption text-caption text-success font-semibold bg-[#eaf5ee] px-1.5 py-0.5 rounded">Healthy</span>
+</div>
+<p class="font-caption text-caption text-text-secondary mt-1">Target: 90% SLA met this quarter</p>
+</div>
+</div>
+<!-- Data Visualization Grid (Col-Span 7 / Col-Span 5) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+<!-- Reports per week (col-span-7) -->
+<div class="lg:col-span-7 bg-surface p-5 rounded-[6px] shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between pb-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary font-semibold">Reports per week</h2>
+<p class="font-caption text-caption text-text-secondary">Incident trends across weekly surveillance cycles (October 2026)</p>
+</div>
+<div class="flex items-center gap-4 text-caption font-caption">
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-primary-container rounded"></span>
+<span class="text-text-secondary font-medium">Reported</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-3 h-1 bg-success rounded"></span>
+<span class="text-text-secondary font-medium">Resolved</span>
+</div>
+</div>
+</div>
+<!-- SVG Line & Area Chart -->
+<div class="w-full mt-4">
+<svg class="w-full h-48 overflow-visible" preserveAspectRatio="none" viewBox="0 0 540 180">
+<defs>
+<linearGradient id="primaryAreaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#003366" stop-opacity="0.18"></stop>
+<stop offset="100%" stop-color="#003366" stop-opacity="0.00"></stop>
+</linearGradient>
+<linearGradient id="successAreaGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#006633" stop-opacity="0.12"></stop>
+<stop offset="100%" stop-color="#006633" stop-opacity="0.00"></stop>
+</linearGradient>
+</defs>
+<!-- Horizontal Grid lines -->
+<line stroke="#f0eded" stroke-dasharray="3 3" stroke-width="1" x1="30" x2="520" y1="20" y2="20"></line>
+<line stroke="#f0eded" stroke-dasharray="3 3" stroke-width="1" x1="30" x2="520" y1="65" y2="65"></line>
+<line stroke="#f0eded" stroke-dasharray="3 3" stroke-width="1" x1="30" x2="520" y1="110" y2="110"></line>
+<line stroke="#e5e2e1" stroke-width="1" x1="30" x2="520" y1="155" y2="155"></line>
+<!-- Y Axis values -->
+<text fill="#737780" font-family="Inter" font-size="10" text-anchor="end" x="18" y="24">8</text>
+<text fill="#737780" font-family="Inter" font-size="10" text-anchor="end" x="18" y="69">5</text>
+<text fill="#737780" font-family="Inter" font-size="10" text-anchor="end" x="18" y="114">2</text>
+<text fill="#737780" font-family="Inter" font-size="10" text-anchor="end" x="18" y="158">0</text>
+<!-- Area fills -->
+<!-- Reported: W1(60, 110[3]), W2(200, 80[5]), W3(340, 50[6]), W4(480, 95[4]) -->
+<path d="M 60 110 L 200 80 L 340 50 L 480 95 L 480 155 L 60 155 Z" fill="url(#primaryAreaGrad)"></path>
+<!-- Resolved: W1(60, 125[2]), W2(200, 95[4]), W3(340, 65[5]), W4(480, 125[2]) -->
+<path d="M 60 125 L 200 95 L 340 65 L 480 125 L 480 155 L 60 155 Z" fill="url(#successAreaGrad)"></path>
+<!-- Lines -->
+<path d="M 60 110 L 200 80 L 340 50 L 480 95" fill="none" stroke="#003366" stroke-linecap="round" stroke-width="2.5"></path>
+<path d="M 60 125 L 200 95 L 340 65 L 480 125" fill="none" stroke="#006633" stroke-dasharray="4 3" stroke-linecap="round" stroke-width="2"></path>
+<!-- Reported Dots -->
+<circle cx="60" cy="110" fill="#ffffff" r="4.5" stroke="#003366" stroke-width="2.5"></circle>
+<circle cx="200" cy="80" fill="#ffffff" r="4.5" stroke="#003366" stroke-width="2.5"></circle>
+<circle cx="340" cy="50" fill="#ffffff" r="4.5" stroke="#003366" stroke-width="2.5"></circle>
+<circle cx="480" cy="95" fill="#ffffff" r="4.5" stroke="#003366" stroke-width="2.5"></circle>
+<!-- Resolved Dots -->
+<circle cx="60" cy="125" fill="#ffffff" r="3.5" stroke="#006633" stroke-width="2"></circle>
+<circle cx="200" cy="95" fill="#ffffff" r="3.5" stroke="#006633" stroke-width="2"></circle>
+<circle cx="340" cy="65" fill="#ffffff" r="3.5" stroke="#006633" stroke-width="2"></circle>
+<circle cx="480" cy="125" fill="#ffffff" r="3.5" stroke="#006633" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+<!-- X Axis Labels -->
+<div class="grid grid-cols-4 pt-3 text-center">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">W1</span>
+<span class="font-caption text-caption text-text-secondary">01 - 07 Oct (3)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">W2</span>
+<span class="font-caption text-caption text-text-secondary">08 - 14 Oct (5)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">W3</span>
+<span class="font-caption text-caption text-text-secondary">15 - 21 Oct (6)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-text-primary font-semibold">W4</span>
+<span class="font-caption text-caption text-text-secondary">22 - 28 Oct (4)</span>
+</div>
+</div>
+</div>
+<!-- By category group (col-span-5) -->
+<div class="lg:col-span-5 bg-surface p-5 rounded-[6px] shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-3">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-text-primary font-semibold">By category group</h2>
+<p class="font-caption text-caption text-text-secondary">Distribution by incident classification</p>
+</div>
+<span class="text-caption font-caption bg-surface-container px-2 py-0.5 rounded text-on-surface-variant font-medium">18 total</span>
+</div>
+<!-- Progress Distribution Stack -->
+<div class="space-y-3.5 mt-2"><div>
+<div class="flex justify-between items-center text-body-sm font-body-sm mb-1">
+<span class="font-medium text-text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                E-mail or SMS
+              </span>
+<span class="text-text-secondary font-medium">7 <span class="text-outline text-caption">(39%)</span></span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary-container h-2 rounded-full" style="width: 39%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-body-sm font-body-sm mb-1">
+<span class="font-medium text-text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#b26a00]"></span>
+                Fraud &amp; scams
+              </span>
+<span class="text-text-secondary font-medium">5 <span class="text-outline text-caption">(28%)</span></span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-[#b26a00] h-2 rounded-full" style="width: 28%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-body-sm font-body-sm mb-1">
+<span class="font-medium text-text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#5b4b9a]"></span>
+                My accounts &amp; passwords
+              </span>
+<span class="text-text-secondary font-medium">3 <span class="text-outline text-caption">(17%)</span></span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-[#5b4b9a] h-2 rounded-full" style="width: 17%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-body-sm font-body-sm mb-1">
+<span class="font-medium text-text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-danger"></span>
+                My computer
+              </span>
+<span class="text-text-secondary font-medium">2 <span class="text-outline text-caption">(11%)</span></span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-danger h-2 rounded-full" style="width: 11%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center text-body-sm font-body-sm mb-1">
+<span class="font-medium text-text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                Something else
+              </span>
+<span class="text-text-secondary font-medium">1 <span class="text-outline text-caption">(5%)</span></span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary h-2 rounded-full" style="width: 5%"></div>
+</div>
+</div></div>
+</div>
+<div class="pt-3 mt-2 bg-surface-bright rounded px-3 py-2 flex items-center justify-between"><span class="font-caption text-caption text-text-secondary">Primary Threat Category:</span>
+<span class="font-caption text-caption text-primary-container font-semibold">E-mail or SMS &amp; Fraud (67%)</span></div>
+</div>
+</div>
+<!-- Latest Incidents Table Section (Full Width) -->
+<div class="bg-surface rounded-[6px] shadow-sm overflow-hidden mb-6">
+<!-- Card Table Header -->
+<div class="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+<div>
+<div class="flex items-center gap-2">
+<h2 class="font-headline-sm text-headline-sm text-text-primary font-semibold">Latest incidents</h2>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-caption text-caption font-semibold">ORAC Scope</span>
+</div>
+<p class="font-caption text-caption text-text-secondary">Recent reports submitted by Office Régional des Archives du Centre staff</p>
+</div>
+<a class="inline-flex items-center gap-1 text-primary-container font-label-md text-label-md font-semibold hover:underline group" data-path="incidents" href="#">
+<span class="">View all incidents</span>
+<span class="material-symbols-outlined text-[16px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</a>
+</div>
+<!-- Responsive Table Wrapper -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-background text-text-secondary font-label-table-header text-label-table-header uppercase tracking-wider h-11">
+<th class="px-5 py-3">Reference</th>
+<th class="px-5 py-3 min-w-[280px]">Title &amp; Subject</th>
+<th class="px-5 py-3">Severity</th>
+<th class="px-5 py-3">Status</th>
+<th class="px-5 py-3">Assigned SFC Analyst</th>
+<th class="px-5 py-3 text-right">Reported Time (WAT)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container font-body-md text-body-md text-text-primary">
+<!-- Row 1: Critical Phishing -->
+<tr class="hover:bg-primary-fixed/30 transition-colors h-14">
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container tracking-tight">SFC-2026-001258</span>
+</td>
+<td class="px-5 py-3">
+<div class="flex items-center gap-2">
+<span class="font-medium text-text-primary">Phishing email with fake ministerial decree attachment</span>
+<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container text-text-secondary text-[11px] font-caption font-medium shrink-0" title="Protected identity / Confidential reporter">
+<span class="material-symbols-outlined text-[12px] text-primary-container">shield_lock</span>
+                  Confidential reporter
+                </span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-caption font-caption font-semibold bg-[#fdecec] text-[#cc0000]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#cc0000]"></span>
+                Critical
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-caption font-semibold bg-[#fef5e7] text-[#b26a00]">
+                In progress
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary text-[10px] font-bold flex items-center justify-center shrink-0">
+                  JN
+                </div>
+<span class="font-body-sm text-body-sm text-text-primary">Jean-Paul Nguemo</span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap text-right font-body-sm text-body-sm text-text-secondary">14/10/2026 14:15 WAT</td>
+</tr>
+<!-- Row 2: High SMS Orange Money -->
+<tr class="hover:bg-primary-fixed/30 transition-colors h-14">
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container tracking-tight">SFC-2026-001252</span>
+</td>
+<td class="px-5 py-3">
+<span class="font-medium text-text-primary">Suspicious SMS requesting Orange Money validation code</span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-caption font-caption font-semibold bg-[#fdf0e7] text-[#d35400]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#d35400]"></span>
+                High
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-caption font-semibold bg-[#efebf7] text-[#5b4b9a]">
+                Assigned
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-[#5b4b9a] text-surface text-[10px] font-bold flex items-center justify-center shrink-0">
+                  EM
+                </div>
+<span class="font-body-sm text-body-sm text-text-primary">Estelle Mbarga</span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap text-right font-body-sm text-body-sm text-text-secondary">
+              13/10/2026 11:25 WAT
+            </td>
+</tr>
+<!-- Row 3: Moderate Lockout -->
+<tr class="hover:bg-primary-fixed/30 transition-colors h-14">
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container tracking-tight">SFC-2026-001248</span>
+</td>
+<td class="px-5 py-3">
+<span class="font-medium text-text-primary">Archive portal login lock after repeated failed passwords</span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-caption font-caption font-semibold bg-[#fef5e7] text-[#b26a00]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#b26a00]"></span>
+                Moderate
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-caption font-semibold bg-[#fef5e7] text-[#b26a00]">
+                In progress
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-secondary text-surface text-[10px] font-bold flex items-center justify-center shrink-0">
+                  YF
+                </div>
+<span class="font-body-sm text-body-sm text-text-primary">Yannick Fotso</span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap text-right font-body-sm text-body-sm text-text-secondary">
+              12/10/2026 16:40 WAT
+            </td>
+</tr>
+<!-- Row 4: Moderate WhatsApp Code (Resolved) -->
+<tr class="hover:bg-primary-fixed/30 transition-colors h-14">
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container tracking-tight">SFC-2026-001240</span>
+</td>
+<td class="px-5 py-3">
+<span class="font-medium text-text-primary">Unauthorised WhatsApp verification code received</span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-caption font-caption font-semibold bg-[#fef5e7] text-[#b26a00]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#b26a00]"></span>
+                Moderate
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-caption font-semibold bg-[#eaf5ee] text-[#006633]">
+                Resolved
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-[#5b4b9a] text-surface text-[10px] font-bold flex items-center justify-center shrink-0">
+                  EM
+                </div>
+<span class="font-body-sm text-body-sm text-text-primary">Estelle Mbarga</span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap text-right font-body-sm text-body-sm text-text-secondary">
+              10/10/2026 09:15 WAT
+            </td>
+</tr>
+<!-- Row 5: Low Shared Drive Scan (Resolved) -->
+<tr class="hover:bg-primary-fixed/30 transition-colors h-14">
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container tracking-tight">SFC-2026-001235</span>
+</td>
+<td class="px-5 py-3">
+<span class="font-medium text-text-primary">Inability to access shared drive after USB drive scan</span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-caption font-caption font-semibold bg-[#eaf5ee] text-[#006633]">
+<span class="w-1.5 h-1.5 rounded-full bg-[#006633]"></span>
+                Low
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-caption font-caption font-semibold bg-[#eaf5ee] text-[#006633]">
+                Resolved
+              </span>
+</td>
+<td class="px-5 py-3 whitespace-nowrap">
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary text-[10px] font-bold flex items-center justify-center shrink-0">
+                  JN
+                </div>
+<span class="font-body-sm text-body-sm text-text-primary">Jean-Paul Nguemo</span>
+</div>
+</td>
+<td class="px-5 py-3 whitespace-nowrap text-right font-body-sm text-body-sm text-text-secondary">
+              08/10/2026 15:30 WAT
+            </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Footer / Pagination Notice -->
+<div class="p-4 bg-surface-bright flex items-center justify-between text-caption font-caption text-text-secondary">
+<span class="">Showing 5 of 18 incidents recorded for October 2026</span>
+<div class="flex items-center gap-3">
+<span class="">SLA Resolution Average: <strong class="text-text-primary font-semibold">2h 14m</strong></span>
+<span class="h-3 w-px bg-surface-container"></span>
+<span class="text-success font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+          Zero Breaches
+        </span>
+</div>
+</div>
+</div>
+<!-- Regional Context / Compliance Footnote Card -->
+<div class="p-4 bg-surface rounded-[6px] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-caption font-caption text-text-secondary"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary-container">call</span><span class="font-medium text-text-primary">Support SFC: +237 6 99 00 00 00</span></div></div>
+</div></main></div>
+
+
+
+</body></html>

@@ -1,0 +1,11 @@
+{
+  "name": "secure360-design-tools",
+  "private": true,
+  "description": "Re-renders the Stitch screen exports to PNG (see design/README.md)",
+  "scripts": {
+    "render": "node render-screens.js ../stitch ../renders"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.13.0"
+  }
+}

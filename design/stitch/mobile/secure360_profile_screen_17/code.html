@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-fixed-variant": "#723610", "surface-tint": "#3a5f94", "inverse-on-surface": "#f1f0f5", "on-secondary-fixed-variant": "#3e4850", "primary-container": "#003366", "on-tertiary-fixed": "#341100", "tertiary": "#381300", "text-secondary": "#666666", "on-surface": "#1a1c1f", "danger": "#cc0000", "surface-container-highest": "#e2e2e7", "on-tertiary-container": "#d8885c", "surface-container-low": "#f4f3f8", "on-primary-container": "#799dd6", "border": "#e0e0e0", "secondary-container": "#dae4ee", "surface-bright": "#f9f9fe", "inverse-surface": "#2f3034", "surface-container-high": "#e8e8ed", "error-container": "#ffdad6", "surface-variant": "#e2e2e7", "secondary-fixed": "#dae4ee", "primary-fixed": "#d5e3ff", "tertiary-fixed": "#ffdbca", "on-surface-variant": "#43474f", "on-secondary-container": "#5c666e", "primary-fixed-dim": "#a7c8ff", "primary": "#001e40", "tertiary-container": "#592300", "error": "#ba1a1a", "on-primary-fixed": "#001b3c", "surface-dim": "#dad9de", "text-primary": "#1e1e1e", "outline": "#737780", "on-secondary": "#ffffff", "background": "#ffffff", "surface-container-lowest": "#ffffff", "on-error-container": "#93000a", "on-background": "#1a1c1f", "secondary": "#566068", "surface-container": "#eeedf2", "on-secondary-fixed": "#131d24", "inverse-primary": "#a7c8ff", "on-tertiary": "#ffffff", "on-primary": "#ffffff", "tertiary-fixed-dim": "#ffb690", "on-primary-fixed-variant": "#1f477b", "secondary-fixed-dim": "#bec8d1", "success": "#006633", "surface": "#f8f9fc", "outline-variant": "#c3c6d1", "on-error": "#ffffff" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "space-xs": "0.25rem", "space-md": "1rem", "gutter": "1rem", "space-lg": "1.5rem", "space-sm": "0.5rem", "space-xl": "2rem", "margin": "1rem" }, "fontFamily": { "caption": ["Inter"], "body-sm": ["Inter"], "headline-md": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Inter"], "headline-lg": ["Inter"] }, "fontSize": { "caption": ["12px", {"lineHeight": "16px", "fontWeight": "400"}], "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}], "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "700"}], "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}], "headline-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}], "headline-lg": ["24px", {"lineHeight": "32px", "fontWeight": "700"}] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[20px]">shield</span></div><div><span class="font-caption text-caption text-secondary block leading-none">Secure360</span><h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-tight">Profile</h1></div></div><div class="flex items-center"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full px-margin pt-16 pb-28 bg-surface flex-grow"><div class="flex flex-col w-full pb-8">
+<!-- Profile Summary Card -->
+<section class="w-full bg-surface-container-lowest rounded-xl p-space-md shadow-sm mb-space-lg flex flex-col items-center text-center relative overflow-hidden">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-fixed/30 rounded-full blur-2xl pointer-events-none"></div>
+<div class="absolute -bottom-10 -left-10 w-28 h-28 bg-secondary-container/40 rounded-full blur-xl pointer-events-none"></div>
+<!-- Avatar with verified halo -->
+<div class="relative mb-space-sm">
+<div class="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-primary to-primary-container flex items-center justify-center text-on-primary shadow-md">
+<span class="font-headline-md text-headline-md tracking-wider">AK</span>
+</div>
+<div class="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-surface-container-lowest flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-success" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Identity & Role -->
+<h2 class="font-headline-md text-headline-md text-on-surface tracking-tight mb-1">Aimé Kamga</h2>
+<div class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-caption text-caption font-medium mb-2">
+      Employee
+    </div>
+<p class="font-body-sm text-body-sm text-secondary mb-1 select-all">aime.kamga@kamdem-distribution.cm</p>
+<div class="inline-flex items-center gap-1.5 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-secondary">domain</span>
+<span>Kamdem Distribution SARL</span>
+</div>
+</section>
+<!-- Section: Account -->
+<section class="w-full mb-space-lg">
+<h3 class="font-caption text-caption text-secondary uppercase tracking-wider font-bold mb-space-xs px-1">
+      Account
+    </h3>
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Edit Information -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">person_outline</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Edit my information</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Security -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">shield_person</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Security</span>
+</div>
+<div class="flex items-center gap-space-sm shrink-0">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-bright text-success font-caption text-caption shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+            2-step on
+          </span>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Reports & Statistics -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">My reports & statistics</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Section: Preferences -->
+<section class="w-full mb-space-lg">
+<h3 class="font-caption text-caption text-secondary uppercase tracking-wider font-bold mb-space-xs px-1">
+      Preferences
+    </h3>
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Language -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">language</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Language</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="font-body-sm text-body-sm text-secondary">English</span>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Notifications -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">notifications_none</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Notifications</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="px-2 py-0.5 rounded-lg bg-surface-bright text-success font-caption text-caption font-semibold">On</span>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Section: Help -->
+<section class="w-full mb-space-lg">
+<h3 class="font-caption text-caption text-secondary uppercase tracking-wider font-bold mb-space-xs px-1">
+      Help
+    </h3>
+<div class="w-full bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- How to report guide -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">How to report (guide)</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Contact SFC -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="tel:+237699000000">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Contact SFC</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="font-body-sm text-body-sm font-semibold text-primary-container">+237 6 99 00 00 00</span>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- Privacy Notice -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">Privacy notice</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<div class="h-px w-full bg-surface-container-low"></div>
+<!-- About Secure360 -->
+<a class="flex items-center justify-between min-h-[52px] px-space-md py-space-sm hover:bg-surface-container-low transition-colors group" href="#">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-9 h-9 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shrink-0">
+<span class="material-symbols-outlined text-[20px]">info</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface truncate">About Secure360</span>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="font-caption text-caption text-secondary font-mono bg-surface-container px-1.5 py-0.5 rounded">1.0.0</span>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</div>
+</a>
+</div>
+</section>
+<!-- Sign Out Action -->
+<section class="w-full mb-space-lg">
+<button class="w-full min-h-[48px] bg-surface-container-lowest hover:bg-error-container/40 active:scale-[0.99] transition-all rounded-xl p-space-md shadow-sm flex items-center justify-center gap-space-sm text-error group" id="sign-out-btn" type="button">
+<span class="material-symbols-outlined text-[22px] group-hover:-translate-x-0.5 transition-transform">logout</span>
+<span class="font-headline-sm text-headline-sm text-error">Sign out</span>
+</button>
+</section>
+<!-- App Footer Note -->
+<footer class="w-full text-center px-space-sm">
+<p class="font-caption text-caption text-secondary">
+      Secure360 by Security First Cameroon · Douala, Cameroon
+    </p>
+</footer>
+</div>
+<script>
+  document.getElementById('sign-out-btn')?.addEventListener('click', () => {
+    if (confirm('Are you sure you want to sign out of Secure360?')) {
+      console.log('User signed out');
+    }
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-headline-sm"><div class="flex justify-around items-center h-16 px-space-xs"><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] py-space-xs px-space-sm text-secondary hover:text-primary transition-colors" data-path="home" href="#"><span class="material-symbols-outlined text-[24px]">home</span><span class="font-caption text-caption mt-0.5">Home</span></a><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] py-space-xs px-space-sm text-secondary hover:text-primary transition-colors" data-path="my-incidents" href="#"><span class="material-symbols-outlined text-[24px]">report_problem</span><span class="font-caption text-caption mt-0.5">My Incidents</span></a><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] py-space-xs px-space-sm text-secondary hover:text-primary transition-colors" data-path="notifications" href="#"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="font-caption text-caption mt-0.5">Notifications</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] py-space-xs px-space-sm transition-colors text-primary font-headline-sm" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">person</span><span class="font-caption text-caption mt-0.5">Profile</span></a></div></nav></body></html>

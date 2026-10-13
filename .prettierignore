@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+coverage
+package-lock.json
+apps/mobile/android
+apps/mobile/ios
+**/prisma/migrations/**/*.sql
+design/
+docs/reference/
+.taskmaster/

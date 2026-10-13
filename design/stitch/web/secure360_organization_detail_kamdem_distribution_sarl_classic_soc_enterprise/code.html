@@ -1,0 +1,653 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Kamdem Distribution SARL (#ORG-001) - Secure360 SOC</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#e67e22',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              mediumLight: '#fef3c7',
+              mediumBorder: '#fde68a',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366 / #002244) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-slate-200 shadow-sm" data-purpose="soc-sidebar">
+<div>
+<!-- Brand -->
+<div class="p-4 border-b border-slate-200">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-[#003366] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+</svg>
+</div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[15px] font-bold text-slate-900 leading-snug truncate tracking-tight">Secure360</h1>
+<div class="text-[10px] text-slate-500 font-medium tracking-wide uppercase">Security First Cameroon</div>
+</div>
+</div>
+</div>
+<!-- Navigation Menu -->
+<nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1">
+<!-- Queue -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#queue">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 6h16M4 12h16M4 18h7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-100 text-slate-700">4</span>
+</a>
+<!-- Incidents (24) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#incidents">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-rose-600 text-white">24</span>
+</a>
+<!-- Statistics -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#statistics">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Statistics</span>
+</a>
+<!-- Reports -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#reports">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Reports</span>
+</a>
+<!-- Organizations (ACTIVE) -->
+<a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-[#e6f0fa] text-[#003366] text-[13px] font-semibold transition-colors" href="#organizations">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Organizations</span>
+</div>
+</a>
+<!-- Users -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#users">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Users</span>
+</a>
+<!-- Audit log -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#audit">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Audit log</span>
+</a>
+<!-- Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-[13px] font-medium transition-colors" href="#settings">
+<svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom profile: Jean-Paul Nguemo -->
+<div class="p-3 border-t border-slate-200 bg-slate-50/70"><div class="flex items-center gap-2.5 min-w-0"><div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">RE</div><div class="min-w-0 flex-1"><p class="text-[12px] font-semibold text-slate-900 leading-tight truncate">Rodrigue Essomba</p><p class="text-[11px] text-slate-500 truncate">Admin • Security First Cameroon</p></div></div></div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Top Breadcrumbs Header (h-10 border-b #e0e0e0 bg-slate-50/70) -->
+<div class="h-16 flex-shrink-0 bg-white border-b border-slate-200 px-6 flex items-center justify-between text-[13px]">
+<!-- Left: Breadcrumbs -->
+<div class="flex items-center gap-2 text-slate-500 font-medium">
+<a class="text-slate-600 hover:text-slate-900 transition-colors" href="#organizations">Organizations</a>
+<span class="text-slate-300">/</span>
+<span class="text-slate-900 font-semibold">Kamdem Distribution SARL</span>
+</div>
+<!-- Center & Right: Search, Live indicator, Bell, Language toggle, JN avatar -->
+<div class="flex items-center gap-4">
+<!-- Search bar -->
+<div class="relative w-64 hidden md:block">
+<svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<input class="w-full pl-9 pr-3 py-1.5 text-[12px] bg-slate-50 border border-slate-200 rounded-md text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition" placeholder="Search incidents, entities..." type="text">
+</div>
+<!-- Live (WAT) badge -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="">Live (WAT)</span>
+</div>
+<!-- Bell icon -->
+<button class="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-md transition" title="Notifications">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- FR | EN toggle -->
+<div class="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded border border-slate-200 select-none flex items-center gap-1">
+<span class="text-slate-900 cursor-pointer">FR</span>
+<span class="text-slate-300">|</span>
+<span class="text-slate-500 hover:text-slate-800 cursor-pointer">EN</span>
+</div>
+<!-- User Avatar -->
+<div class="w-8 h-8 rounded-full bg-[#003366] text-white flex items-center justify-center font-bold text-xs ring-1 ring-slate-300">RE</div>
+</div>
+</div>
+<!-- Main Hero Header Bar (Crisp White) -->
+<header class="bg-white border-b border-slate-200 px-6 py-4 flex-shrink-0" data-purpose="tenant-header">
+<!-- Back navigation -->
+<div class="mb-3">
+<a class="inline-flex items-center gap-1.5 text-[12px] font-medium text-slate-600 hover:text-[#003366] transition" href="#organizations">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Back to Organizations</span>
+</a>
+</div>
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<!-- Left Info with Organization Identity -->
+<div class="flex items-start gap-4">
+<div class="w-13 h-13 p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center font-bold text-[#003366] text-xl flex-shrink-0 shadow-sm">
+        KD
+      </div>
+<div>
+<div class="flex items-center gap-3 flex-wrap">
+<h1 class="text-[24px] font-bold text-slate-900 tracking-tight leading-tight">Kamdem Distribution SARL</h1>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            Company
+          </span>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+            Standard Plan
+          </span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-[#006633] border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-[#006633]"></span>
+            Active
+          </span>
+</div>
+<p class="text-[13px] text-slate-500 mt-1 flex items-center gap-3 flex-wrap">
+<span class="font-mono text-slate-700 flex items-center gap-1.5">
+<svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<line x1="2" x2="22" y1="12" y2="12"></line>
+<path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+</svg>
+            kamdem-distribution.cm
+          </span>
+<span class="text-slate-300">•</span>
+<span class="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded text-[11px] border border-slate-200">Org ID: #ORG-001</span>
+</p>
+</div>
+</div>
+<!-- Right Action Buttons: Edit and Deactivate -->
+<div class="flex items-center gap-2.5 self-start lg:self-center">
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[13px] font-medium shadow-sm transition" onclick="alert('Edit Kamdem Distribution SARL')">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Edit</span>
+</button>
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-[13px] font-medium shadow-sm transition" onclick="alert('Deactivate Kamdem Distribution SARL')">
+<svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Deactivate</span>
+</button>
+</div>
+</div>
+</header>
+<!-- BEGIN: Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg space-y-6"><div class="max-w-[1440px] mx-auto space-y-6">
+<!-- SECTION 1: Detail Cards Row (4 cards) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-purpose="info-cards-row">
+<!-- Card 1: Contact -->
+<div class="bg-white p-4 rounded-[12px] border border-slate-200 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-2">
+<span class="">Contact</span>
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+</div>
+<div class="font-bold text-[14px] text-slate-900">Paul Ndoumou</div>
+<div class="text-[12px] text-slate-500 mb-2">CEO</div>
+<a class="text-[12px] text-[#003366] hover:underline font-mono truncate block" href="mailto:contact@kamdem-distribution.cm">contact@kamdem-distribution.cm</a>
+<div class="text-[12px] text-slate-600 font-mono mt-0.5">+237 6 77 00 11 22</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+<span class="">Primary Admin</span>
+<span class="font-semibold text-slate-700">Direct Phone Line</span>
+</div>
+</div>
+<!-- Card 2: Location -->
+<div class="bg-white p-4 rounded-[12px] border border-slate-200 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-2">
+<span class="">Location</span>
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+</div>
+<div class="font-bold text-[14px] text-slate-900">Douala, Akwa</div>
+<div class="text-[12px] text-slate-500 mb-2">Littoral Region</div>
+<div class="text-[12px] text-slate-700 font-medium">
+          Cameroon (Littoral Region)
+        </div>
+<div class="text-[11px] text-slate-400 font-mono mt-0.5">Timezone: WAT (UTC+1)</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+<span class="">Jurisdiction</span>
+<span class="font-semibold text-slate-700">Central Africa (CEMAC)</span>
+</div>
+</div>
+<!-- Card 3: Sector -->
+<div class="bg-white p-4 rounded-[12px] border border-slate-200 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-2">
+<span class="">Sector</span>
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+</div>
+<div class="font-bold text-[14px] text-slate-900">Distribution</div>
+<div class="text-[12px] text-slate-500 mb-2">FMCG Wholesale &amp; Retail Logistics</div>
+<div class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-[#003366] text-[11px] font-medium border border-blue-200">
+          Supply Chain &amp; FMCG
+        </div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+<span class="">Operational Scale</span>
+<span class="font-semibold text-slate-700">Multi-hub Logistics</span>
+</div>
+</div>
+<!-- Card 4: Contract -->
+<div class="bg-white p-4 rounded-[12px] border border-slate-200 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between text-slate-500 text-[11px] font-semibold uppercase tracking-wider mb-2">
+<span class="">Contract</span>
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+</div>
+<div class="font-bold text-[14px] text-slate-900">01/03/2026</div>
+<div class="text-[12px] text-slate-500 mb-2">Start Date</div>
+<div class="text-[12px] font-semibold text-slate-700">Plan: Standard</div>
+<div class="text-[11px] text-emerald-700 font-medium mt-0.5">Renewal cadence: Annual</div>
+</div>
+<div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+<span class="">Status</span>
+<span class="font-semibold text-[#006633]">In Good Standing</span>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Tabs Navigation & Overview Section -->
+<div class="bg-white rounded-[12px] border border-slate-200 shadow-sm overflow-hidden" data-purpose="organization-detail-tabs">
+<!-- Tab Header -->
+<div class="border-b border-slate-200 bg-slate-50/70 px-6 flex items-center justify-between">
+<div class="flex items-center gap-8 -mb-px">
+<button class="py-3.5 border-b-2 border-[#003366] text-[#003366] font-bold text-[13px] flex items-center gap-2 transition" id="tab-btn-overview">
+<svg class="w-4 h-4 text-[#003366]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Overview</span>
+</button>
+<button class="py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 font-semibold text-[13px] flex items-center gap-2 transition" id="tab-btn-users">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Users</span>
+<span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-200 text-slate-700">12</span>
+</button>
+<button class="py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 font-semibold text-[13px] flex items-center gap-2 transition" id="tab-btn-incidents">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Incidents</span>
+<span class="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-200 text-slate-700">34</span>
+</button>
+<button class="py-3.5 border-b-2 border-transparent text-slate-500 hover:text-slate-900 font-semibold text-[13px] flex items-center gap-2 transition" id="tab-btn-stats">
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Statistics</span>
+</button>
+</div>
+</div>
+<!-- Overview Tab Content Area -->
+<div class="p-6 space-y-6">
+<!-- 4 KPI Summary Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- KPI 1: Total Users -->
+<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+<div class="flex items-center justify-between text-slate-500 text-[12px] font-medium">
+<span class="">Total Users</span>
+<span class="p-1 rounded bg-white text-[#003366] shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+</span>
+</div>
+<div class="mt-2 font-bold text-[24px] text-slate-900 leading-none">12 provisioned</div>
+<div class="mt-2 text-[12px] text-slate-500 font-medium">Standard allocation tier</div>
+</div>
+<!-- KPI 2: Lifetime Incidents -->
+<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+<div class="flex items-center justify-between text-slate-500 text-[12px] font-medium">
+<span class="">Lifetime Incidents</span>
+<span class="p-1 rounded bg-white text-[#003366] shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+</span>
+</div>
+<div class="mt-2 font-bold text-[24px] text-slate-900 leading-none">34 reported</div>
+<div class="mt-2 text-[12px] text-slate-500 font-medium">31 resolved or closed</div>
+</div>
+<!-- KPI 3: Open Incidents -->
+<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+<div class="flex items-center justify-between text-slate-500 text-[12px] font-medium">
+<span class="">Open Incidents</span>
+<span class="p-1 rounded bg-rose-50 text-rose-600 shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+</span>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="text-[24px] font-bold text-rose-600 leading-none">3 active</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800">1 Critical</span>
+</div>
+<div class="mt-2 text-[12px] text-slate-500 font-medium">1 Critical, 1 High, 1 Moderate</div>
+</div>
+<!-- KPI 4: Avg Response / MTTR -->
+<div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+<div class="flex items-center justify-between text-slate-500 text-[12px] font-medium">
+<span class="">Avg Response / MTTR</span>
+<span class="p-1 rounded bg-white text-[#003366] shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+</span>
+</div>
+<div class="mt-2 font-bold text-[24px] text-slate-900 leading-none">28m median</div>
+<div class="mt-2 text-[12px] text-emerald-700 font-medium">SLA target &lt; 2h (Compliant)</div>
+</div>
+</div>
+<!-- Recent Incidents Table (5 realistic Cameroon incidents) -->
+<div class="border border-slate-200 rounded-lg overflow-hidden">
+<div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+<div class="font-bold text-[14px] text-slate-900">Recent Incidents</div>
+<span class="text-[12px] text-slate-500">Last 5 incidents recorded</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="h-10 bg-[#f6f8fb] border-b border-slate-200 text-[11px] font-semibold uppercase tracking-wider text-slate-500 select-none">
+<th class="py-2.5 px-4">Reference</th>
+<th class="py-2.5 px-4 min-w-[280px]">Incident Type / Title</th>
+<th class="py-2.5 px-4">Reporter</th>
+<th class="py-2.5 px-4">Severity</th>
+<th class="py-2.5 px-4">Reported Date</th>
+<th class="py-2.5 px-4">Status</th>
+<th class="py-2.5 px-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 text-[13px]">
+<!-- Incident 1 -->
+<tr class="h-12 hover:bg-slate-50 transition-colors">
+<td class="py-2 px-4 font-mono font-bold text-[#003366]">
+                  SFC-2026-001241
+                </td>
+<td class="py-2 px-4 font-medium text-slate-900">
+                  Fraudulent SMS pretending to be MTN MoMo
+                </td>
+<td class="py-2 px-4 text-slate-700">
+                  Aimé Kamga
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-[#cc0000] border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-[#cc0000]"></span>
+                    Critical
+                  </span>
+</td>
+<td class="py-2 px-4 font-mono text-[12px] text-slate-600 whitespace-nowrap">
+                  14/10/2026 11:20 WAT
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                    In progress
+                  </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap">
+<button class="text-[12px] font-semibold text-[#003366] hover:underline" onclick="alert('Open incident SFC-2026-001241')">
+                    View →
+                  </button>
+</td>
+</tr>
+<!-- Incident 2 -->
+<tr class="h-12 hover:bg-slate-50 transition-colors">
+<td class="py-2 px-4 font-mono font-bold text-[#003366]">
+                  SFC-2026-001235
+                </td>
+<td class="py-2 px-4 font-medium text-slate-900">
+                  Phishing e-mail with fake supplier invoice
+                </td>
+<td class="py-2 px-4 text-slate-700">
+                  Brice Etoundi
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-[#d97706] border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    High
+                  </span>
+</td>
+<td class="py-2 px-4 font-mono text-[12px] text-slate-600 whitespace-nowrap">
+                  12/10/2026 09:45 WAT
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    Assigned
+                  </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap">
+<button class="text-[12px] font-semibold text-[#003366] hover:underline" onclick="alert('Open incident SFC-2026-001235')">
+                    View →
+                  </button>
+</td>
+</tr>
+<!-- Incident 3 -->
+<tr class="h-12 hover:bg-slate-50 transition-colors">
+<td class="py-2 px-4 font-mono font-bold text-[#003366]">
+                  SFC-2026-001228
+                </td>
+<td class="py-2 px-4 font-medium text-slate-900">
+                  Suspected SIM swap on payroll supervisor line
+                </td>
+<td class="py-2 px-4 text-slate-700">
+                  Samuel Njoya
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-[#cc0000] border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-[#cc0000]"></span>
+                    Critical
+                  </span>
+</td>
+<td class="py-2 px-4 font-mono text-[12px] text-slate-600 whitespace-nowrap">
+                  08/10/2026 16:15 WAT
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-[#006633] border border-emerald-200">
+                    Resolved
+                  </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap">
+<button class="text-[12px] font-semibold text-[#003366] hover:underline" onclick="alert('Open incident SFC-2026-001228')">
+                    View →
+                  </button>
+</td>
+</tr>
+<!-- Incident 4 -->
+<tr class="h-12 hover:bg-slate-50 transition-colors">
+<td class="py-2 px-4 font-mono font-bold text-[#003366]">
+                  SFC-2026-001214
+                </td>
+<td class="py-2 px-4 font-medium text-slate-900">
+                  Unauthorised Orange Money debit attempt
+                </td>
+<td class="py-2 px-4 text-slate-700">
+                  Nadège Tchoua
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                    Moderate
+                  </span>
+</td>
+<td class="py-2 px-4 font-mono text-[12px] text-slate-600 whitespace-nowrap">
+                  02/10/2026 14:00 WAT
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-50 text-[#006633] border border-emerald-200">
+                    Resolved
+                  </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap">
+<button class="text-[12px] font-semibold text-[#003366] hover:underline" onclick="alert('Open incident SFC-2026-001214')">
+                    View →
+                  </button>
+</td>
+</tr>
+<!-- Incident 5 -->
+<tr class="h-12 hover:bg-slate-50 transition-colors">
+<td class="py-2 px-4 font-mono font-bold text-[#003366]">
+                  SFC-2026-001198
+                </td>
+<td class="py-2 px-4 font-medium text-slate-900">
+                  WhatsApp business account takeover attempt
+                </td>
+<td class="py-2 px-4 text-slate-700">
+                  Grace Ayuk
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-[#006633] border border-emerald-200">
+<span class="w-1.5 h-1.5 rounded-full bg-[#006633]"></span>
+                    Low
+                  </span>
+</td>
+<td class="py-2 px-4 font-mono text-[12px] text-slate-600 whitespace-nowrap">
+                  27/09/2026 10:30 WAT
+                </td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                    Closed
+                  </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap">
+<button class="text-[12px] font-semibold text-[#003366] hover:underline" onclick="alert('Open incident SFC-2026-001198')">
+                    View →
+                  </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div></main>
+<!-- END: Main Scrollable Content -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Interactive Scripts -->
+<script>
+  function switchDetailTab(tabKey) {
+    const btnUsers = document.getElementById('tab-btn-users');
+    const btnIncidents = document.getElementById('tab-btn-incidents');
+    const panelUsers = document.getElementById('tab-panel-users');
+    const panelIncidents = document.getElementById('tab-panel-incidents');
+    const helperText = document.getElementById('tab-helper-text');
+
+    if (tabKey === 'users') {
+      btnUsers.className = 'py-3.5 border-b-2 border-sfc-navy text-sfc-navy font-bold text-[13px] flex items-center gap-2 transition';
+      btnIncidents.className = 'py-3.5 border-b-2 border-transparent text-sfc-textMuted hover:text-sfc-textPrimary font-semibold text-[13px] flex items-center gap-2 transition';
+      panelUsers.classList.remove('hidden');
+      panelIncidents.classList.add('hidden');
+      if (helperText) helperText.innerText = 'Displaying first 5 authorized users';
+    } else {
+      btnIncidents.className = 'py-3.5 border-b-2 border-sfc-navy text-sfc-navy font-bold text-[13px] flex items-center gap-2 transition';
+      btnUsers.className = 'py-3.5 border-b-2 border-transparent text-sfc-textMuted hover:text-sfc-textPrimary font-semibold text-[13px] flex items-center gap-2 transition';
+      panelUsers.classList.add('hidden');
+      panelIncidents.classList.remove('hidden');
+      if (helperText) helperText.innerText = 'Displaying recent security incidents';
+    }
+  }
+
+  function navigateToUserDetail(userId) {
+    alert('Navigating to User Detail (W15) for ' + userId + ' (Apex National Bank)');
+  }
+
+  function navigateToIncidentDetail(incidentId) {
+    alert('Navigating to Incident Detail (W07) for ' + incidentId + ' (Apex National Bank)');
+  }
+</script>
+
+
+</body></html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><meta content="mobile_tab" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "primary-fixed-dim": "#a7c8ff", "success": "#006633", "background": "#ffffff", "tertiary-fixed": "#ffdbca", "on-tertiary": "#ffffff", "on-primary-fixed": "#001b3c", "primary": "#001e40", "on-secondary-container": "#5c666e", "outline": "#737780", "secondary-fixed-dim": "#bec8d1", "on-primary-fixed-variant": "#1f477b", "surface-tint": "#3a5f94", "on-tertiary-fixed": "#341100", "on-error-container": "#93000a", "text-secondary": "#666666", "surface-container-highest": "#e2e2e7", "surface-container-high": "#e8e8ed", "tertiary": "#381300", "surface-container-lowest": "#ffffff", "danger": "#cc0000", "secondary-container": "#dae4ee", "outline-variant": "#c3c6d1", "surface-dim": "#dad9de", "error": "#ba1a1a", "inverse-primary": "#a7c8ff", "on-secondary-fixed": "#131d24", "inverse-surface": "#2f3034", "tertiary-fixed-dim": "#ffb690", "secondary-fixed": "#dae4ee", "on-tertiary-fixed-variant": "#723610", "surface-container-low": "#f4f3f8", "border": "#e0e0e0", "on-secondary-fixed-variant": "#3e4850", "inverse-on-surface": "#f1f0f5", "on-tertiary-container": "#d8885c", "on-error": "#ffffff", "secondary": "#566068", "tertiary-container": "#592300", "error-container": "#ffdad6", "text-primary": "#1e1e1e", "on-secondary": "#ffffff", "on-background": "#1a1c1f", "surface-variant": "#e2e2e7", "primary-fixed": "#d5e3ff", "surface": "#f8f9fc", "on-surface": "#1a1c1f", "surface-bright": "#f9f9fe", "primary-container": "#003366", "on-primary": "#ffffff", "on-surface-variant": "#43474f", "on-primary-container": "#799dd6", "surface-container": "eeedf2" }, borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, spacing: { "gutter": "1rem", "space-xl": "2rem", "space-md": "1rem", "space-xs": "0.25rem", "margin": "1rem", "space-lg": "1.5rem", "space-sm": "0.5rem" }, fontFamily: { "headline-sm": ["Inter"], "headline-lg": ["Inter"], "headline-md": ["Inter"], "caption": ["Inter"], "body-md": ["Inter"], "body-sm": ["Inter"] }, fontSize: { "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }], "caption": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script><style>@layer base { html, body { width: 100%; margin: 0; padding: 0; min-height: 100%; } body { overscroll-behavior-y: none; -webkit-tap-highlight-color: transparent; } .pb-safe { padding-bottom: env(safe-area-inset-bottom, 0px); } .pt-safe { padding-top: env(safe-area-inset-top, 0px); } } ::-webkit-scrollbar { display: none; }</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface antialiased min-h-screen flex flex-col font-body-md text-body-md"><main class="flex-1 flex flex-col relative w-full bg-surface pb-20"><div class="flex flex-col w-full">
+<!-- Header Section -->
+<section class="bg-primary-container text-on-primary px-gutter pt-space-lg pb-space-xl rounded-b-xl shadow-md">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h1 class="font-headline-lg text-headline-lg text-on-primary tracking-tight">Hello, Aimé</h1>
+<p class="font-body-sm text-body-sm text-primary-fixed opacity-90 mt-0.5">Kamdem Distribution SARL</p>
+</div>
+<!-- Notification bell button -->
+<button aria-label="View notifications" class="relative w-12 h-12 flex items-center justify-center rounded-full bg-on-primary/10 hover:bg-on-primary/15 active:scale-95 transition-all text-on-primary" type="button">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<!-- Red alert indicator dot -->
+<span class="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full bg-danger"></span>
+</button>
+</div>
+</section>
+<!-- Content Container -->
+<div class="px-gutter flex flex-col gap-space-lg -mt-6">
+<!-- Primary Action Hero Card -->
+<a class="group relative flex items-center justify-between p-space-md rounded-xl bg-primary text-on-primary shadow-lg hover:shadow-xl active:scale-[0.99] transition-all min-h-[72px]" data-path="report-incident" href="#" role="button">
+<div class="flex items-center gap-space-md min-w-0 pr-space-xs">
+<div class="w-12 h-12 rounded-full bg-primary-fixed/20 flex items-center justify-center shrink-0 text-primary-fixed group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">add_moderator</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-primary leading-tight">Report an incident</span>
+<span class="font-body-sm text-body-sm text-primary-fixed-dim opacity-95 mt-0.5">Something suspicious? Tell us in 2 minutes.</span>
+</div>
+</div>
+<div class="w-8 h-8 flex items-center justify-center shrink-0 text-on-primary/70 group-hover:text-on-primary group-hover:translate-x-0.5 transition-all">
+<span class="material-symbols-outlined text-[24px]">chevron_right</span>
+</div>
+</a>
+<!-- Row of 3 Small Stat Cards -->
+<div class="grid grid-cols-3 gap-space-sm">
+<!-- Stat 1: In progress -->
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex flex-col justify-between">
+<span class="font-caption text-caption text-secondary line-clamp-1">In progress</span>
+<div class="flex items-baseline gap-1 mt-space-xs">
+<span class="font-headline-lg text-headline-lg text-tertiary-container">1</span>
+</div>
+</div>
+<!-- Stat 2: Resolved -->
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex flex-col justify-between">
+<span class="font-caption text-caption text-secondary line-clamp-1">Resolved</span>
+<div class="flex items-baseline gap-1 mt-space-xs">
+<span class="font-headline-lg text-headline-lg text-success">4</span>
+</div>
+</div>
+<!-- Stat 3: Waiting to send -->
+<div class="bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex flex-col justify-between"><div class="flex items-center justify-between"><span class="font-caption text-caption text-secondary line-clamp-1">Waiting to send</span><span class="material-symbols-outlined text-tertiary text-[14px]">cloud_upload</span></div><div class="flex items-baseline gap-1 mt-space-xs"><span class="font-headline-lg text-headline-lg text-tertiary">1</span></div></div>
+</div>
+<!-- Section "My recent reports" -->
+<section class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-text-primary">My recent reports</h2>
+<a class="font-body-sm text-body-sm text-primary-container font-semibold hover:underline flex items-center py-1" data-path="my-incidents" href="#">
+          See all
+        </a>
+</div>
+<!-- Stacked Report Cards -->
+<div class="flex flex-col gap-space-sm">
+<!-- Card 1: Fraudulent SMS -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">sms</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-space-xs">
+<h3 class="font-body-md text-body-md font-semibold text-text-primary line-clamp-2 leading-snug">
+                Fraudulent SMS pretending to be MTN MoMo
+              </h3>
+</div>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="font-caption text-caption text-text-secondary">SFC-2026-001231</span>
+<span class="text-secondary/40 font-caption text-caption">•</span>
+<span class="font-caption text-caption text-text-secondary">2 h ago</span>
+</div>
+<div class="mt-2.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-caption text-caption font-semibold">
+                Assigned
+              </span>
+</div>
+</div>
+</article>
+<!-- Card 2: Offline pending item -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-tertiary-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">signal_cellular_connected_no_internet_4_bar</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-space-xs">
+<h3 class="font-body-md text-body-md font-semibold text-text-primary line-clamp-2 leading-snug">
+                Sudden loss of mobile network
+              </h3>
+</div>
+<div class="flex items-center gap-1 mt-1 text-tertiary">
+<span class="material-symbols-outlined text-[13px]">cloud_sync</span>
+<span class="font-caption text-caption">Saved 10 min ago, will be sent automatically</span>
+</div>
+<div class="mt-2.5">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary-fixed text-tertiary-container font-caption text-caption font-semibold">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                Waiting to send
+              </span>
+</div>
+</div>
+</article>
+<!-- Card 3: Phishing email -->
+<article class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between gap-space-xs">
+<h3 class="font-body-md text-body-md font-semibold text-text-primary line-clamp-2 leading-snug">
+                Phishing e-mail with fake invoice
+              </h3>
+</div>
+<div class="flex items-center gap-space-sm mt-1">
+<span class="font-caption text-caption text-text-secondary">SFC-2026-001198</span>
+<span class="text-secondary/40 font-caption text-caption">•</span>
+<span class="font-caption text-caption text-text-secondary">12/09/2026</span>
+</div>
+<div class="mt-2.5">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-fixed text-success font-caption text-caption font-semibold">
+                Resolved
+              </span>
+</div>
+</div>
+</article>
+</div>
+</section>
+<!-- Bottom Card: Security Tip of the Week -->
+<aside class="bg-secondary-container text-primary p-space-md rounded-xl shadow-sm flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary-container mt-0.5">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm font-semibold text-primary">Tip of the week</span>
+<p class="font-caption text-caption text-on-surface-variant leading-relaxed mt-0.5">
+          SFC or your operator will never ask for your Mobile Money PIN. Keep your credentials private at all times.
+        </p>
+</div>
+</aside>
+</div>
+</div>
+<script>
+  // Simple micro-interaction for tactile feedback on interactive cards
+  document.querySelectorAll('article, a[role="button"]').forEach((card) => {
+    card.addEventListener('touchstart', () => {
+      card.classList.add('opacity-95');
+    }, { passive: true });
+    card.addEventListener('touchend', () => {
+      card.classList.remove('opacity-95');
+    }, { passive: true });
+  });
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-16 px-gutter"><a aria-current="page" class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-space-xs transition-colors text-primary font-semibold" data-path="home" href="#"><span class="material-symbols-outlined text-[24px]">shield</span><span class="font-caption text-caption tracking-tight mt-0.5">Home</span></a><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-space-xs text-on-surface-variant hover:text-on-surface transition-colors" data-path="my-incidents" href="#"><span class="material-symbols-outlined text-[24px]">warning</span><span class="font-caption text-caption tracking-tight mt-0.5">My Incidents</span></a><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-space-xs text-on-surface-variant hover:text-on-surface transition-colors" data-path="notifications" href="#"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="font-caption text-caption tracking-tight mt-0.5">Notifications</span></a><a class="flex flex-col items-center justify-center min-w-[48px] min-h-[48px] px-space-xs text-on-surface-variant hover:text-on-surface transition-colors" data-path="profile" href="#"><span class="material-symbols-outlined text-[24px]">person</span><span class="font-caption text-caption tracking-tight mt-0.5">Profile</span></a></div></nav>
+
+</body></html>

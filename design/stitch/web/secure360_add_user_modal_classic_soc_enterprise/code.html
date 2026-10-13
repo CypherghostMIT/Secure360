@@ -1,0 +1,404 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Secure360 SOC Portal - Add User</title>
+<!-- Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#fcf9f8",
+            "error-container": "#ffdad6",
+            "tertiary": "#381300",
+            "primary-fixed": "#d5e3ff",
+            "on-tertiary": "#ffffff",
+            "on-surface-variant": "#43474f",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#1f477b",
+            "on-primary-container": "#799dd6",
+            "on-tertiary-container": "#d8885c",
+            "surface-container": "#f0eded",
+            "on-surface": "#1b1b1c",
+            "on-secondary-fixed-variant": "#3e4850",
+            "primary-fixed-dim": "#a7c8ff",
+            "surface-container-highest": "#e5e2e1",
+            "text-primary": "#1e1e1e",
+            "surface-tint": "#3a5f94",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "inverse-primary": "#a7c8ff",
+            "background": "#f8f9fc",
+            "on-primary-fixed": "#001b3c",
+            "surface-container-lowest": "#ffffff",
+            "tertiary-fixed-dim": "#ffb690",
+            "inverse-surface": "#303030",
+            "secondary": "#566068",
+            "surface-variant": "#e5e2e1",
+            "border": "#e0e0e0",
+            "outline": "#737780",
+            "inverse-on-surface": "#f3f0ef",
+            "on-secondary-container": "#5c666e",
+            "on-tertiary-fixed": "#341100",
+            "secondary-container": "#dae4ee",
+            "on-tertiary-fixed-variant": "#723610",
+            "tertiary-container": "#592300",
+            "on-background": "#1b1b1c",
+            "outline-variant": "#c3c6d1",
+            "tertiary-fixed": "#ffdbca",
+            "surface": "#ffffff",
+            "success": "#006633",
+            "on-primary": "#ffffff",
+            "primary": "#001e40",
+            "surface-container-low": "#f6f3f2",
+            "on-secondary-fixed": "#131d24",
+            "primary-container": "#003366",
+            "text-secondary": "#666666",
+            "on-error": "#ffffff",
+            "surface-dim": "#dcd9d9",
+            "secondary-fixed": "#dae4ee",
+            "secondary-fixed-dim": "#bec8d1",
+            "surface-container-high": "#eae7e7",
+            "danger": "#cc0000"
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            'body-md': ['Inter', 'sans-serif'],
+            'label-md': ['Inter', 'sans-serif'],
+            'headline-md': ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body class="h-full bg-background font-sans text-on-surface antialiased overflow-hidden">
+<!-- ========================================================================= -->
+<!-- BACKGROUND APP SHELL (Daylight SOC Portal UI)                             -->
+<!-- ========================================================================= -->
+<div class="flex h-screen w-full overflow-hidden">
+<!-- LEFT SIDEBAR (240px wide) -->
+<aside class="w-[240px] flex-shrink-0 bg-surface border-r border-[#e0e0e0] flex flex-col justify-between h-full select-none z-0">
+<div class="flex flex-col">
+<!-- Brand Header -->
+<div class="h-16 flex items-center px-4 border-b border-border gap-2"><img alt="SFC Emblem" class="w-8 h-8 rounded-full object-cover shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1VSJ_H_lzCxksgXrclCzX6FbaCm4usbeCbnNxdUV8m8NPu-Pb3eIm5yVtIFkZqTJybVpWsET689qS1ko6ZH6-Xf-UVvU8TcHRVkcrlU4oFi-BVeRIAW0k3ciTXCDW7mmFex22UzRaH6p7k-7vVL6nJ1ngnrJhso4WqGDK8OwJZifczmdfeNVJBtk661k3IQ7SBrpgQKTF3_IOw8azj7NPeeWISEg6ki-ptpSWmP7U1Rn18k2PCCW2oZi5FVfTF042C5TA9QoMbvhZ8"><div class="flex flex-col min-w-0"><span class="font-bold text-sm text-primary tracking-tight truncate leading-tight">Secure360</span><span class="text-[11px] text-text-secondary truncate tracking-tight">Security First Cameroon</span></div></div>
+<!-- Navigation items -->
+<nav class="flex flex-col py-2 px-1 gap-0.5" data-active-classes="bg-secondary-container text-primary font-medium"><a class="flex items-center justify-between px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="queue" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">inbox</span><span class="">Queue</span></div><span class="bg-error text-white text-[11px] px-1.5 py-0.5 rounded-full font-semibold leading-none">4</span></a><a class="flex items-center justify-between px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="incidents" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">warning</span><span class="">Incidents</span></div><span class="bg-surface-container-highest text-on-surface text-[11px] px-1.5 py-0.5 rounded-full font-semibold leading-none">24</span></a><a class="flex items-center px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="statistics" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">query_stats</span><span class="">Statistics</span></div></a><a class="flex items-center px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="reports" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">description</span><span class="">Reports</span></div></a><a class="flex items-center px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="organizations" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">corporate_fare</span><span class="">Organizations</span></div></a><a aria-current="page" class="flex items-center justify-between px-2 py-2 rounded transition-colors bg-secondary-container text-primary font-medium text-sm" data-path="users" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">group</span><span class="">Users</span></div></a><a class="flex items-center px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="audit-log" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">history</span><span class="">Audit log</span></div></a><a class="flex items-center px-2 py-2 rounded text-secondary hover:bg-surface-container-low hover:text-on-surface transition-colors text-sm font-medium" data-path="settings" href="#"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">settings</span><span class="">Settings</span></div></a></nav>
+</div>
+<!-- Bottom Operator Profile -->
+<div class="border-t border-border p-2 bg-surface"><div class="flex items-center gap-2 p-1.5 rounded hover:bg-surface-container-low transition-colors cursor-pointer"><div class="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white font-medium text-xs shrink-0">RE<span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-success ring-2 ring-white"></span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-medium text-xs text-text-primary truncate leading-tight">Rodrigue Essomba</span><span class="text-[11px] text-text-secondary truncate leading-tight">Admin · SFC</span></div><span class="material-symbols-outlined text-outline text-[18px]">unfold_more</span></div></div>
+</aside>
+<!-- MAIN DASHBOARD CONTENT AREA -->
+<div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+<!-- Sticky Header (64px) -->
+<header class="h-16 bg-surface border-b border-[#e0e0e0] px-6 flex items-center justify-between flex-shrink-0">
+<!-- Breadcrumbs & Quick Filter -->
+<div class="flex items-center gap-3">
+<div class="flex items-center text-sm font-medium">
+<span class="text-secondary">Users</span>
+<span class="mx-2 text-outline-variant">/</span>
+<span class="text-primary font-semibold">User Directory</span>
+</div>
+<div class="ml-6 relative">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-secondary">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</span>
+<input class="w-72 pl-9 pr-4 py-1.5 text-xs bg-surface-container-low border border-border rounded-lg text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container focus:bg-white" placeholder="Search by name, email, or client..." readonly="" type="text">
+</div>
+</div>
+<!-- Controls: WAT Pulse, Language, Bell, Profile Avatar -->
+<div class="flex items-center gap-4">
+<!-- WAT live status pulse -->
+<div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-semibold text-success">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="">Live (WAT)</span>
+</div>
+<!-- Language toggle -->
+<div class="inline-flex rounded-lg border border-border bg-surface-container-low p-0.5 text-xs font-semibold text-secondary">
+<button class="px-2 py-1 rounded bg-white text-primary shadow-xs">FR</button>
+<button class="px-2 py-1 rounded text-secondary hover:text-primary">EN</button>
+</div>
+<!-- Notification Bell -->
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-secondary hover:bg-surface-container-low relative">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-danger"></span>
+</button>
+<!-- Topbar Avatar -->
+<div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" title="Rodrigue Essomba">RE</div>
+</div>
+</header>
+<!-- Main Directory Table Background (Simulated Screen 6 Data) -->
+<main class="flex-1 overflow-y-auto p-6 bg-background">
+<div class="flex items-center justify-between mb-4">
+<div>
+<h1 class="text-xl font-bold text-text-primary">User Directory</h1>
+<p class="text-xs text-text-secondary">Directory of active enterprise contacts and Security First Cameroon responders</p>
+</div>
+<button class="px-4 py-2 bg-primary-container text-white text-xs font-semibold rounded-lg shadow-sm flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span class="">Add user</span>
+</button>
+</div>
+<!-- Directory Table -->
+<div class="bg-surface rounded-lg border border-border overflow-hidden shadow-xs">
+<table class="w-full text-left border-collapse text-xs">
+<thead>
+<tr class="bg-surface-container-low border-b border-border text-secondary font-semibold uppercase tracking-wider text-[11px]">
+<th class="py-3 px-4">Name</th>
+<th class="py-3 px-4">Organization</th>
+<th class="py-3 px-4">Email</th>
+<th class="py-3 px-4">Phone</th>
+<th class="py-3 px-4">Role</th>
+<th class="py-3 px-4">Status</th>
+<th class="py-3 px-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border text-on-surface">
+<tr class="hover:bg-slate-50">
+<td class="py-3 px-4 font-medium text-text-primary">Aimé Kamga</td>
+<td class="py-3 px-4">Kamdem Distribution SARL</td>
+<td class="py-3 px-4 text-text-secondary">a.kamga@kamdem.cm</td>
+<td class="py-3 px-4 text-text-secondary">+237 6 77 45 12 09</td>
+<td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-700">Manager</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+<td class="py-3 px-4 text-right text-secondary"><span class="material-symbols-outlined text-[18px]">more_vert</span></td>
+</tr>
+<tr class="hover:bg-slate-50">
+<td class="py-3 px-4 font-medium text-text-primary">Paul Ndoumou</td>
+<td class="py-3 px-4">Office Régional des Archives du Centre</td>
+<td class="py-3 px-4 text-text-secondary">p.ndoumou@orac.gov.cm</td>
+<td class="py-3 px-4 text-text-secondary">+237 6 99 21 88 43</td>
+<td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-700">User</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+<td class="py-3 px-4 text-right text-secondary"><span class="material-symbols-outlined text-[18px]">more_vert</span></td>
+</tr>
+<tr class="hover:bg-slate-50">
+<td class="py-3 px-4 font-medium text-text-primary">Christelle Biya</td>
+<td class="py-3 px-4">ONG Santé Pour Tous</td>
+<td class="py-3 px-4 text-text-secondary">c.biya@santepourtous.org</td>
+<td class="py-3 px-4 text-text-secondary">+237 6 74 12 33 00</td>
+<td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-700">User</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+<td class="py-3 px-4 text-right text-secondary"><span class="material-symbols-outlined text-[18px]">more_vert</span></td>
+</tr>
+<tr class="hover:bg-slate-50">
+<td class="py-3 px-4 font-medium text-text-primary">Brice Etoundi</td>
+<td class="py-3 px-4">Security First Cameroon</td>
+<td class="py-3 px-4 text-text-secondary">b.etoundi@securityfirst.cm</td>
+<td class="py-3 px-4 text-text-secondary">+237 6 91 55 90 22</td>
+<td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-blue-100 text-primary-container font-semibold">Technician</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+<td class="py-3 px-4 text-right text-secondary"><span class="material-symbols-outlined text-[18px]">more_vert</span></td>
+</tr>
+<tr class="hover:bg-slate-50">
+<td class="py-3 px-4 font-medium text-text-primary">Grace Ayuk</td>
+<td class="py-3 px-4">Bamenda Agro Cooperative</td>
+<td class="py-3 px-4 text-text-secondary">g.ayuk@bamendagro.cm</td>
+<td class="py-3 px-4 text-text-secondary">+237 6 75 09 81 74</td>
+<td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-slate-100 font-medium text-slate-700">Manager</span></td>
+<td class="py-3 px-4"><span class="inline-flex items-center gap-1.5 text-secondary font-medium"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Pending Invite</span></td>
+<td class="py-3 px-4 text-right text-secondary"><span class="material-symbols-outlined text-[18px]">more_vert</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</main>
+</div>
+</div>
+<!-- ========================================================================= -->
+<!-- FLOATING SUCCESS TOAST NOTIFICATION (Top-right)                           -->
+<!-- ========================================================================= -->
+<div class="fixed top-5 right-6 z-50 flex items-center gap-3 bg-white border border-slate-200/90 rounded-lg shadow-xl px-4 py-3 transform transition-all duration-300" id="successToast">
+<div class="w-6 h-6 rounded-full bg-success text-white flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</div>
+<div class="flex flex-col">
+<p class="text-xs font-semibold text-text-primary">User created</p>
+<p class="text-[11px] text-text-secondary">Invitation e-mail sent to s.njoya@kamdem-distribution.cm</p>
+</div>
+<button class="ml-2 text-secondary hover:text-on-surface p-1 rounded" onclick="document.getElementById('successToast').style.display='none'">
+<span class="material-symbols-outlined text-[16px]">close</span>
+</button>
+</div>
+<!-- ========================================================================= -->
+<!-- MODAL BACKDROP OVERLAY                                                    -->
+<!-- ========================================================================= -->
+<div class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+<!-- MODAL DIALOG CONTAINER (max-w-[620px]) -->
+<div class="max-w-[620px] w-full bg-white rounded-lg shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in fade-in zoom-in duration-150">
+<!-- Modal Header -->
+<div class="px-6 py-5 border-b border-slate-200 flex items-start justify-between bg-white">
+<div class="space-y-1">
+<h2 class="text-[20px] font-bold text-slate-900 tracking-tight leading-snug">Add user</h2>
+<p class="text-xs text-text-secondary">Provision a new account for an organization member or SFC technician.</p>
+</div>
+<button class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-md transition-colors" title="Close (ESC)">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- Modal Body / Form Fields -->
+<form class="p-6 space-y-4 max-h-[calc(88vh-130px)] overflow-y-auto">
+<!-- Row 1: First Name & Last Name -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5" for="first-name">
+              First name <span class="text-danger">*</span>
+</label>
+<input class="w-full h-10 px-3 text-sm rounded-md border border-slate-300 bg-white text-text-primary focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow" id="first-name" placeholder="e.g. Samuel" required="" type="text" value="Samuel">
+</div>
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5" for="last-name">
+              Last name <span class="text-danger">*</span>
+</label>
+<input class="w-full h-10 px-3 text-sm rounded-md border border-slate-300 bg-white text-text-primary focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow" id="last-name" placeholder="e.g. Njoya" required="" type="text" value="Njoya">
+</div>
+</div>
+<!-- Row 2: Work E-mail & Phone (+237) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5" for="email">
+              Work e-mail <span class="text-danger">*</span>
+</label>
+<input class="w-full h-10 px-3 text-sm rounded-md border border-slate-300 bg-white text-text-primary focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow" id="email" placeholder="e.g. user@organization.cm" required="" type="email" value="s.njoya@kamdem-distribution.cm">
+</div>
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5" for="phone">
+              Phone (+237)
+            </label>
+<div class="relative flex items-center">
+<span class="absolute left-3 text-xs font-medium text-slate-500 pointer-events-none select-none flex items-center gap-1.5">
+<span class="text-[13px]">🇨🇲</span>
+<span class="">+237</span>
+</span>
+<input class="w-full h-10 pl-[74px] pr-3 text-sm rounded-md border border-slate-300 bg-white text-text-primary focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container transition-shadow" id="phone" placeholder="6 XX XX XX XX" type="tel" value="6 77 89 22 10">
+</div>
+</div>
+</div>
+<!-- Row 3: Organization Select -->
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5" for="organization-select">
+            Organization <span class="text-danger">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 pl-3 pr-9 text-sm rounded-md border border-slate-300 bg-white text-text-primary appearance-none focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container cursor-pointer" id="organization-select">
+<option selected="" value="kamdem">Kamdem Distribution SARL</option>
+<option value="orac">Office Régional des Archives du Centre</option>
+<option value="sante">ONG Santé Pour Tous</option>
+<option value="bamenda">Bamenda Agro Cooperative</option>
+<option value="garoua">Garoua Transport Express</option>
+<option value="ekane">Cabinet Ekane &amp; Associés</option>
+<option value="limbe">Lycée Bilingue de Limbé – Administration</option>
+<option value="cafe">Coopérative Café Ouest</option>
+<option value="sfc">Security First Cameroon (SFC)</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+<span class="material-symbols-outlined text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Row 4: Role Selection (User, Manager, Technician, Admin) -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="block text-xs font-semibold text-text-primary">
+              Role <span class="text-danger">*</span>
+</label>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+<!-- Option 1: User (Selected) -->
+<label class="relative flex flex-col p-3 rounded-md border-2 border-primary-container bg-blue-50/40 cursor-pointer text-left transition-all">
+<input checked="" class="sr-only" name="role" type="radio" value="user">
+<div class="flex items-center justify-between w-full mb-1">
+<span class="text-xs font-bold text-primary">User</span>
+<span class="material-symbols-outlined text-[16px] text-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="text-[11px] text-secondary leading-tight">Standard view &amp; report access</span>
+</label>
+<!-- Option 2: Manager -->
+<label class="relative flex flex-col p-3 rounded-md border border-slate-300 bg-white hover:border-slate-400 cursor-pointer text-left transition-all">
+<input class="sr-only" name="role" type="radio" value="manager">
+<div class="flex items-center justify-between w-full mb-1">
+<span class="text-xs font-semibold text-text-primary">Manager</span>
+</div>
+<span class="text-[11px] text-secondary leading-tight">Manage members &amp; incidents</span>
+</label>
+<!-- Option 3: Technician (Disabled for external orgs) -->
+<div class="relative flex flex-col p-3 rounded-md border border-slate-200 bg-slate-50 text-left opacity-60 cursor-not-allowed" title="Restricted to Security First Cameroon personnel">
+<div class="flex items-center justify-between w-full mb-1">
+<span class="text-xs font-semibold text-slate-400">Technician</span>
+<span class="material-symbols-outlined text-[14px] text-slate-400">lock</span>
+</div>
+<span class="text-[11px] text-slate-400 leading-tight">SOC triage &amp; diagnostic tools</span>
+</div>
+<!-- Option 4: Admin (Disabled for external orgs) -->
+<div class="relative flex flex-col p-3 rounded-md border border-slate-200 bg-slate-50 text-left opacity-60 cursor-not-allowed" title="Restricted to Security First Cameroon personnel">
+<div class="flex items-center justify-between w-full mb-1">
+<span class="text-xs font-semibold text-slate-400">Admin</span>
+<span class="material-symbols-outlined text-[14px] text-slate-400">lock</span>
+</div>
+<span class="text-[11px] text-slate-400 leading-tight">Full portal administration</span>
+</div>
+</div>
+<!-- Role Helper notice requirement -->
+<div class="mt-2 flex items-start gap-1.5 text-[11px] text-secondary">
+<span class="material-symbols-outlined text-[14px] text-outline flex-shrink-0 mt-0.5">info</span>
+<span class="">Technician and Admin roles are only selectable when the organization is Security First Cameroon.</span>
+</div>
+</div>
+<!-- Row 5: Preferred Language Segmented Toggle -->
+<div>
+<label class="block text-xs font-semibold text-text-primary mb-1.5">
+            Preferred language
+          </label>
+<div class="inline-flex p-1 bg-surface-container-low rounded-lg border border-border w-full sm:w-auto">
+<button class="flex-1 sm:flex-initial px-5 py-1.5 rounded-md text-xs font-semibold bg-white text-primary shadow-xs border border-slate-200/60" type="button">
+              Français
+            </button>
+<button class="flex-1 sm:flex-initial px-5 py-1.5 rounded-md text-xs font-medium text-secondary hover:text-text-primary transition-colors" type="button">
+              English
+            </button>
+</div>
+</div>
+<!-- INFO CALLOUT BOX -->
+<div class="bg-[#E6F0FA] border border-[#003366]/20 rounded-md p-3.5 flex items-start gap-3">
+<div class="text-[#003366] flex-shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+</div>
+<p class="text-xs text-[#003366] leading-relaxed">
+            The user receives an e-mail to sign in and must choose a new password at first login.
+          </p>
+</div>
+</form>
+<!-- Modal Footer Buttons -->
+<div class="border-t border-slate-200 px-6 py-4 flex items-center justify-end gap-3 bg-slate-50/70">
+<button class="border border-slate-300 text-slate-700 bg-white hover:bg-slate-100 rounded-[6px] px-4 py-2 text-sm font-medium transition-colors shadow-xs" type="button">
+          Cancel
+        </button>
+<button class="bg-[#003366] hover:bg-[#00264d] text-white rounded-[6px] px-5 py-2 text-sm font-medium shadow-sm transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-[16px]">person_add</span>
+<span class="">Create user</span>
+</button>
+</div>
+</div>
+</div>
+
+
+</body></html>

@@ -1,0 +1,870 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Secure360 - Organizations Directory (Classic SOC Enterprise)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#00254c',
+              navyActive: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#eaf5ee',
+              successBorder: '#bbf7d0',
+              warning: '#b45309',
+              warningLight: '#fef3c7',
+              warningBorder: '#fde68a'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: Sidebar (240px fixed width, daylight white #FFFFFF, border-r #E0E0E0) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-sfc-border shadow-sm" data-purpose="soc-sidebar">
+<!-- Top Brand & Navigation -->
+<div>
+<!-- Brand Header: Secure360 / Security First Cameroon -->
+<div class="h-16 px-4 border-b border-sfc-border flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-sfc-navy flex items-center justify-center text-white font-bold text-base shadow-sm flex-shrink-0">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[15px] font-bold text-sfc-navy leading-tight tracking-tight truncate">Secure360</h1>
+<p class="text-[11px] text-sfc-textMuted leading-none truncate font-medium mt-0.5">Security First Cameroon</p>
+</div>
+</div>
+<!-- Main Navigation Menu (Strict order) -->
+<nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1">
+<!-- 1. Queue (badge: 4) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#queue">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] font-semibold rounded bg-slate-100 text-slate-700">4</span>
+</a>
+<!-- 2. Incidents (badge: 24) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#incidents">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-sfc-danger text-white">24</span>
+</a>
+<!-- 3. Statistics -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#statistics">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Statistics</span>
+</a>
+<!-- 4. Reports -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#reports">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Reports</span>
+</a>
+<!-- 5. Organizations (ACTIVE item) -->
+<a class="flex items-center justify-between px-3 py-2 rounded-md bg-sfc-primaryLight text-sfc-navy text-[13px] font-semibold border-l-4 border-sfc-navy transition-colors group" href="#organizations">
+<div class="flex items-center gap-2.5 truncate">
+<svg class="w-4 h-4 text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Organizations</span>
+</div>
+<span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[11px] font-bold rounded bg-white text-sfc-navy border border-[#bfdbfe]">8</span>
+</a>
+<!-- 6. Users -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#users">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Users</span>
+</a>
+<!-- 7. Audit log -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#audit-log">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="truncate">Audit log</span>
+</a>
+<!-- 8. Settings -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-[#43474f] hover:text-sfc-navy hover:bg-slate-50 text-[13px] font-medium transition-colors group" href="#settings">
+<svg class="w-4 h-4 text-slate-400 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom of Sidebar: Logged-in user profile snippet -->
+<div class="p-3 border-t border-sfc-border bg-slate-50/70">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5 min-w-0"><div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">RE</div><div class="truncate"><p class="text-[12px] font-semibold text-sfc-textPrimary leading-tight truncate">Rodrigue Essomba</p><p class="text-[10px] text-sfc-textMuted truncate">Admin · Security First Cameroon</p></div></div>
+<button class="p-1.5 text-slate-400 hover:text-sfc-danger hover:bg-white rounded transition-colors" onclick="alert('Signing out of Secure360...')" title="Logout">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white #FFFFFF, border-b #E0E0E0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between z-20" data-purpose="top-header">
+<!-- Left: Contextual breadcrumbs & Subtitle -->
+<div class="flex items-center gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-sfc-textMuted">Organizations</span>
+<span class="text-slate-300">/</span>
+<h2 class="text-[18px] font-bold text-sfc-textPrimary tracking-tight leading-none">Client &amp; Entity Directory</h2>
+</div>
+<p class="text-[11px] font-normal text-sfc-textMuted mt-1">Manage enrolled client organizations, tenant tiers, and authorized contacts</p>
+</div>
+</div>
+<!-- Right: Global Search, Live WAT status, notifications, FR|EN toggle, avatar -->
+<div class="flex items-center gap-3">
+<!-- Global search field -->
+<div class="relative w-64 hidden lg:block">
+<span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</span>
+<input class="w-full h-8 pl-8 pr-3 text-[12px] bg-slate-50 border border-sfc-border rounded-md text-sfc-textPrimary placeholder:text-sfc-textMuted focus:outline-none focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy transition" placeholder="Search organizations, domains, or city..." type="text">
+</div>
+<!-- Green pulse badge: Live (WAT) -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-[11px] font-semibold text-emerald-800 tracking-wide">Live (WAT)</span>
+</div>
+<!-- Notifications bell icon -->
+<button class="relative p-1.5 text-slate-500 hover:text-sfc-navy hover:bg-slate-100 rounded-md transition" title="Notifications">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-sfc-danger rounded-full"></span>
+</button>
+<!-- FR | EN bilingual toggle -->
+<div class="inline-flex rounded-md border border-sfc-border bg-slate-50 p-0.5 text-[11px] font-semibold">
+<button class="px-1.5 py-0.5 rounded bg-white text-sfc-navy shadow-xs font-bold">FR</button>
+<button class="px-1.5 py-0.5 text-sfc-textMuted hover:text-sfc-navy">EN</button>
+</div>
+<!-- User avatar badge JN -->
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs ring-2 ring-slate-100 shadow-xs" title="Rodrigue Essomba">RE</div>
+</div>
+</header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Actions Bar (Export CSV + Add Organization) & Filters -->
+<div class="bg-white border-b border-sfc-border px-6 py-3 space-y-3 z-10" data-purpose="actions-and-filters">
+<!-- Top Action Row -->
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2">
+<h3 class="text-[14px] font-bold text-sfc-textPrimary">Organizations Overview</h3>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-primaryLight text-sfc-navy border border-[#bfdbfe]" id="saved-views-pill">
+        8 Organizations registered
+      </span>
+</div>
+<!-- Right Action Buttons -->
+<div class="flex items-center gap-2.5">
+<!-- Secondary Export CSV Button -->
+<button class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-sfc-border hover:bg-slate-50 text-[#333333] text-[13px] font-medium shadow-xs transition" onclick="alert('Exporting organizations directory to CSV...')">
+<svg class="w-3.5 h-3.5 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Export CSV</span>
+</button>
+<!-- Primary + Add Organization Button -->
+<button class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[6px] bg-sfc-navy hover:bg-sfc-navyHover text-white text-[13px] font-semibold shadow-xs transition" onclick="triggerAddOrgModal()">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<line x1="12" x2="12" y1="5" y2="19"></line>
+<line x1="5" x2="19" y1="12" y2="12"></line>
+</svg>
+<span class="">+ Add organization</span>
+</button>
+</div>
+</div>
+<!-- Filters Row -->
+<div class="flex items-center justify-between gap-3 flex-wrap">
+<div class="flex items-center gap-2.5 flex-wrap">
+<!-- Search Input -->
+<div class="relative w-64">
+<span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="11" cy="11" r="8"></circle>
+<line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+</svg>
+</span>
+<input class="w-full h-8 pl-8 pr-3 text-[12px] bg-slate-50 border border-sfc-border rounded-md text-sfc-textPrimary placeholder:text-sfc-textMuted focus:outline-none focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy transition" id="org-search" placeholder="Filter by name, ID, domain..." type="text">
+</div>
+<!-- Type Filter -->
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-type-select" onchange="applyFilters()">
+<option value="All">All Types</option>
+<option value="Company">Company</option>
+<option value="Public administration">Public administration</option>
+<option value="NGO">NGO</option>
+</select>
+<!-- Plan Filter -->
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-plan-select" onchange="applyFilters()">
+<option value="All">All Plans</option>
+<option value="Basic">Basic</option>
+<option value="Standard">Standard</option>
+<option value="Premium">Premium</option>
+</select>
+<!-- City Filter -->
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-city-select" onchange="applyFilters()">
+<option value="All">All Cities</option>
+<option value="Douala">Douala</option>
+<option value="Yaoundé">Yaoundé</option>
+<option value="Bafoussam">Bafoussam</option>
+<option value="Bamenda">Bamenda</option>
+<option value="Garoua">Garoua</option>
+<option value="Limbé">Limbé</option>
+<option value="Dschang">Dschang</option>
+</select>
+<!-- Status Filter -->
+<select class="h-8 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-0.5 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-status-select" onchange="applyFilters()">
+<option value="All">All Statuses</option>
+<option value="Active">Active</option>
+<option value="Inactive">Inactive</option>
+</select>
+<!-- Clear Filters -->
+<button class="h-8 inline-flex items-center gap-1 px-2 text-[11px] font-medium text-sfc-textMuted hover:text-sfc-danger transition rounded hover:bg-slate-100" id="btn-clear-filters" onclick="clearAllFilters()">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<line x1="18" x2="6" y1="6" y2="18"></line>
+<line x1="6" x2="18" y1="6" y2="18"></line>
+</svg>
+<span class="">Reset</span>
+</button>
+</div>
+</div>
+</div>
+<!-- END: Actions Bar -->
+<!-- BEGIN: Main Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg">
+<div class="max-w-[1440px] mx-auto space-y-4">
+<!-- DATA TABLE CARD -->
+<div class="bg-white rounded-[8px] border border-sfc-border shadow-card-subtle overflow-hidden flex flex-col justify-between" data-purpose="organizations-datatable-card">
+<!-- Empty State Container (hidden by default) -->
+<div class="hidden py-16 px-6 text-center" id="empty-state-container">
+<div class="w-12 h-12 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-sfc-navy mb-3">
+<svg class="w-6 h-6 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-[16px] font-bold text-sfc-textPrimary">No organizations match the selected criteria</h3>
+<p class="text-[12px] text-sfc-textMuted mt-1">Try resetting the filters or add a new organization.</p>
+<div class="mt-4 flex items-center justify-center gap-2">
+<button class="px-3 py-1.5 bg-sfc-navy text-white text-[12px] font-medium rounded" onclick="triggerAddOrgModal()">+ Add organization</button>
+<button class="px-3 py-1.5 bg-white border border-sfc-border text-sfc-textPrimary text-[12px] font-medium rounded hover:bg-slate-50" onclick="clearAllFilters()">Reset Filters</button>
+</div>
+</div>
+<!-- Actual Organizations Table Container -->
+<div class="overflow-x-auto" id="table-scroll-container">
+<table class="w-full text-left border-collapse" id="organizations-table">
+<thead>
+<tr class="h-10 bg-[#f6f8fb] border-b border-sfc-border text-[11px] font-semibold uppercase tracking-wider text-sfc-textMuted select-none">
+<th class="py-2.5 px-4 min-w-[260px]">Organization</th>
+<th class="py-2.5 px-4 w-[130px]">Type</th>
+<th class="py-2.5 px-4 w-[160px]">Sector</th>
+<th class="py-2.5 px-4 w-[110px]">City</th>
+<th class="py-2.5 px-4 w-[100px]">Plan</th>
+<th class="py-2.5 px-4 w-[90px] text-center">Users</th>
+<th class="py-2.5 px-4 w-[120px] text-center">Open Incidents</th>
+<th class="py-2.5 px-4 w-[105px]">Created</th>
+<th class="py-2.5 px-4 w-[95px] text-center">Status</th>
+<th class="py-2.5 px-4 w-[75px] text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-sfc-border text-[13px]" id="organization-rows">
+<!-- 1. Kamdem Distribution SARL -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Douala" data-name="Kamdem Distribution SARL" data-plan="Premium" data-sector="FMCG &amp; Retail" data-status="Active" data-type="Company" onclick="navigateToDetail('ORG-001')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#e6f0fa] border border-[#bfdbfe] flex items-center justify-center font-bold text-sfc-navy text-xs flex-shrink-0">
+        KD
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Kamdem Distribution SARL</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-001</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">kamdem.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Company</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">FMCG &amp; Retail</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Douala</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+      Premium
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      142
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+      6 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">14/01/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-001')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 2. Office Régional des Archives du Centre -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Yaoundé" data-name="Office Régional des Archives du Centre" data-plan="Premium" data-sector="Heritage &amp; Records" data-status="Active" data-type="Public administration" onclick="navigateToDetail('ORG-002')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#eff6ff] border border-[#bfdbfe] flex items-center justify-center font-bold text-blue-800 text-xs flex-shrink-0">
+        OR
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Office Régional des Archives du Centre</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-002</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">archivescentre.gov.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Public administration</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Heritage &amp; Records</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Yaoundé</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+      Premium
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      85
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+      7 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">22/02/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-002')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 3. ONG Santé Pour Tous -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Bafoussam" data-name="ONG Santé Pour Tous" data-plan="Standard" data-sector="Healthcare &amp; Aid" data-status="Active" data-type="NGO" onclick="navigateToDetail('ORG-003')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#f3e8ff] border border-[#d8b4fe] flex items-center justify-center font-bold text-purple-700 text-xs flex-shrink-0">
+        ST
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">ONG Santé Pour Tous</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-003</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">santepourtous.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">NGO</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Healthcare &amp; Aid</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Bafoussam</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+      Standard
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      46
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+      4 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">10/05/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-003')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 4. Bamenda Agro Cooperative -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Bamenda" data-name="Bamenda Agro Cooperative" data-plan="Standard" data-sector="Agribusiness &amp; Farming" data-status="Active" data-type="Company" onclick="navigateToDetail('ORG-004')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#dcfce7] border border-[#bbf7d0] flex items-center justify-center font-bold text-emerald-800 text-xs flex-shrink-0">
+        BA
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Bamenda Agro Cooperative</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-004</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">bamendacoop.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Company</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Agribusiness &amp; Farming</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Bamenda</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+      Standard
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      68
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+      3 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">18/06/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-004')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 5. Garoua Transport Express -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Garoua" data-name="Garoua Transport Express" data-plan="Basic" data-sector="Logistics &amp; Transit" data-status="Active" data-type="Company" onclick="navigateToDetail('ORG-005')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs flex-shrink-0">
+        GT
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Garoua Transport Express</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-005</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">garouatransport.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Company</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Logistics &amp; Transit</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Garoua</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+      Basic
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      34
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+      1 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">09/08/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-005')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 6. Cabinet Ekane & Associés -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Douala" data-name="Cabinet Ekane &amp; Associés" data-plan="Standard" data-sector="Legal" data-status="Active" data-type="Company" onclick="navigateToDetail('ORG-006')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#e0e7ff] border border-[#c7d2fe] flex items-center justify-center font-bold text-indigo-700 text-xs flex-shrink-0">
+        CE
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Cabinet Ekane &amp; Associés</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-006</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">ekane-avocats.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Company</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Legal</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Douala</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+      Standard
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      28
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+      2 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">15/11/2025</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-006')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 7. Lycée Bilingue de Limbé – Administration -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Limbé" data-name="Lycée Bilingue de Limbé – Administration" data-plan="Basic" data-sector="Education" data-status="Active" data-type="Public administration" onclick="navigateToDetail('ORG-007')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-slate-700 text-xs flex-shrink-0">
+        LB
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Lycée Bilingue de Limbé – Administration</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-007</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">gblimbe.edu.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Public administration</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Education</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Limbé</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-300">
+      Basic
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      52
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+      0 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">03/02/2026</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-007')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+<!-- 8. Coopérative Café Ouest -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer org-row odd:bg-white even:bg-[#fafbfe]" data-city="Dschang" data-name="Coopérative Café Ouest" data-plan="Standard" data-sector="Agriculture" data-status="Active" data-type="Company" onclick="navigateToDetail('ORG-008')">
+<td class="py-2 px-4">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded bg-[#fef3c7] border border-[#fde68a] flex items-center justify-center font-bold text-amber-900 text-xs flex-shrink-0">
+        CC
+      </div>
+<div class="min-w-0">
+<div class="font-semibold text-sfc-textPrimary truncate flex items-center gap-1.5">
+<span class="">Coopérative Café Ouest</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200">#ORG-008</span>
+</div>
+<div class="text-[11px] text-sfc-textMuted truncate font-mono">cafeouest.cm</div>
+</div>
+</div>
+</td>
+<td class="py-2 px-4 font-medium text-sfc-textPrimary whitespace-nowrap">Company</td>
+<td class="py-2 px-4 text-sfc-textMuted truncate">Agriculture</td>
+<td class="py-2 px-4 text-sfc-textPrimary truncate">Dschang</td>
+<td class="py-2 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+      Standard
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 text-[12px] font-medium text-sfc-textPrimary bg-slate-100 px-2 py-0.5 rounded">
+<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle></svg>
+      41
+    </span>
+</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+      1 active
+    </span>
+</td>
+<td class="py-2 px-4 text-sfc-textMuted text-[12px] font-mono whitespace-nowrap">19/04/2026</td>
+<td class="py-2 px-4 text-center whitespace-nowrap">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sfc-successLight text-sfc-success border border-[#bbf7d0]">
+<span class="w-1.5 h-1.5 rounded-full bg-sfc-success"></span>
+      Active
+    </span>
+</td>
+<td class="py-2 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+<button class="p-1 text-slate-400 hover:text-sfc-navy hover:bg-slate-100 rounded transition" onclick="navigateToDetail('ORG-008')" title="View details">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- BEGIN: Bottom Pagination & Controls -->
+<div class="px-5 py-3 bg-[#fcfcfd] border-t border-sfc-border flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-sfc-textMuted select-none">
+<!-- Left: Showing range -->
+<div class="flex items-center gap-3">
+<span class="">Showing <strong class="text-sfc-textPrimary font-semibold" id="pagination-start">1</strong>-<strong class="text-sfc-textPrimary font-semibold" id="pagination-end">8</strong> of <strong class="text-sfc-textPrimary font-semibold" id="pagination-total">8</strong> organizations</span>
+<span class="text-slate-300">|</span>
+<!-- Page size selector -->
+<div class="flex items-center gap-1.5">
+<span class="">Per page:</span>
+<select class="h-6 text-[11px] font-medium bg-white border border-sfc-border rounded px-1.5 py-0 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none">
+<option selected="">10 per page</option>
+<option>25 per page</option>
+<option>50 per page</option>
+</select>
+</div>
+</div>
+<!-- Right: Numbered pagination buttons -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1">
+<span class="">Page</span>
+<span class="font-semibold text-sfc-textPrimary">1</span>
+<span class="">of 1</span>
+</div>
+<div class="inline-flex items-center gap-1">
+<button class="h-6 px-2 border border-sfc-border rounded bg-white text-sfc-textPrimary disabled:opacity-40 disabled:cursor-not-allowed text-[11px] font-medium" disabled="">
+        Previous
+      </button>
+<button class="h-6 w-6 rounded bg-sfc-navy text-white text-[11px] font-semibold text-center leading-6 shadow-xs">
+        1
+      </button>
+<button class="h-6 px-2 border border-sfc-border rounded bg-white text-sfc-textPrimary disabled:opacity-40 disabled:cursor-not-allowed text-[11px] font-medium" disabled="">
+        Next
+      </button>
+</div>
+</div>
+</div>
+<!-- END: Bottom Pagination & Controls -->
+</div>
+<!-- END: DATA TABLE CARD -->
+</div>
+</main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- Interactive Client Behaviors -->
+<script>
+  function navigateToDetail(orgId) {
+    alert('Navigating to Organization Details for ' + orgId + ' (Cameroon Client Tenant View)');
+  }
+
+  function triggerAddOrgModal() {
+    alert('Opening "+ Add organization" modal: configure tenant details, Cameroon entity type, domain verification, and SLA plan.');
+  }
+
+  function applyFilters() {
+    const searchVal = (document.getElementById('org-search')?.value || '').toLowerCase().trim();
+    const typeVal = document.getElementById('filter-type-select')?.value || 'All';
+    const planVal = document.getElementById('filter-plan-select')?.value || 'All';
+    const cityVal = document.getElementById('filter-city-select')?.value || 'All';
+    const statusVal = document.getElementById('filter-status-select')?.value || 'All';
+
+    const rows = document.querySelectorAll('.org-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const rowName = row.getAttribute('data-name') || '';
+      const rowCity = row.getAttribute('data-city') || '';
+      const rowType = row.getAttribute('data-type') || '';
+      const rowPlan = row.getAttribute('data-plan') || '';
+      const rowStatus = row.getAttribute('data-status') || '';
+      const rowText = (row.innerText + ' ' + rowCity).toLowerCase();
+
+      const matchesSearch = !searchVal || rowText.includes(searchVal);
+      const matchesType = (typeVal === 'All') || (rowType === typeVal);
+      const matchesPlan = (planVal === 'All') || (rowPlan === planVal);
+      const matchesCity = (cityVal === 'All') || (rowCity === cityVal);
+      const matchesStatus = (statusVal === 'All') || (rowStatus === statusVal);
+
+      if (matchesSearch && matchesType && matchesPlan && matchesCity && matchesStatus) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const pill = document.getElementById('saved-views-pill');
+    const emptyState = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const paginationStart = document.getElementById('pagination-start');
+    const paginationEnd = document.getElementById('pagination-end');
+    const paginationTotal = document.getElementById('pagination-total');
+
+    if (visibleCount === 0) {
+      if (emptyState) emptyState.classList.remove('hidden');
+      if (tableScroll) tableScroll.classList.add('hidden');
+      if (pill) pill.innerText = '0 Organizations registered';
+      if (paginationStart) paginationStart.innerText = '0';
+      if (paginationEnd) paginationEnd.innerText = '0';
+      if (paginationTotal) paginationTotal.innerText = '0';
+    } else {
+      if (emptyState) emptyState.classList.add('hidden');
+      if (tableScroll) tableScroll.classList.remove('hidden');
+      if (pill) pill.innerText = `${visibleCount} Organizations registered`;
+      if (paginationStart) paginationStart.innerText = '1';
+      if (paginationEnd) paginationEnd.innerText = visibleCount;
+      if (paginationTotal) paginationTotal.innerText = visibleCount;
+    }
+  }
+
+  function clearAllFilters() {
+    const search = document.getElementById('org-search');
+    if (search) search.value = '';
+    const typeSelect = document.getElementById('filter-type-select');
+    if (typeSelect) typeSelect.value = 'All';
+    const planSelect = document.getElementById('filter-plan-select');
+    if (planSelect) planSelect.value = 'All';
+    const citySelect = document.getElementById('filter-city-select');
+    if (citySelect) citySelect.value = 'All';
+    const statusSelect = document.getElementById('filter-status-select');
+    if (statusSelect) statusSelect.value = 'All';
+
+    const empty = document.getElementById('empty-state-container');
+    if (empty) empty.classList.add('hidden');
+    const tableScroll = document.getElementById('table-scroll-container');
+    if (tableScroll) tableScroll.classList.remove('hidden');
+
+    applyFilters();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('org-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+  });
+</script>
+
+
+</body></html>

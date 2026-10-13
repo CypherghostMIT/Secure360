@@ -1,0 +1,77 @@
+# Secure360 project rules — run with the Semgrep registry rulesets (see CI and scripts/verify.sh).
+# Each rule encodes a decision from L2 (architecture) or the project security requirements.
+rules:
+  - id: secure360-no-unsafe-raw-sql
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Unsafe raw SQL. Use Prisma queries or the tagged template $queryRaw`...${value}...`,
+      which is parameterised. Never build SQL strings from input (L2 §8.4).
+    pattern-either:
+      - pattern: $DB.$queryRawUnsafe(...)
+      - pattern: $DB.$executeRawUnsafe(...)
+
+  - id: secure360-no-sql-string-building
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: SQL built by concatenation or interpolation. Use parameter placeholders ($1, $2…).
+    pattern-either:
+      - pattern: $DB.query("..." + $X, ...)
+      - pattern: $DB.query(`...${$X}...`, ...)
+
+  - id: secure360-jwt-verify-without-algorithms
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      jwt.verify() must pin the accepted algorithms ({ algorithms: ['HS256'] }) to prevent
+      algorithm-confusion attacks (L2 §8.2).
+    patterns:
+      - pattern: jwt.verify($TOKEN, $KEY, ...)
+      - pattern-not: 'jwt.verify($TOKEN, $KEY, {..., algorithms: $A, ...}, ...)'
+
+  - id: secure360-jwt-decode-for-auth
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: jwt.decode() does not verify the signature. Never use its result for authentication or authorisation.
+    pattern: jwt.decode(...)
+
+  - id: secure360-multer-disk-storage
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Uploads must use multer.memoryStorage(): files are validated (magic bytes), re-encoded and encrypted
+      before anything touches the disk (L2 §8.5).
+    pattern: multer.diskStorage(...)
+
+  - id: secure360-client-filename-in-path
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Never build storage paths from the client file name. Generate a server-side UUID name.
+    pattern-either:
+      - pattern: path.join(..., $F.originalname, ...)
+      - pattern: path.resolve(..., $F.originalname, ...)
+
+  - id: secure360-cors-wildcard-credentials
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: CORS with a wildcard origin is forbidden. The dashboard is same-origin (L2 §4.4); list exact origins if CORS is ever needed.
+    pattern: 'cors({..., origin: "*", ...})'
+
+  - id: secure360-zod-object-not-strict-in-schemas
+    languages: [typescript]
+    severity: WARNING
+    message: Request schemas must use .strict() so unknown fields are rejected (mass-assignment protection).
+    paths:
+      include:
+        - '**/*.schema.ts'
+        - '**/schemas/**'
+    patterns:
+      - pattern: z.object({...})
+      - pattern-not-inside: z.object({...}).strict()
+      - pattern-not-inside: z.object({...}).strict().$M(...)
+
+  - id: secure360-token-in-async-storage
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: Do not store anything in AsyncStorage. Tokens go in expo-secure-store; offline data in encrypted MMKV.
+    pattern: AsyncStorage.setItem(...)

@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Secure360 - Organizations</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-background": "#1b1b1c",
+            "tertiary-fixed": "#ffdbca",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#e5e2e1",
+            "danger": "#cc0000",
+            "background": "#f8f9fc",
+            "outline": "#737780",
+            "primary": "#001e40",
+            "tertiary-container": "#592300",
+            "surface-variant": "#e5e2e1",
+            "on-primary-fixed-variant": "#1f477b",
+            "on-secondary-container": "#5c666e",
+            "primary-fixed-dim": "#a7c8ff",
+            "secondary-fixed-dim": "#bec8d1",
+            "on-tertiary-fixed-variant": "#723610",
+            "on-primary-container": "#799dd6",
+            "on-surface": "#1b1b1c",
+            "error": "#ba1a1a",
+            "on-error-container": "#93000a",
+            "surface-container-low": "#f6f3f2",
+            "on-primary": "#ffffff",
+            "on-primary-fixed": "#001b3c",
+            "surface-tint": "#3a5f94",
+            "outline-variant": "#c3c6d1",
+            "surface-container": "#f0eded",
+            "surface-container-high": "#eae7e7",
+            "error-container": "#ffdad6",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed-dim": "#ffb690",
+            "secondary-fixed": "#dae4ee",
+            "on-tertiary-fixed": "#341100",
+            "on-surface-variant": "#43474f",
+            "inverse-primary": "#a7c8ff",
+            "on-error": "#ffffff",
+            "text-primary": "#1e1e1e",
+            "surface-bright": "#fcf9f8",
+            "surface": "#ffffff",
+            "on-secondary-fixed": "#131d24",
+            "primary-fixed": "#d5e3ff",
+            "surface-dim": "#dcd9d9",
+            "border": "#e0e0e0",
+            "success": "#006633",
+            "text-secondary": "#666666",
+            "tertiary": "#381300",
+            "on-tertiary-container": "#d8885c",
+            "secondary": "#566068",
+            "inverse-on-surface": "#f3f0ef",
+            "inverse-surface": "#303030",
+            "on-secondary-fixed-variant": "#3e4850",
+            "primary-container": "#003366",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#dae4ee"
+          },
+          borderRadius: {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          fontFamily: {
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "label-table-header": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "caption": ["Inter"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased overflow-hidden min-h-screen relative flex">
+<!-- 1. BACKDROP & SHELL -->
+<!-- Left Sidebar (240px wide) -->
+<aside class="w-60 bg-surface border-r border-border h-screen flex flex-col justify-between shrink-0 select-none">
+<div>
+<!-- Brand Logo & Name -->
+<div class="h-16 flex items-center gap-3 px-6 border-b border-border"><div class="w-7 h-7 text-primary flex items-center justify-center shrink-0">
+<svg class="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 0.757355L47.2426 24L24 47.2426L0.757355 24L24 0.757355ZM21 35.7574V12.2426L9.24264 24L21 35.7574Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-primary font-bold text-base tracking-tight leading-none truncate">Secure360</span>
+<span class="text-text-secondary text-caption mt-1 truncate">Security First Cameroon</span>
+</div></div>
+<!-- Navigation items -->
+<nav class="p-3 space-y-1"><a class="flex items-center justify-between px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-secondary" data-icon="inbox">inbox</span>
+    <span class="">Queue</span>
+  </div>
+  <span class="px-1.5 py-0.5 rounded bg-surface-container text-text-secondary text-caption font-semibold">4</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-secondary" data-icon="emergency">emergency</span>
+    <span class="">Incidents</span>
+  </div>
+  <span class="px-1.5 py-0.5 rounded bg-secondary-container text-primary font-semibold text-caption">24</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <span class="material-symbols-outlined text-secondary" data-icon="bar_chart">bar_chart</span>
+  <span class="">Statistics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <span class="material-symbols-outlined text-secondary" data-icon="description">description</span>
+  <span class="">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded bg-secondary-container text-primary font-semibold text-body-sm" href="#">
+  <span class="material-symbols-outlined text-primary" data-icon="corporate_fare">corporate_fare</span>
+  <span class="">Organizations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <span class="material-symbols-outlined text-secondary" data-icon="group">group</span>
+  <span class="">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <span class="material-symbols-outlined text-secondary" data-icon="history_toggle_off">history_toggle_off</span>
+  <span class="">Audit log</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded text-secondary hover:bg-surface-container font-medium text-body-sm transition-colors" href="#">
+  <span class="material-symbols-outlined text-secondary" data-icon="settings">settings</span>
+  <span class="">Settings</span>
+</a></nav>
+</div>
+<!-- Live indicator + User badge -->
+<div class="p-4 border-t border-border space-y-4"><div class="flex items-center gap-2 px-2 py-1 bg-surface-container-low rounded border border-border">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-success"></span>
+</span>
+<span class="text-caption font-semibold text-secondary">Live (WAT)</span>
+<span class="text-caption text-text-secondary ml-auto">UTC+1</span>
+</div>
+<div class="flex items-center gap-3 px-1">
+<div class="relative">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-body-sm">
+  RE
+</div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-success border-2 border-surface"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="text-body-sm font-semibold text-text-primary truncate">Rodrigue Essomba</span>
+<span class="text-caption text-text-secondary truncate">Admin · Security First Cameroon</span>
+</div>
+</div></div>
+</aside>
+<!-- Main Background Container -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden bg-background">
+<!-- Top Bar -->
+<header class="h-16 bg-surface border-b border-border flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-2 text-body-sm">
+<span class="text-secondary font-medium">Organizations</span>
+<span class="text-outline-variant">/</span>
+<span class="text-primary font-semibold">Client &amp; Entity Directory</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Language Switcher -->
+<div class="flex items-center bg-surface-container rounded border border-border px-2.5 py-1 text-caption font-semibold text-text-primary">
+<span class="text-primary font-bold">FR</span>
+<span class="mx-1.5 text-outline-variant">|</span>
+<span class="text-text-secondary">EN</span>
+</div>
+<button class="bg-primary-container text-on-primary px-4 py-2 rounded text-body-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-on-primary" data-icon="add">add</span>
+<span class="">Add Organization</span>
+</button>
+<div class="flex items-center gap-2 border-l border-border pl-4">
+  <div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-semibold text-caption cursor-pointer" title="Rodrigue Essomba">
+    RE
+  </div>
+</div></div>
+</header>
+<!-- Table Directory View (Background Mock) -->
+<div class="p-8 flex-1 overflow-auto">
+<div class="flex justify-between items-center mb-6">
+<div>
+<h1 class="text-headline-md font-bold text-text-primary">Client &amp; Entity Directory</h1>
+<p class="text-body-sm text-text-secondary mt-1">Manage verified organizations registered under Secure360 regional node.</p>
+</div>
+</div>
+<!-- Cameroon Authentic Organizations Table -->
+<div class="bg-surface rounded border border-border shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-border text-label-table-header text-secondary uppercase tracking-wider">
+<th class="px-5 py-3">Organization Name</th>
+<th class="px-5 py-3">Type</th>
+<th class="px-5 py-3">Sector</th>
+<th class="px-5 py-3">City</th>
+<th class="px-5 py-3">Contact</th>
+<th class="px-5 py-3">Plan</th>
+<th class="px-5 py-3">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border text-body-sm">
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Kamdem Distribution SARL</td>
+<td class="px-5 py-3 text-secondary">Company</td>
+<td class="px-5 py-3 text-secondary">Distribution</td>
+<td class="px-5 py-3 text-secondary">Douala</td>
+<td class="px-5 py-3 text-secondary">contact@kamdem.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-caption font-medium">Standard</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Office Régional des Archives du Centre</td>
+<td class="px-5 py-3 text-secondary">Public administration</td>
+<td class="px-5 py-3 text-secondary">Public Sector</td>
+<td class="px-5 py-3 text-secondary">Yaoundé</td>
+<td class="px-5 py-3 text-secondary">archives.centre@gov.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed text-caption font-medium">Premium</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">ONG Santé Pour Tous</td>
+<td class="px-5 py-3 text-secondary">NGO</td>
+<td class="px-5 py-3 text-secondary">Healthcare</td>
+<td class="px-5 py-3 text-secondary">Yaoundé</td>
+<td class="px-5 py-3 text-secondary">info@santepourtous.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-surface-container text-secondary font-medium text-caption">Basic</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Bamenda Agro Cooperative</td>
+<td class="px-5 py-3 text-secondary">Company</td>
+<td class="px-5 py-3 text-secondary">Agribusiness</td>
+<td class="px-5 py-3 text-secondary">Bamenda</td>
+<td class="px-5 py-3 text-secondary">desk@bamenda-agro.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-caption font-medium">Standard</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Garoua Transport Express</td>
+<td class="px-5 py-3 text-secondary">Company</td>
+<td class="px-5 py-3 text-secondary">Logistics</td>
+<td class="px-5 py-3 text-secondary">Garoua</td>
+<td class="px-5 py-3 text-secondary">contact@garouatrans.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-caption font-medium">Standard</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Cabinet Ekane &amp; Associés</td>
+<td class="px-5 py-3 text-secondary">Company</td>
+<td class="px-5 py-3 text-secondary">Legal</td>
+<td class="px-5 py-3 text-secondary">Douala</td>
+<td class="px-5 py-3 text-secondary">juridique@ekane-law.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed text-caption font-medium">Premium</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Lycée Bilingue de Limbé – Administration</td>
+<td class="px-5 py-3 text-secondary">Public administration</td>
+<td class="px-5 py-3 text-secondary">Education</td>
+<td class="px-5 py-3 text-secondary">Limbé</td>
+<td class="px-5 py-3 text-secondary">secretariat@lblimbe.edu.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-surface-container text-secondary font-medium text-caption">Basic</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-secondary font-medium"><span class="w-1.5 h-1.5 rounded-full bg-outline"></span>Inactive</span></td>
+</tr>
+<tr>
+<td class="px-5 py-3 font-semibold text-text-primary">Coopérative Café Ouest</td>
+<td class="px-5 py-3 text-secondary">Company</td>
+<td class="px-5 py-3 text-secondary">Agribusiness</td>
+<td class="px-5 py-3 text-secondary">Bafoussam</td>
+<td class="px-5 py-3 text-secondary">direction@cafe-ouest.cm</td>
+<td class="px-5 py-3"><span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed text-caption font-medium">Standard</span></td>
+<td class="px-5 py-3"><span class="inline-flex items-center gap-1.5 text-success font-medium"><span class="w-1.5 h-1.5 rounded-full bg-success"></span>Active</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- 2. MODAL OVERLAY & CARD -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/40 backdrop-blur-[2px]">
+<div class="bg-surface w-full max-w-[620px] rounded-lg border border-border shadow-2xl flex flex-col overflow-hidden max-h-[942px]">
+<!-- Modal Header -->
+<div class="px-6 py-5 border-b border-border flex items-start justify-between bg-surface">
+<div>
+<h2 class="text-headline-sm font-bold text-text-primary">Add organization</h2>
+<p class="text-body-sm text-text-secondary mt-0.5">Register a new client entity in the Secure360 portal</p>
+</div>
+<button aria-label="Close dialog" class="text-secondary hover:text-text-primary p-1 rounded transition-colors">
+<span class="material-symbols-outlined text-secondary" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Body (Form Fields) -->
+<div class="px-6 py-5 overflow-y-auto space-y-4">
+<!-- Organization Name * -->
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+            Organization Name <span class="text-danger">*</span>
+</label>
+<input class="w-full h-10 px-3.5 rounded bg-surface border border-border text-body-md text-text-primary placeholder:text-text-secondary/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition" placeholder="e.g. Société Camerounaise de Verrerie" type="text" value="Société Camerounaise de Verrerie">
+</div>
+<!-- Type * & Sector -->
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+              Type <span class="text-danger">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3.5 pr-8 rounded bg-surface border border-border text-body-md text-text-primary focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition appearance-none">
+<option selected="" value="Company">Company</option>
+<option value="Public administration">Public administration</option>
+<option value="NGO">NGO</option>
+</select>
+<span class="material-symbols-outlined text-secondary absolute right-2.5 top-2.5 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+              Sector
+            </label>
+<input class="w-full h-10 px-3.5 rounded bg-surface border border-border text-body-md text-text-primary placeholder:text-text-secondary/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition" placeholder="e.g. Distribution, Agribusiness" type="text" value="Manufacturing &amp; Distribution">
+</div>
+</div>
+<!-- City * & Main contact name -->
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+              City <span class="text-danger">*</span>
+</label>
+<div class="relative">
+<select class="w-full h-10 px-3.5 pr-8 rounded bg-surface border border-border text-body-md text-text-primary focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition appearance-none">
+<option selected="" value="Douala">Douala</option>
+<option value="Yaoundé">Yaoundé</option>
+<option value="Bafoussam">Bafoussam</option>
+<option value="Bamenda">Bamenda</option>
+<option value="Garoua">Garoua</option>
+<option value="Limbé">Limbé</option>
+<option value="Dschang">Dschang</option>
+</select>
+<span class="material-symbols-outlined text-secondary absolute right-2.5 top-2.5 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+              Main contact name
+            </label>
+<input class="w-full h-10 px-3.5 rounded bg-surface border border-border text-body-md text-text-primary placeholder:text-text-secondary/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition" placeholder="e.g. Paul Ndoumou" type="text" value="Paul Ndoumou">
+</div>
+</div>
+<!-- Contact e-mail * (Validation Error State) -->
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+            Contact e-mail <span class="text-danger">*</span>
+</label>
+<div class="relative">
+<input class="w-full h-10 px-3.5 pr-10 rounded bg-surface border border-danger text-body-md text-text-primary outline-none focus:ring-1 focus:ring-danger" type="text" value="contact@kamdem-distribution">
+<span class="material-symbols-outlined text-danger absolute right-3 top-2.5" data-icon="error">error</span>
+</div>
+<p class="text-caption text-danger mt-1.5 flex items-center gap-1">
+<span class="">Enter a valid e-mail address.</span>
+</p>
+</div>
+<!-- Contact phone -->
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+            Contact phone
+          </label>
+<div class="flex">
+<span class="inline-flex items-center px-3 rounded-l bg-surface-container border border-r-0 border-border text-body-sm font-medium text-secondary">
+              +237
+            </span>
+<input class="w-full h-10 px-3.5 rounded-r bg-surface border border-border text-body-md text-text-primary placeholder:text-text-secondary/60 focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition" placeholder="6 77 00 11 22" type="text" value="6 77 00 11 22">
+</div>
+</div>
+<!-- Plan * (Segmented Card Picker) -->
+<div>
+<label class="block text-body-sm font-medium text-text-primary mb-1.5">
+            Plan <span class="text-danger">*</span>
+</label>
+<div class="grid grid-cols-3 gap-3">
+<label class="cursor-pointer border border-border rounded p-3 text-center flex flex-col items-center hover:bg-surface-container-low transition">
+<input class="sr-only" name="plan" type="radio" value="Basic">
+<span class="text-body-sm font-semibold text-text-primary">Basic</span>
+<span class="text-caption text-text-secondary mt-0.5">Core Audit</span>
+</label>
+<label class="cursor-pointer border-2 border-primary-container bg-surface-container-low rounded p-3 text-center flex flex-col items-center shadow-xs">
+<input checked="" class="sr-only" name="plan" type="radio" value="Standard">
+<div class="flex items-center gap-1">
+<span class="text-body-sm font-bold text-primary-container">Standard</span>
+<span class="material-symbols-outlined text-primary-container text-[16px]" data-icon="check_circle">check_circle</span>
+</div>
+<span class="text-caption text-secondary mt-0.5">Full Monitoring</span>
+</label>
+<label class="cursor-pointer border border-border rounded p-3 text-center flex flex-col items-center hover:bg-surface-container-low transition">
+<input class="sr-only" name="plan" type="radio" value="Premium">
+<span class="text-body-sm font-semibold text-text-primary">Premium</span>
+<span class="text-caption text-text-secondary mt-0.5">High Governance</span>
+</label>
+</div>
+</div>
+<!-- Status Toggle -->
+<div class="pt-2 border-t border-border flex items-center justify-between">
+<div>
+<p class="text-body-sm font-medium text-text-primary">Active client status</p>
+<p class="text-caption text-text-secondary">Allow organization members to authenticate and access portal</p>
+</div>
+<!-- Toggle switch (ON) -->
+<button aria-checked="true" class="w-11 h-6 bg-primary-container rounded-full relative flex items-center p-0.5 cursor-pointer focus:outline-none" role="switch" type="button">
+<span class="w-5 h-5 bg-surface rounded-full shadow transform translate-x-5 transition-transform"></span>
+</button>
+</div>
+</div>
+<!-- 5. Modal Footer Actions -->
+<div class="px-6 py-4 border-t border-border bg-surface-container-low flex justify-end items-center gap-3">
+<button class="px-4 py-2 border border-border rounded bg-surface text-secondary hover:text-text-primary text-body-sm font-semibold transition hover:bg-surface-container" type="button">
+          Cancel
+        </button>
+<button class="px-5 py-2 rounded bg-primary-container text-on-primary text-body-sm font-semibold transition hover:bg-primary shadow-xs" type="button">
+          Save
+        </button>
+</div>
+</div>
+</div>
+
+
+</body></html>

@@ -1,0 +1,851 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SFC Incident Reporter - Incidents List (Classic SOC Enterprise)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              navyActive: '#0a4078',
+              navyDark: '#001e40',
+              primaryLight: '#e6f0fa',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+              danger: '#cc0000',
+              dangerLight: '#fee2e2',
+              dangerBorder: '#fca5a5',
+              success: '#006633',
+              successLight: '#dcfce7',
+              successBorder: '#bbf7d0',
+              warning: '#e67e22',
+              warningLight: '#ffedd5',
+              warningBorder: '#fed7aa',
+              medium: '#d97706',
+              mediumLight: '#fef3c7',
+              mediumBorder: '#fde68a',
+              purple: '#7c3aed',
+              purpleLight: '#f3e8ff',
+              purpleBorder: '#d8b4fe',
+              blue: '#2563eb',
+              blueLight: '#eff6ff',
+              blueBorder: '#bfdbfe'
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card-hover': '0 4px 12px rgba(0, 51, 102, 0.07)',
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f3f7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9aa1b0;
+    }
+    .custom-checkbox:checked {
+      background-color: #003366;
+      border-color: #003366;
+    }
+  </style>
+</head>
+<body class="h-full flex overflow-hidden antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: Sidebar (240px fixed width, dark SFC Blue #003366) -->
+<aside class="w-[240px] flex-shrink-0 bg-white flex flex-col justify-between select-none z-30 border-r border-sfc-border" data-purpose="soc-sidebar">
+<div>
+<div class="p-4 border-b border-sfc-border">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-white p-0.5 flex items-center justify-center flex-shrink-0 border border-slate-200 overflow-hidden shadow-sm">
+<img alt="Secure360" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7hmMJBK9IP45dlj5k-Ctl2AbrqvhQ_6xcpyMTZy0yNEOUYKwEFGkJq_H0nZMmBGMo8Xvp8sQQFaYVaRk4t4kgZPikmditvYgQ-SCS29IDVtChMWJscKRVEDNj0MyqQEJUosYJV2iusVO-3sjwxhp8M3bIoJEJJaHysbFJS4KgMVXtfF4j41kBt6GgWUqJi4Nt5zmbgVS1P49vrXpel_-loiV2LDdasJN2hhrr6h8kYjgFqNEeKZxQbAIfIZ8JYI1gZ3E">
+</div>
+<div class="min-w-0 flex-1">
+<h1 class="text-[14px] font-bold text-sfc-navy leading-snug truncate tracking-tight">Secure360</h1>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#eff6ff] text-[#2563eb] uppercase tracking-wider border border-[#bfdbfe]">SOC Console</span>
+</div>
+</div>
+</div>
+</div>
+<nav aria-label="Sidebar Navigation" class="mt-3 px-2 space-y-1">
+<a class="flex items-center justify-between px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#queue">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+<span class="truncate">Queue</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-semibold rounded-full bg-slate-200 text-slate-700">4</span>
+</a>
+<a class="relative flex items-center justify-between px-3 py-2 rounded-md bg-[#003366] text-white text-[13px] font-semibold shadow-sm transition-colors group" href="#incidents">
+<div class="flex items-center gap-3 truncate">
+<svg class="w-4 h-4 text-[#93c5fd]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="truncate">Incidents</span>
+</div>
+<span class="inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-bold rounded-full bg-sfc-danger text-white">24</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#statistics">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+<span class="truncate">Statistics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#reports">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<span class="truncate">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#organizations">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+<span class="truncate">Organizations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#users">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+<span class="truncate">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#audit-log">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+<span class="truncate">Audit log</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-md text-slate-700 hover:text-sfc-navy hover:bg-slate-100 text-[13px] font-medium transition-colors group" href="#settings">
+<svg class="w-4 h-4 text-slate-500 group-hover:text-sfc-navy" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+<span class="truncate">Settings</span>
+</a>
+</nav>
+</div>
+<div class="p-3 border-t border-sfc-border space-y-3 bg-slate-50/60">
+<div class="bg-white rounded-lg p-2.5 border border-slate-200 shadow-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<span class="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide">SOC Operational</span>
+</div>
+<span class="text-[10px] text-slate-500 font-mono">WAT Cluster</span>
+</div>
+</div>
+<div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+JN
+</div>
+<div class="truncate">
+<p class="text-[12px] font-semibold text-slate-900 leading-tight truncate">Jean-Paul Nguemo</p>
+<p class="text-[10px] text-slate-500 truncate">SOC Analyst</p>
+</div>
+</div>
+<button class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded-md transition-colors" onclick="window.location.reload();" title="Sign Out">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</div>
+</aside>
+<!-- END: Sidebar -->
+<!-- BEGIN: Main Page Shell -->
+<div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- BEGIN: Sticky Header (64px, crisp white, border-bottom #e0e0e0) -->
+<header class="h-16 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between z-20" data-purpose="top-header">
+<div class="flex items-center gap-4">
+<div>
+<h2 class="text-[24px] font-bold text-[#1e1e1e] tracking-tight leading-none">Incidents</h2>
+<p class="text-[12px] font-normal text-sfc-textMuted mt-1 flex items-center gap-1.5">
+<span class="">Incidents</span>
+<span class="inline-block w-1 h-1 rounded-full bg-slate-400"></span>
+<span class="text-sfc-navy font-medium">All incidents</span>
+</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+</span>
+<span class="text-[11px] font-semibold text-emerald-800">● Live (WAT)</span>
+</div>
+<div class="flex items-center text-[12px] font-medium border border-slate-200 rounded-md overflow-hidden">
+<button class="px-2 py-1 bg-slate-100 text-sfc-navy font-semibold hover:bg-slate-200">FR</button>
+<span class="text-slate-300">|</span>
+<button class="px-2 py-1 bg-white text-slate-600 hover:bg-slate-50">EN</button>
+</div>
+<button aria-label="View notifications" class="relative p-2 rounded-full text-sfc-textMuted hover:text-sfc-navy hover:bg-slate-100 transition focus:outline-none">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-sfc-danger text-[10px] font-bold text-white ring-2 ring-white">3</span>
+</button>
+<div class="h-6 w-px bg-sfc-border"></div>
+<div class="flex items-center gap-2.5 cursor-pointer pl-1 group">
+<div class="relative">
+<div class="w-8 h-8 rounded-full bg-sfc-navy text-white flex items-center justify-center font-bold text-xs shadow-sm">
+JN
+</div>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+</div>
+<div class="text-left hidden sm:block">
+<div class="text-[13px] font-semibold text-sfc-textPrimary group-hover:text-sfc-navy leading-none">Jean-Paul Nguemo</div>
+<div class="text-[11px] text-sfc-textMuted mt-0.5">SOC Analyst</div>
+</div>
+</div>
+<div class="relative inline-block text-left" id="export-dropdown-wrapper">
+<button class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-sfc-navy hover:bg-sfc-navyHover text-white text-[13px] font-medium shadow-sm transition-colors focus:outline-none" id="export-dropdown-btn" onclick="toggleExportMenu()">
+<svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="">Export</span>
+<svg class="w-3.5 h-3.5 text-blue-200 ml-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<div class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 z-50 focus:outline-none" id="export-menu">
+<div class="py-1">
+<a class="group flex items-center px-4 py-2 text-[13px] text-gray-700 hover:bg-slate-50" href="javascript:void(0)" onclick="alert('Exporting CSV...')">
+<svg class="w-4 h-4 mr-2.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<span class="">Export CSV</span>
+</a>
+<a class="group flex items-center px-4 py-2 text-[13px] text-gray-700 hover:bg-slate-50" href="javascript:void(0)" onclick="alert('Exporting PDF report...')">
+<svg class="w-4 h-4 mr-2.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+<span class="">Export PDF report</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Sticky Header -->
+<!-- BEGIN: Sticky Filter Bar (56px, white background, bottom border #e0e0e0) -->
+<div class="h-14 flex-shrink-0 bg-white border-b border-sfc-border px-6 flex items-center justify-between gap-3 z-10" data-purpose="table-filter-bar">
+<div class="flex items-center gap-2.5 flex-wrap">
+<div class="relative w-[280px]">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>
+</span>
+<input class="w-full h-9 pl-9 pr-3 text-[13px] bg-slate-50 border border-sfc-border rounded-md text-sfc-textPrimary placeholder:text-sfc-textMuted focus:outline-none focus:bg-white focus:border-sfc-navy focus:ring-1 focus:ring-sfc-navy transition" id="incidents-search" placeholder="Search reference, title, organization…" type="text">
+</div>
+<div class="relative flex items-center">
+<button class="h-9 inline-flex items-center gap-2 px-2.5 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md text-sfc-textPrimary hover:bg-slate-100 transition">
+<svg class="w-3.5 h-3.5 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+<span class="">Oct 01 - Nov 01, 2026</span>
+<svg class="w-3 h-3 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"></path></svg>
+</button>
+</div>
+<div class="relative">
+<select class="h-9 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-1 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-status-select" onchange="applyFilters()">
+<option value="All">All Statuses</option>
+<option value="New">New</option>
+<option value="Assigned">Assigned</option>
+<option value="In progress">In progress</option>
+<option value="Resolved">Resolved</option>
+<option value="Closed">Closed</option>
+</select>
+</div>
+<div class="relative">
+<select class="h-9 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-1 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-severity-select" onchange="applyFilters()">
+<option value="All">All Severities</option>
+<option value="Low">Low</option>
+<option value="Moderate">Moderate</option>
+<option value="High">High</option>
+<option value="Critical">Critical</option>
+</select>
+</div>
+<div class="relative">
+<select class="h-9 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-1 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-category-select" onchange="applyFilters()">
+<option value="All">All Categories</option>
+<option value="E-mail or SMS">E-mail or SMS</option>
+<option value="My computer">My computer</option>
+<option value="Accounts &amp; passwords">Accounts &amp; passwords</option>
+<option value="Internet &amp; network">Internet &amp; network</option>
+<option value="Fraud &amp; scams">Fraud &amp; scams</option>
+<option value="My phone">My phone</option>
+<option value="Office &amp; equipment">Office &amp; equipment</option>
+<option value="Service unavailable">Service unavailable</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="relative">
+<select class="h-9 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-1 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-org-select" onchange="applyFilters()">
+<option value="All">All Organizations</option>
+<option value="Kamdem Distribution SARL">Kamdem Distribution SARL</option>
+<option value="Office Régional des Archives du Centre">Office Régional des Archives du Centre</option>
+<option value="ONG Santé Pour Tous">ONG Santé Pour Tous</option>
+<option value="Bamenda Agro Cooperative">Bamenda Agro Cooperative</option>
+<option value="Garoua Transport Express">Garoua Transport Express</option>
+</select>
+</div>
+<div class="relative">
+<select class="h-9 text-[12px] font-medium bg-slate-50 border border-sfc-border rounded-md pl-2.5 pr-7 py-1 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" id="filter-assignee-select" onchange="applyFilters()">
+<option value="All">All Assignees</option>
+<option value="Jean-Paul Nguemo">Jean-Paul Nguemo</option>
+<option value="Estelle Mbarga">Estelle Mbarga</option>
+<option value="Yannick Fotso">Yannick Fotso</option>
+<option value="Unassigned">Unassigned</option>
+</select>
+</div>
+<button class="h-9 inline-flex items-center gap-1 px-2 text-[12px] font-medium text-sfc-textMuted hover:text-sfc-danger transition rounded hover:bg-slate-100" id="btn-clear-filters" onclick="clearAllFilters()">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+<span class="">Clear</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-semibold bg-slate-100 text-sfc-navy border border-slate-200" id="saved-views-pill">
+245 Incidents found
+</span>
+</div>
+</div>
+<!-- END: Sticky Filter Bar -->
+<!-- BEGIN: Batch Selection Bar (Active/Previewable on multi-selection) -->
+<div class="hidden h-11 bg-[#001e40] text-white px-6 flex items-center justify-between z-10 transition-all duration-200" id="batch-selection-bar">
+<div class="flex items-center gap-4 text-[13px]">
+<div class="flex items-center gap-2 font-semibold">
+<span class="w-2 h-2 rounded-full bg-blue-400"></span>
+<span id="selected-count-badge" class="">3</span>
+<span class="">incidents selected</span>
+</div>
+<span class="text-slate-400">|</span>
+<div class="flex items-center gap-2">
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium bg-[#0a4078] hover:bg-[#164e87] rounded transition" onclick="alert('Bulk Assigning selected incidents...')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+<circle cx="8.5" cy="7" r="4"></circle>
+<line x1="20" x2="20" y1="8" y2="14"></line>
+<line x1="23" x2="17" y1="11" y2="11"></line>
+</svg>
+<span class="">Bulk Assign</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium bg-[#0a4078] hover:bg-[#164e87] rounded transition" onclick="alert('Bulk Status update modal opening...')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+</svg>
+<span class="">Bulk Status</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[12px] font-medium bg-[#0a4078] hover:bg-[#164e87] rounded transition" onclick="alert('Exporting selected incidents dataset...')">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+</svg>
+<span class="">Bulk Export</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-[12px] text-slate-300 hover:text-white underline" onclick="deselectAllRows()">
+        Deselect All
+      </button>
+</div>
+</div>
+<!-- END: Batch Selection Bar -->
+<!-- BEGIN: Main Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto p-6 bg-sfc-bg">
+<div class="max-w-[1440px] mx-auto space-y-4">
+<!-- DATA TABLE CARD -->
+<div class="bg-white rounded-[12px] border border-sfc-border shadow-card-subtle overflow-hidden flex flex-col justify-between" data-purpose="incidents-datatable-card">
+<!-- Skeleton Loading Simulation Container (hidden by default) -->
+<div class="hidden p-6 space-y-4 animate-pulse" id="skeleton-container">
+<div class="h-8 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+<div class="h-10 bg-slate-100 rounded w-full"></div>
+</div>
+<!-- Empty State Simulation Container (hidden by default) -->
+<div class="hidden py-16 px-6 text-center" id="empty-state-container">
+<div class="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center text-sfc-navy mb-4">
+<svg class="w-8 h-8 text-sfc-textMuted" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="text-[17px] font-bold text-sfc-textPrimary">No incidents match your filters</h3>
+<p class="text-[13px] text-sfc-textMuted mt-1 max-w-md mx-auto">Try broadening your search query or adjusting your severity, status, or organization criteria.</p>
+<div class="mt-5">
+<button class="inline-flex items-center gap-2 px-4 py-2 bg-sfc-navy hover:bg-sfc-navyHover text-white text-[13px] font-semibold rounded-md shadow-sm transition" onclick="clearAllFilters()">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Clear Filters</span>
+</button>
+</div>
+</div>
+<!-- Actual Table Container -->
+<div class="overflow-x-auto" id="table-scroll-container">
+<table class="w-full text-left border-collapse" id="incidents-table">
+<thead><tr class="h-12 bg-[#f6f8fb] border-b border-sfc-border text-[12px] font-semibold uppercase tracking-wider text-sfc-textMuted select-none">
+<th class="py-3 px-4 w-[48px] text-center">
+<input class="custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" id="th-select-all" onchange="toggleSelectAll(this)" type="checkbox">
+</th>
+<th class="py-3 px-4 w-[140px]">REFERENCE</th>
+<th class="py-3 px-4 min-w-[260px]">TITLE</th>
+<th class="py-3 px-4 w-[170px]">ORGANIZATION</th>
+<th class="py-3 px-4 w-[140px]">CATEGORY</th>
+<th class="py-3 px-4 w-[100px]">SEVERITY</th>
+<th class="py-3 px-4 w-[110px]">STATUS</th>
+<th class="py-3 px-4 w-[140px]">ASSIGNED TO</th>
+<th class="py-3 px-4 w-[110px]">REPORTED</th>
+<th class="py-3 px-4 w-[90px] text-right">SLA</th>
+</tr></thead>
+<tbody class="divide-y divide-sfc-border text-[13px]" id="incident-rows"><!-- Row 1 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Unassigned" data-category="E-mail or SMS" data-org="Kamdem Distribution SARL" data-severity="Critical" data-status="New">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001248</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Fraudulent SMS pretending to be MTN MoMo</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Kamdem Distribution SARL</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">E-mail or SMS</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">Critical</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#E6F0FA] text-[#003366] border border-[#003366]/20">New</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textMuted italic text-[12px]">Unassigned</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">11:05 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-semibold text-rose-600">00:25:00</td>
+</tr>
+<!-- Row 2 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Jean-Paul Nguemo" data-category="Fraud &amp; scams" data-org="Kamdem Distribution SARL" data-severity="Critical" data-status="Assigned">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001247</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Unauthorised Orange Money withdrawal</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Kamdem Distribution SARL</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">Fraud &amp; scams</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">Critical</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFEBF7] text-[#5B4B9A] border border-[#5B4B9A]/20">Assigned</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Jean-Paul Nguemo</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">10:48 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-semibold text-amber-700">00:42:00</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Estelle Mbarga" data-category="My phone" data-org="Garoua Transport Express" data-severity="High" data-status="In progress">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001246</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Sudden loss of mobile network (suspected SIM swap)</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Garoua Transport Express</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">My phone</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FDF0E7] text-[#D35400] border border-[#D35400]/20">High</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">In progress</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Estelle Mbarga</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">10:15 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-medium text-slate-700">01:15:00</td>
+</tr>
+<!-- Row 4 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Yannick Fotso" data-category="E-mail or SMS" data-org="Office Régional des Archives du Centre" data-severity="High" data-status="In progress">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001245</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Phishing e-mail with fake invoice</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Office Régional des Archives du Centre</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">E-mail or SMS</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FDF0E7] text-[#D35400] border border-[#D35400]/20">High</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">In progress</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Yannick Fotso</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">09:50 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-medium text-slate-700">01:40:00</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Jean-Paul Nguemo" data-category="Fraud &amp; scams" data-org="Bamenda Agro Cooperative" data-severity="Moderate" data-status="Assigned">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001244</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Fake tax administration website reported</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Bamenda Agro Cooperative</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">Fraud &amp; scams</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">Moderate</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFEBF7] text-[#5B4B9A] border border-[#5B4B9A]/20">Assigned</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Jean-Paul Nguemo</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">09:12 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-medium text-slate-700">03:18:00</td>
+</tr>
+<!-- Row 6 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Estelle Mbarga" data-category="Office &amp; equipment" data-org="Kamdem Distribution SARL" data-severity="Critical" data-status="In progress">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001243</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Lost laptop in public transport (Douala)</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Kamdem Distribution SARL</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">Office &amp; equipment</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FDECEC] text-[#CC0000] border border-[#CC0000]/20">Critical</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">In progress</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Estelle Mbarga</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">08:40 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-semibold text-rose-600">00:50:00</td>
+</tr>
+<!-- Row 7 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Yannick Fotso" data-category="My computer" data-org="ONG Santé Pour Tous" data-severity="Moderate" data-status="In progress">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001242</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Computer very slow after opening an attachment</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">ONG Santé Pour Tous</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">My computer</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">Moderate</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">In progress</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Yannick Fotso</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">08:15 WAT</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-mono text-[12px] font-medium text-slate-700">04:10:00</td>
+</tr>
+<!-- Row 8 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Jean-Paul Nguemo" data-category="Internet &amp; network" data-org="Garoua Transport Express" data-severity="Low" data-status="Resolved">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001241</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Suspicious Wi-Fi network popup at business hotel</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Garoua Transport Express</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">Internet &amp; network</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EAF5EE] text-[#006633] border border-[#006633]/20">Low</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EAF5EE] text-[#006633] border border-[#006633]/20">Resolved</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Jean-Paul Nguemo</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">Yesterday, 16:30</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-medium text-emerald-700 text-[12px]">Met</td>
+</tr>
+<!-- Row 9 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Estelle Mbarga" data-category="My phone" data-org="Bamenda Agro Cooperative" data-severity="Moderate" data-status="Resolved">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001240</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Suspicious instant loan app installed on company phone</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Bamenda Agro Cooperative</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">My phone</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#FEF5E7] text-[#B26A00] border border-[#B26A00]/20">Moderate</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#EAF5EE] text-[#006633] border border-[#006633]/20">Resolved</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Estelle Mbarga</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">Yesterday, 14:10</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-medium text-emerald-700 text-[12px]">Met</td>
+</tr>
+<!-- Row 10 -->
+<tr class="h-12 hover:bg-[#f0f4f8] transition-colors cursor-pointer incident-row odd:bg-white even:bg-[#f9fafc]" data-assignee="Yannick Fotso" data-category="Service unavailable" data-org="Office Régional des Archives du Centre" data-severity="Low" data-status="Closed">
+<td class="py-2.5 px-4 text-center" onclick="event.stopPropagation()">
+<input class="row-checkbox custom-checkbox w-4 h-4 text-sfc-navy rounded border-gray-300 focus:ring-sfc-navy cursor-pointer" onchange="updateSelectedCount()" type="checkbox">
+</td>
+<td class="py-2.5 px-4 font-mono font-semibold text-sfc-navy whitespace-nowrap">SFC-2026-001239</td>
+<td class="py-2.5 px-4 font-medium text-sfc-textPrimary truncate max-w-xs">Public portal service unavailable during payroll window</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary truncate">Office Régional des Archives du Centre</td>
+<td class="py-2.5 px-4 text-sfc-textMuted text-[12px] truncate">Service unavailable</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-[#EAF5EE] text-[#006633] border border-[#006633]/20">Low</span>
+</td>
+<td class="py-2.5 px-4 whitespace-nowrap">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#F0F0F0] text-[#666666] border border-[#CCCCCC]">Closed</span>
+</td>
+<td class="py-2.5 px-4 text-sfc-textPrimary text-[12px] truncate">Yannick Fotso</td>
+<td class="py-2.5 px-4 text-sfc-textMuted font-mono text-[12px] whitespace-nowrap">12/10/2026</td>
+<td class="py-2.5 px-4 text-right whitespace-nowrap font-medium text-emerald-700 text-[12px]">Met</td>
+</tr></tbody>
+</table>
+</div>
+<!-- BEGIN: Bottom Pagination & Controls -->
+<div class="px-5 py-3.5 bg-[#fcfcfd] border-t border-sfc-border flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-sfc-textMuted select-none">
+<!-- Left: Showing range -->
+<div class="flex items-center gap-3">
+<span class="">Showing <strong class="text-sfc-textPrimary font-semibold" id="pagination-start">1</strong>-<strong class="text-sfc-textPrimary font-semibold" id="pagination-end">10</strong> of <strong class="text-sfc-textPrimary font-semibold" id="pagination-total">245</strong> incidents</span>
+<span class="text-slate-300">|</span>
+<!-- Page size selector -->
+<div class="flex items-center gap-1.5">
+<span class="">Per page:</span>
+<select class="h-7 text-[12px] font-medium bg-white border border-sfc-border rounded px-2 py-0 text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none">
+<option selected="">20 per page</option>
+<option>50 per page</option>
+<option>100 per page</option>
+</select>
+</div>
+</div>
+<!-- Right: Page Jump input & Numbered pagination buttons -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5">
+<span class="">Page</span>
+<input class="h-7 w-12 text-center text-[12px] font-semibold border border-sfc-border rounded bg-white text-sfc-textPrimary focus:ring-1 focus:ring-sfc-navy focus:border-sfc-navy focus:outline-none" max="13" min="1" type="number" value="1">
+<span class="">of 13</span>
+</div>
+<div class="inline-flex items-center gap-1">
+<button class="h-7 px-2.5 border border-sfc-border rounded bg-white text-sfc-textPrimary disabled:opacity-40 disabled:cursor-not-allowed font-medium transition" disabled="">
+                Previous
+              </button>
+<button class="h-7 w-7 rounded bg-sfc-navy text-white font-semibold text-center leading-7 shadow-xs">
+                1
+              </button>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+                2
+              </button>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+                3
+              </button>
+<span class="px-1 text-slate-400">...</span>
+<button class="h-7 w-7 rounded bg-white border border-sfc-border text-sfc-textPrimary hover:bg-slate-100 font-medium text-center leading-7 transition">
+                13
+              </button>
+<button class="h-7 px-2.5 border border-sfc-border rounded bg-white text-sfc-textPrimary hover:bg-slate-100 font-medium transition">
+                Next
+              </button>
+</div>
+</div>
+</div>
+<!-- END: Bottom Pagination & Controls -->
+</div>
+<!-- END: DATA TABLE CARD -->
+</div>
+</main>
+<!-- END: Main Scrollable Content Area -->
+</div>
+<!-- END: Main Page Shell -->
+<!-- BEGIN: Interactive Client Behaviors -->
+<script>
+  // Export Dropdown menu toggle
+  function toggleExportMenu() {
+    const menu = document.getElementById('export-menu');
+    menu.classList.toggle('hidden');
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    const btn = document.getElementById('export-dropdown-btn');
+    const menu = document.getElementById('export-menu');
+    if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+
+  // Table status dropdown triggers
+  function toggleRowStatusDropdown(id) {
+    // close others
+    document.querySelectorAll('[id^="status-drop-"]').forEach(el => {
+      if (el.id !== id) el.classList.add('hidden');
+    });
+    const target = document.getElementById(id);
+    if (target) target.classList.toggle('hidden');
+  }
+
+  function changeRowStatus(btnEl, newStatus) {
+    const dropdown = btnEl.closest('.relative');
+    const triggerBtn = dropdown.querySelector('button');
+    const row = btnEl.closest('.incident-row');
+
+    row.setAttribute('data-status', newStatus);
+
+    let colorClass = 'bg-[#ffedd5] text-[#c2410c] border-[#fed7aa]';
+    if (newStatus === 'Containment') colorClass = 'bg-[#f3e8ff] text-[#7c3aed] border-[#d8b4fe]';
+    if (newStatus === 'Eradication') colorClass = 'bg-[#eff6ff] text-[#2563eb] border-[#bfdbfe]';
+    if (newStatus === 'Resolved') colorClass = 'bg-[#dcfce7] text-[#15803d] border-[#bbf7d0]';
+    if (newStatus === 'New') colorClass = 'bg-blue-50 text-blue-800 border-blue-200';
+
+    triggerBtn.className = `inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${colorClass} border hover:shadow-sm`;
+    triggerBtn.querySelector('span').innerText = newStatus;
+
+    dropdown.querySelector('div[id^="status-drop-"]').classList.add('hidden');
+  }
+
+  // Multi-selection checkboxes
+  function toggleSelectAll(masterCheckbox) {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = masterCheckbox.checked;
+    });
+    updateSelectedCount();
+  }
+
+  function updateSelectedCount() {
+    const selected = document.querySelectorAll('.row-checkbox:checked').length;
+    const batchBar = document.getElementById('batch-selection-bar');
+    const countBadge = document.getElementById('selected-count-badge');
+    const masterCb = document.getElementById('th-select-all');
+
+    if (selected > 0) {
+      batchBar.classList.remove('hidden');
+      countBadge.innerText = selected;
+    } else {
+      batchBar.classList.add('hidden');
+      masterCb.checked = false;
+    }
+  }
+
+  function deselectAllRows() {
+    document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+    const master = document.getElementById('th-select-all');
+    if (master) master.checked = false;
+    updateSelectedCount();
+  }
+
+  // Filtering functionality
+  function applyFilters() {
+    const searchVal = (document.getElementById('incidents-search')?.value || '').toLowerCase().trim();
+    const statusVal = document.getElementById('filter-status-select')?.value || 'All';
+    const severityVal = document.getElementById('filter-severity-select')?.value || 'All';
+    const orgVal = document.getElementById('filter-org-select')?.value || 'All';
+
+    const rows = document.querySelectorAll('.incident-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const rowSev = row.getAttribute('data-severity');
+      const rowStat = row.getAttribute('data-status');
+      const rowOrg = row.getAttribute('data-org');
+      const rowText = row.innerText.toLowerCase();
+
+      const matchesSearch = !searchVal || rowText.includes(searchVal);
+      const matchesStatus = (statusVal === 'All') || (rowStat === statusVal);
+      const matchesSeverity = (severityVal === 'All') || (rowSev === severityVal);
+      const matchesOrg = (orgVal === 'All') || (rowOrg === orgVal);
+
+      if (matchesSearch && matchesStatus && matchesSeverity && matchesOrg) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const pill = document.getElementById('saved-views-pill');
+    const emptyState = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const paginationStart = document.getElementById('pagination-start');
+    const paginationEnd = document.getElementById('pagination-end');
+    const paginationTotal = document.getElementById('pagination-total');
+
+    if (visibleCount === 0) {
+      emptyState.classList.remove('hidden');
+      tableScroll.classList.add('hidden');
+      if (pill) pill.innerText = '0 Incidents found';
+      if (paginationStart) paginationStart.innerText = '0';
+      if (paginationEnd) paginationEnd.innerText = '0';
+      if (paginationTotal) paginationTotal.innerText = '0';
+    } else {
+      emptyState.classList.add('hidden');
+      tableScroll.classList.remove('hidden');
+      if (pill) pill.innerText = `${visibleCount} Incidents found`;
+      if (paginationStart) paginationStart.innerText = '1';
+      if (paginationEnd) paginationEnd.innerText = visibleCount;
+      if (paginationTotal) paginationTotal.innerText = visibleCount === 10 ? '245' : visibleCount;
+    }
+  }
+
+  function clearAllFilters() {
+    const search = document.getElementById('incidents-search');
+    if (search) search.value = '';
+    const stat = document.getElementById('filter-status-select');
+    if (stat) stat.value = 'All';
+    const sev = document.getElementById('filter-severity-select');
+    if (sev) sev.value = 'All';
+    const org = document.getElementById('filter-org-select');
+    if (org) org.value = 'All';
+
+    // Hide demo containers if active
+    const empty = document.getElementById('empty-state-container');
+    if (empty) empty.classList.add('hidden');
+    const skeleton = document.getElementById('skeleton-container');
+    if (skeleton) skeleton.classList.add('hidden');
+    const tableScroll = document.getElementById('table-scroll-container');
+    if (tableScroll) tableScroll.classList.remove('hidden');
+
+    applyFilters();
+  }
+
+  // Demo simulation toggles
+  function toggleSkeletonDemo() {
+    const skeleton = document.getElementById('skeleton-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const empty = document.getElementById('empty-state-container');
+
+    empty.classList.add('hidden');
+    if (skeleton.classList.contains('hidden')) {
+      skeleton.classList.remove('hidden');
+      tableScroll.classList.add('hidden');
+    } else {
+      skeleton.classList.add('hidden');
+      tableScroll.classList.remove('hidden');
+    }
+  }
+
+  function toggleEmptyStateDemo() {
+    const empty = document.getElementById('empty-state-container');
+    const tableScroll = document.getElementById('table-scroll-container');
+    const skeleton = document.getElementById('skeleton-container');
+    const pill = document.getElementById('saved-views-pill');
+
+    skeleton.classList.add('hidden');
+    if (empty.classList.contains('hidden')) {
+      empty.classList.remove('hidden');
+      tableScroll.classList.add('hidden');
+      if (pill) pill.innerText = '0 Incidents found';
+    } else {
+      empty.classList.add('hidden');
+      tableScroll.classList.remove('hidden');
+      applyFilters();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('incidents-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', applyFilters);
+    }
+  });
+</script>
+<!-- END: Interactive Client Behaviors -->
+
+
+
+
+</body></html>

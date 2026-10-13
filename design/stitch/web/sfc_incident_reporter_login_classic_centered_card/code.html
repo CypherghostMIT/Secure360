@@ -1,0 +1,145 @@
+<!DOCTYPE html><html class="h-full" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SFC Incident Reporter - Technician Login</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            sfc: {
+              navy: '#003366',
+              navyHover: '#002244',
+              bg: '#f8f9fc',
+              border: '#e0e0e0',
+              textPrimary: '#1e1e1e',
+              textMuted: '#666666',
+            }
+          },
+          boxShadow: {
+            'card-subtle': '0 4px 20px -2px rgba(0, 51, 102, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Form Controls and Focus States -->
+<style data-purpose="custom-overrides">
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #f8f9fc;
+    }
+    .form-input-custom:focus {
+      outline: none;
+      border-color: #003366;
+      box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.15);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col justify-center items-center p-4 antialiased text-sfc-textPrimary bg-sfc-bg">
+<!-- BEGIN: MainContainer -->
+<main class="w-full flex items-center justify-center">
+<!-- BEGIN: LoginCard -->
+<div class="w-full max-w-[400px] bg-white rounded-[12px] border border-sfc-border p-6 shadow-card-subtle" data-purpose="login-card">
+<!-- BEGIN: CardHeader -->
+<header class="flex flex-col items-center mb-6">
+<!-- Prominent Brand Logo -->
+<div class="h-16 w-auto flex items-center justify-center mb-3">
+<img alt="Secure360 - Security First Cameroon" class="h-16 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVzXuGaxb-8fw6gWohLNZZW_R4B5awkAW_4f_E9Sv8w2U2KR2kt4T48r_jxuZ-nrjEi6fufVw9VreJtYPe-aViTPQsSnBIshFUifGVGoo_2Q1oPgZPzqHh9OVieqrktOWEVMXm0MU-YHrBOfFU2etJvLNjH80FIIV7gGnPKvFvmyPU0ZpVDzR4nah0jzzL4uyVWzPyHMEAwOhAEJro1jC01ZSN3lA3YLWfK3wRjNQxF119wnaC4KM3fHtze1IocWmsb2s">
+</div>
+<!-- Platform Title -->
+<h1 class="text-[20px] font-bold text-sfc-textPrimary tracking-tight text-center">Secure360</h1>
+<!-- Role/Subtitle Indicator -->
+<p class="text-[13px] font-normal text-sfc-textMuted text-center mt-0.5">SFC analyst &amp; administrator console</p>
+</header>
+<!-- END: CardHeader -->
+<!-- BEGIN: LoginForm -->
+<form class="space-y-5" data-purpose="auth-form" onsubmit="event.preventDefault();">
+<!-- Email Field Group -->
+<div class="space-y-1.5">
+<label class="block text-[13px] font-semibold text-sfc-textPrimary" for="work-email">Work e-mail</label>
+<div class="relative flex items-center">
+<!-- Mail Icon -->
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<input class="form-input-custom w-full h-[40px] pl-9 pr-3 rounded-[8px] border border-sfc-border text-[14px] text-sfc-textPrimary placeholder:text-sfc-textMuted placeholder:opacity-60 transition duration-150" id="work-email" name="email" placeholder="analyst@sfc.cm" required="" type="email">
+</div>
+</div>
+<!-- Password Field Group -->
+<div class="space-y-1.5">
+<div class="flex justify-between items-center">
+<label class="block text-[13px] font-semibold text-sfc-textPrimary" for="account-password">
+              Password
+            </label>
+</div>
+<div class="relative flex items-center">
+<!-- Lock Icon -->
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sfc-textMuted">
+<svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<input class="form-input-custom w-full h-[40px] pl-9 pr-10 rounded-[8px] border border-sfc-border text-[14px] text-sfc-textPrimary placeholder:text-sfc-textMuted placeholder:opacity-60 transition duration-150" id="account-password" name="password" placeholder="••••••••••••" required="" type="password">
+<!-- Password Toggle Visibility Button -->
+<button aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3 flex items-center text-sfc-textMuted hover:text-sfc-navy transition focus:outline-none" id="toggle-password-btn" type="button">
+<!-- Eye Open Icon -->
+<svg class="h-[18px] w-[18px]" fill="none" id="icon-eye-open" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<!-- Eye Closed Icon (Hidden initially) -->
+<svg class="h-[18px] w-[18px] hidden" fill="none" id="icon-eye-closed" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+</div>
+<!-- Primary Submit Button -->
+<div class="flex items-center gap-2 p-2.5 rounded-[6px] bg-[#FFF5F5] border border-[#FFD0D0] text-[#CC0000] text-[13px]" role="alert"><svg class="w-4 h-4 flex-shrink-0 text-[#CC0000]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg><span class="font-medium leading-tight">E-mail or password incorrect.</span></div><button class="w-full h-[40px] bg-sfc-navy text-white text-[14px] font-semibold hover:bg-sfc-navyHover active:scale-[0.99] transition duration-150 shadow-sm flex items-center justify-center rounded-[6px]" type="submit" style="opacity: 0;">Sign in</button>
+<!-- Forgot Password Link -->
+<div class="text-center pt-0.5">
+<a class="text-[13px] hover:text-sfc-navy hover:underline transition font-medium text-sfc-navy" href="#forgot-password" style="opacity: 0;">Forgot password?</a>
+</div>
+</form>
+<!-- END: LoginForm -->
+<!-- BEGIN: CardFooter -->
+<footer class="mt-6 pt-5 border-t border-sfc-border/80 flex flex-col items-center justify-center gap-2" data-purpose="card-footer"><div class="flex items-center gap-2 text-[12px] font-medium text-sfc-textMuted"><button type="button" class="hover:text-sfc-navy transition font-semibold text-sfc-navy underline cursor-pointer" title="Français">FR</button><span class="text-sfc-border">|</span><button type="button" class="hover:text-sfc-navy transition font-semibold text-sfc-textMuted cursor-pointer" title="English">EN</button></div><p class="text-[11px] font-normal text-sfc-textMuted tracking-wide text-center">Security First Cameroon</p></footer>
+<!-- END: CardFooter -->
+</div>
+<!-- END: LoginCard -->
+</main>
+<!-- END: MainContainer -->
+<!-- BEGIN: Script Interactions -->
+<script data-purpose="password-visibility-toggle">
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggleBtn = document.getElementById('toggle-password-btn');
+      const passwordInput = document.getElementById('account-password');
+      const eyeOpenIcon = document.getElementById('icon-eye-open');
+      const eyeClosedIcon = document.getElementById('icon-eye-closed');
+
+      if (toggleBtn && passwordInput && eyeOpenIcon && eyeClosedIcon) {
+        toggleBtn.addEventListener('click', () => {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          
+          eyeOpenIcon.classList.toggle('hidden', isPassword);
+          eyeClosedIcon.classList.toggle('hidden', !isPassword);
+        });
+      }
+    });
+  </script>
+<!-- END: Script Interactions -->
+
+
+</body></html>
