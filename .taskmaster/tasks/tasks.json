@@ -1,0 +1,800 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Initialize shared package with Zod schemas and TypeScript configuration",
+        "description": "Create packages/shared workspace with Zod schemas as single source of truth, TypeScript types, error codes, category codes (34 categories from L1 Table 12), i18n keys (fr/en), and design tokens including WCAG AA severity colours. Requirements: BF02-BF05, BNF07.",
+        "details": "1. Create packages/shared/package.json with name '@secure360/shared', exports field for ESM/CJS.\n2. Create tsconfig.json extending tsconfig.base.json with composite:true, outDir:dist.\n3. Create src/schemas/ with Zod schemas using .strict():\n   - auth.schema.ts: LoginInput, VerifyTotpInput, RefreshInput, ResetPasswordInput\n   - incident.schema.ts: CreateIncidentInput, UpdateIncidentInput, IncidentFilters\n   - user.schema.ts: CreateUserInput, UpdateUserInput\n   - organization.schema.ts: CreateOrgInput\n   - message.schema.ts: CreateMessageInput\n4. Create src/types/ inferring types from Zod schemas: export type LoginInput = z.infer<typeof LoginInputSchema>\n5. Create src/constants/error-codes.ts: AUTH_INVALID_CREDENTIALS, AUTH_2FA_REQUIRED, TENANT_FORBIDDEN, etc. per L2 Table 7.\n6. Create src/constants/categories.ts: 9 groups, 34 categories with fr/en labels, default severities (L1 Table 12 + SIM swap MOB-02).\n7. Create src/i18n/: fr.json and en.json with all UI strings, shared between mobile and web.\n8. Create src/tokens/: colors.ts (#8F5600 for Moderate text, #B34700 for High text), spacing.ts, typography.ts.\n9. Create src/index.ts barrel export.\n10. Update root tsconfig.json references array to include packages/shared.",
+        "testStrategy": "Unit tests with Vitest: validate Zod schemas accept valid input, reject invalid input; verify all 34 categories exist with both fr and en labels; verify design token values match specification; verify TypeScript compilation produces correct .d.ts files.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create packages/shared workspace with package.json and TypeScript configuration",
+            "description": "Set up the packages/shared directory structure with proper package.json exports configuration for ESM/CJS and tsconfig.json extending the base configuration with composite mode.",
+            "dependencies": [],
+            "details": "1. Create packages/shared directory structure.\n2. Create packages/shared/package.json with:\n   - name: '@secure360/shared'\n   - version: '0.0.0'\n   - type: 'module'\n   - exports field for ESM/CJS dual package support (./dist/index.js for import, ./dist/index.cjs for require)\n   - main: './dist/index.cjs'\n   - module: './dist/index.js'\n   - types: './dist/index.d.ts'\n   - files: ['dist']\n   - scripts: { 'build': 'tsc', 'typecheck': 'tsc --noEmit' }\n   - dependencies: { 'zod': '^3.23.0' }\n3. Create packages/shared/tsconfig.json extending '../tsconfig.base.json' with:\n   - composite: true\n   - outDir: './dist'\n   - rootDir: './src'\n   - declarationMap: true\n4. Create packages/shared/src/index.ts as empty barrel export file.\n5. Update root tsconfig.json references array to include { \"path\": \"./packages/shared\" }.\n6. Run 'npm install' to link workspace and install zod dependency.\n7. Verify TypeScript compilation with 'npm run typecheck -w @secure360/shared'.",
+            "status": "pending",
+            "testStrategy": "Verify npm workspace resolves @secure360/shared; verify tsc compiles without errors; verify .d.ts files generated in dist/; verify exports field allows both import and require syntax."
+          },
+          {
+            "id": 2,
+            "title": "Implement Zod schemas for auth, incident, user, organization, and message entities",
+            "description": "Create all Zod validation schemas with .strict() mode as the single source of truth, with TypeScript types inferred from schemas.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Create src/schemas/auth.schema.ts with .strict() schemas:\n   - LoginInputSchema: email (z.string().email()), password (z.string().min(8))\n   - VerifyTotpInputSchema: userId (z.string().uuid()), code (z.string().length(6))\n   - RefreshInputSchema: (empty for HttpOnly cookie refresh)\n   - ResetPasswordInputSchema: email (z.string().email())\n   - ChangePasswordInputSchema: currentPassword, newPassword with validation\n2. Create src/schemas/incident.schema.ts:\n   - CreateIncidentInputSchema: categoryCode, title (optional), description, location, isAnonymous, severity, attachments\n   - UpdateIncidentInputSchema: partial fields for technician/analyst updates\n   - IncidentFiltersSchema: status, severity, categoryCode, dateRange, organizationId\n3. Create src/schemas/user.schema.ts:\n   - CreateUserInputSchema: email, firstName, lastName, role, organizationId\n   - UpdateUserInputSchema: partial user fields\n4. Create src/schemas/organization.schema.ts:\n   - CreateOrgInputSchema: name, domain, settings\n5. Create src/schemas/message.schema.ts:\n   - CreateMessageInputSchema: incidentId, content, isInternal\n6. Create src/types/index.ts: export inferred types using z.infer<typeof Schema>.\n7. Create src/schemas/index.ts barrel export.\n8. Verify TypeScript compilation succeeds.",
+            "status": "pending",
+            "testStrategy": "Unit tests with Vitest: test each schema accepts valid input; test each schema rejects invalid input (missing fields, wrong types, invalid formats); test .strict() rejects extra properties; verify inferred types match expected structure."
+          },
+          {
+            "id": 3,
+            "title": "Create constants for error codes and 34 incident categories",
+            "description": "Define all error codes per L2 Table 7 specification and implement the 34 incident categories across 9 groups with French/English labels and default severities from L1 Table 12.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Create src/constants/error-codes.ts with typed constants:\n   - AUTH_INVALID_CREDENTIALS, AUTH_2FA_REQUIRED, AUTH_2FA_INVALID\n   - AUTH_TOKEN_EXPIRED, AUTH_TOKEN_INVALID, AUTH_REFRESH_REVOKED\n   - TENANT_FORBIDDEN, TENANT_NOT_FOUND\n   - VALIDATION_ERROR, NOT_FOUND, CONFLICT\n   - RATE_LIMIT_EXCEEDED, INTERNAL_ERROR\n   - Export ErrorCode type as union of all codes\n2. Create src/constants/categories.ts with 9 groups and 34 categories:\n   - MALWARE (MAL-01 to MAL-04): Ransomware, Virus, Spyware, Rootkit\n   - PHISHING (PHI-01 to PHI-05): Email, SMS (smishing), Voice (vishing), Spear-phishing, Whaling\n   - INTRUSION (INT-01 to INT-04): Unauthorized access, Brute force, SQL injection, XSS\n   - DATA (DAT-01 to DAT-04): Data breach, Data leak, Data loss, Privacy violation\n   - MOBILE (MOB-01 to MOB-03): Device theft, SIM swap, Malicious app\n   - SOCIAL (SOC-01 to SOC-04): Social engineering, Impersonation, Pretexting, Baiting\n   - NETWORK (NET-01 to NET-04): DDoS, Man-in-middle, DNS poisoning, Packet sniffing\n   - INSIDER (INS-01 to INS-03): Sabotage, Data theft, Policy violation\n   - OTHER (OTH-01 to OTH-03): Cryptojacking, Zero-day, Other\n   - Each category has: code, group, labelFr, labelEn, defaultSeverity (LOW/MODERATE/HIGH/CRITICAL)\n3. Create CategoryCode and CategoryGroup types.\n4. Create lookup functions: getCategoryByCode(), getCategoriesByGroup().\n5. Verify TypeScript compilation.",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify all 34 categories exist; verify each category has fr and en labels; verify default severities are valid enum values; verify getCategoryByCode returns correct category; verify getCategoriesByGroup returns correct subset."
+          },
+          {
+            "id": 4,
+            "title": "Implement i18n translation files for French and English",
+            "description": "Create comprehensive i18n JSON translation files for both French (default) and English covering all UI strings shared between mobile and web applications.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "1. Create src/i18n/fr.json with French translations (default language):\n   - auth: login, logout, email, password, forgotPassword, verify2fa, resetPassword\n   - incident: title, description, location, category, severity, status, timeline, messages\n   - severity: low, moderate, high, critical\n   - status: pending, assigned, inProgress, resolved, closed\n   - errors: map all error codes to user-friendly French messages\n   - common: save, cancel, confirm, delete, edit, view, search, filter, loading, noResults\n   - validation: required, invalidEmail, minLength, maxLength\n   - notifications: newIncident, statusChanged, messageReceived\n   - Include all 34 category labels (can reference categories.ts)\n2. Create src/i18n/en.json with matching English translations.\n3. Create src/i18n/index.ts:\n   - Export TranslationKey type from fr.json structure\n   - Export translations object: { fr, en }\n   - Export getTranslation(locale, key) helper function\n4. Ensure every key in fr.json exists in en.json (and vice versa).\n5. Verify TypeScript compilation and type safety for translation keys.",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify fr.json and en.json have identical key structures; verify no missing keys in either language; verify getTranslation returns correct value for both locales; verify TranslationKey type provides autocomplete for valid keys."
+          },
+          {
+            "id": 5,
+            "title": "Create design tokens for colors, spacing, and typography with WCAG AA compliance",
+            "description": "Implement design tokens including WCAG AA compliant severity colours (#8F5600 for Moderate text, #B34700 for High text), spacing scale, and typography settings for consistency across mobile and web.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Create src/tokens/colors.ts:\n   - Primary, secondary, neutral color scales (50-900)\n   - Severity text colors (WCAG AA compliant):\n     * severityLowText: appropriate dark color\n     * severityModerateText: '#8F5600'\n     * severityHighText: '#B34700'\n     * severityCriticalText: appropriate dark red\n   - Severity background colors (lighter fills for badges):\n     * severityLowBg, severityModerateBg, severityHighBg, severityCriticalBg\n   - Status colors: pending, assigned, inProgress, resolved, closed\n   - Semantic colors: success, warning, error, info\n   - Offline banner colors using #8F5600\n2. Create src/tokens/spacing.ts:\n   - Scale: 0, 1, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96\n   - Named spacing: xs, sm, md, lg, xl, 2xl\n3. Create src/tokens/typography.ts:\n   - Font families: sans, mono\n   - Font sizes: xs, sm, base, lg, xl, 2xl, 3xl\n   - Font weights: normal, medium, semibold, bold\n   - Line heights: tight, normal, relaxed\n4. Create src/tokens/index.ts barrel export.\n5. Update src/index.ts to export all tokens.\n6. Verify TypeScript compilation produces correct types.",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify severity text colors match specification (#8F5600, #B34700); verify all color values are valid hex codes; verify spacing scale is consistent; verify exported types allow autocomplete for token values."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Set up API workspace with Express 5, TypeScript, and project structure",
+        "description": "Initialize apps/api workspace with Node.js 24, Express 5, TypeScript, and the Router → Controller → Service → Repository layer architecture. Requirements: Technical Architecture.",
+        "details": "1. Create apps/api/package.json with dependencies: express@5, typescript, @types/node, @types/express, tsx for dev.\n2. Create apps/api/tsconfig.json extending tsconfig.base.json with paths alias '@/*' → 'src/*', references to packages/shared.\n3. Create directory structure:\n   src/\n   ├── config/         # Environment, secrets\n   ├── middleware/     # Auth, validation, error handler, tenant\n   ├── modules/        # Feature modules (auth, incidents, users, etc.)\n   │   └── auth/\n   │       ├── auth.router.ts\n   │       ├── auth.controller.ts\n   │       ├── auth.service.ts\n   │       └── auth.repository.ts\n   ├── lib/            # Shared utilities (crypto, redis, logger)\n   ├── types/          # Express extensions, request context\n   └── index.ts        # Entry point\n4. Create src/types/express.d.ts extending Express Request with tenant context (orgId, userId, role).\n5. Create src/index.ts with basic Express app setup, JSON parsing, CORS.\n6. Add scripts: 'dev': 'tsx watch src/index.ts', 'build': 'tsc', 'start': 'node dist/index.js'.\n7. Configure ESLint import boundaries to enforce layer rules (controllers cannot import repositories directly).",
+        "testStrategy": "Verify npm run dev starts server on port 3000; verify TypeScript compilation succeeds with npm run build; verify ESLint catches layer violations when a controller imports a repository.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Configure Docker Compose for PostgreSQL 16 and Redis 8 development environment",
+        "description": "Create Docker Compose configuration for local development with PostgreSQL 16 and Redis 8, including volume persistence and health checks. Requirements: Technical Architecture, Phase S5.",
+        "details": "1. Create infra/docker-compose.dev.yml:\n   ```yaml\n   services:\n     postgres:\n       image: postgres:16-alpine\n       environment:\n         POSTGRES_DB: secure360\n         POSTGRES_USER: secure360\n         POSTGRES_PASSWORD_FILE: /run/secrets/db_password\n       volumes:\n         - pgdata:/var/lib/postgresql/data\n         - ./init-db:/docker-entrypoint-initdb.d\n       ports: ['5432:5432']\n       healthcheck:\n         test: pg_isready -U secure360\n         interval: 5s\n     redis:\n       image: redis:8-alpine\n       command: redis-server --appendonly yes\n       volumes:\n         - redisdata:/data\n       ports: ['6379:6379']\n       healthcheck:\n         test: redis-cli ping\n   volumes:\n     pgdata:\n     redisdata:\n   secrets:\n     db_password:\n       file: ./secrets/db_password.txt\n   ```\n2. Create infra/secrets/db_password.txt with placeholder (git-ignored).\n3. Create infra/init-db/01-roles.sql for creating database roles (s360_owner, s360_app, s360_worker, s360_metrics).\n4. Add npm script 'docker:dev': 'docker compose -f infra/docker-compose.dev.yml up -d'.\n5. Create .env.example with DATABASE_URL and REDIS_URL templates.",
+        "testStrategy": "Run docker:dev and verify both containers start with healthy status; verify PostgreSQL accepts connections on localhost:5432; verify Redis accepts connections on localhost:6379; verify database roles are created.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement Prisma schema with complete L2 data model and RLS policies",
+        "description": "Create Prisma schema for all entities (organizations, users, incidents, etc.) with PostgreSQL Row-Level Security policies, forced RLS, and database role grants. Requirements: Technical Architecture, Phase S5, BNF19.",
+        "details": "1. Install prisma, @prisma/client in apps/api.\n2. Create apps/api/prisma/schema.prisma with all models:\n   - Organization: id (uuid), name, slug, is_active, created_at, updated_at\n   - User: id, organization_id, email, password_hash, first_name, last_name, role (enum), totp_secret (encrypted), totp_enabled, session_version, must_change_password, is_active, created_at\n   - Incident: id, organization_id, reporter_id, reference (SFC-YYYY-NNNNNN), category_code, severity (Low/Moderate/High/Critical), title, description, is_anonymous, status (NEW/ASSIGNED/IN_PROGRESS/RESOLVED/CLOSED), assigned_to_id, version, resolved_at, closed_at, deleted_at, created_at, updated_at\n   - IncidentCategory: code (PK), group_code, label_fr, label_en, default_severity, sort_order\n   - IncidentStatusHistory: id, incident_id, from_status, to_status, changed_by_id, comment, created_at\n   - IncidentMessage: id, incident_id, sender_id, body, is_internal, created_at\n   - Attachment: id, incident_id, message_id, file_key, encryption_iv, original_name, mime_type, size_bytes, created_at\n   - Notification: id, user_id, incident_id, type, title_key, body_key, read_at, created_at\n   - AuditLog: id, organization_id, user_id, event, entity_type, entity_id, old_data, new_data, ip_address, user_agent, created_at\n   - RefreshToken: id, user_id, token_hash, family_id, expires_at, revoked_at, created_at\n   - PasswordResetToken: id, user_id, token_hash, expires_at, used_at, created_at\n   - DeviceToken: id, user_id, token, platform, created_at\n   - OutboxEvent: id, event_type, payload, processed_at, created_at\n   - IdempotencyKey: key (PK), user_id, response, expires_at, created_at\n   - ReportJob: id, organization_id, requested_by_id, type, parameters, status, file_key, error, created_at, completed_at\n   - IncidentReferenceCounter: organization_id (PK), year, counter\n3. Create migration with RLS policies in raw SQL:\n   - Enable RLS: ALTER TABLE users ENABLE ROW LEVEL SECURITY; ALTER TABLE users FORCE ROW LEVEL SECURITY;\n   - Policies: CREATE POLICY tenant_isolation ON users USING (organization_id::text = current_setting('app.org_id', true));\n   - Grants: GRANT SELECT, INSERT, UPDATE ON users TO s360_app; REVOKE ALL ON users FROM PUBLIC;",
+        "testStrategy": "Run prisma migrate dev and verify migration applies cleanly; verify RLS policies exist with \\dp in psql; write integration test that sets app.org_id and verifies queries only return matching tenant data; test that queries without app.org_id fail.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Create category seed data and fictitious test data",
+        "description": "Implement Prisma seed script with 34 incident categories (fr/en labels, default severities) and fictitious data for 5 organisations with personas. Requirements: Phase S5, BF02.",
+        "details": "1. Create apps/api/prisma/seed.ts using categories from @secure360/shared.\n2. Seed 34 categories from L1 Table 12 + SIM swap (MOB-02):\n   - PHI-01 to PHI-04 (Phishing: Email, SMS, Voice, Social Media)\n   - FRD-01 to FRD-05 (Fraud: Mobile Money, Bank, Identity, Invoice, Other)\n   - MOB-01 to MOB-02 (Mobile: Unauthorized Access, SIM Swap)\n   - MAL-01 to MAL-04 (Malware: Ransomware, Virus, Spyware, Other)\n   - ACC-01 to ACC-04 (Account: Email, Social Media, Banking, Other)\n   - NET-01 to NET-04 (Network: DDoS, Intrusion, Man-in-Middle, Other)\n   - DAT-01 to DAT-04 (Data: Breach, Leak, Loss, Theft)\n   - SOC-01 to SOC-04 (Social Eng: Pretexting, Baiting, Quid Pro Quo, Tailgating)\n   - OTH-01 to OTH-03 (Other: Policy Violation, Suspicious Activity, Other)\n3. Seed 5 organizations: Alpha Corp, Beta Industries, Gamma Services, Delta Tech, Epsilon Ltd.\n4. Seed personas per org:\n   - Aimé (EMPLOYEE), Christelle (MANAGER), at least one per org\n   - Jean-Paul (TECHNICIAN) and Paul (ADMIN) at SFC organization\n5. Passwords: bcrypt hash with cost 12, must_change_password: true.\n6. Seed 10-20 sample incidents per org with realistic data.\n7. Add script to package.json: 'db:seed': 'tsx prisma/seed.ts'.",
+        "testStrategy": "Run db:seed and verify 34 categories exist with correct codes and labels in both languages; verify 5 organizations created; verify at least 2 users per org; verify sample incidents created with valid category_code references.",
+        "priority": "high",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement platform kernel: configuration, logger, and request context",
+        "description": "Build core platform infrastructure: configuration loader with Docker secrets support, Pino structured logger with request ID, and request context propagation. Requirements: Phase S5, BNF19.",
+        "details": "1. Create src/config/index.ts:\n   - Load secrets from /run/secrets/* in production, .env in development\n   - Export typed config object: { database: { url }, redis: { url }, jwt: { secret, accessTtl, refreshTtl }, smtp: { host, port, user, pass }, firebase: { projectId, privateKey, clientEmail } }\n   - Validate required vars exist at startup, throw clear error if missing\n2. Create src/lib/logger.ts:\n   - Configure Pino with level from NODE_ENV (debug in dev, info in prod)\n   - Create child logger factory: createLogger(context: { requestId?, module? })\n   - Redact sensitive fields: password, token, authorization, cookie\n   - Format: JSON in prod, pretty in dev\n3. Create src/middleware/request-id.middleware.ts:\n   - Generate UUID for each request using crypto.randomUUID()\n   - Set X-Request-Id response header\n   - Attach to req.id\n4. Create src/middleware/request-logger.middleware.ts:\n   - Log request start: method, url, user-agent\n   - Log request end: status, duration\n   - Attach logger child to req.log\n5. Create src/types/express.d.ts extending Request with id: string and log: Logger.",
+        "testStrategy": "Unit test config loader with mock secrets files; unit test logger redaction (verify password field not in output); integration test that request generates unique ID and appears in response header and logs.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Implement error handler and API response envelope",
+        "description": "Create centralized error handling middleware and response envelope utilities ensuring consistent API responses. Requirements: Technical Architecture, L2 Table 7.",
+        "details": "1. Create src/lib/errors.ts with custom error classes:\n   - AppError: base class with code, message, statusCode, details?\n   - ValidationError: extends AppError, 400\n   - AuthenticationError: extends AppError, 401\n   - AuthorizationError: extends AppError, 403\n   - NotFoundError: extends AppError, 404\n   - ConflictError: extends AppError, 409\n   - RateLimitError: extends AppError, 429\n   - InternalError: extends AppError, 500\n2. Create src/lib/response.ts with envelope utilities:\n   - success<T>(data: T, message?: string): { success: true, data, message? }\n   - error(code: string, message: string, details?: unknown): { success: false, error: { code, message, details? } }\n   - paginated<T>(data: T[], cursor?: string, hasMore: boolean): { success: true, data, pagination: { cursor, hasMore } }\n3. Create src/middleware/error-handler.middleware.ts:\n   - Catch all errors, convert to envelope format\n   - Log errors with request ID\n   - In production: hide internal error details\n   - Handle Prisma errors (P2002 unique, P2025 not found)\n   - Handle Zod validation errors: map to ValidationError with field details\n4. Use error codes from @secure360/shared/constants/error-codes.",
+        "testStrategy": "Unit test each error class produces correct status code; unit test envelope functions produce correct shape; integration test that thrown ValidationError returns 400 with proper envelope; test Prisma unique violation maps to ConflictError.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Zod validation middleware and tenant context middleware",
+        "description": "Create request validation middleware using Zod schemas and tenant isolation middleware using Prisma interactive transactions with set_config. Requirements: Phase S5, Technical Architecture.",
+        "details": "1. Create src/middleware/validate.middleware.ts:\n   ```typescript\n   import { ZodSchema } from 'zod';\n   export const validate = (schema: { body?: ZodSchema; query?: ZodSchema; params?: ZodSchema }) => {\n     return (req, res, next) => {\n       const result = {};\n       if (schema.body) result.body = schema.body.parse(req.body);\n       if (schema.query) result.query = schema.query.parse(req.query);\n       if (schema.params) result.params = schema.params.parse(req.params);\n       Object.assign(req, result);\n       next();\n     };\n   };\n   ```\n2. Create src/lib/prisma.ts:\n   - Export singleton PrismaClient\n   - Configure logging to Pino in development\n3. Create src/middleware/tenant.middleware.ts:\n   ```typescript\n   export const withTenant = async (req, res, next) => {\n     const { orgId, userId, role } = req.auth; // from JWT middleware\n     req.tx = await prisma.$transaction(async (tx) => {\n       await tx.$executeRaw`SELECT set_config('app.org_id', ${orgId}, true)`;\n       await tx.$executeRaw`SELECT set_config('app.user_id', ${userId}, true)`;\n       await tx.$executeRaw`SELECT set_config('app.role', ${role}, true)`;\n       return tx;\n     });\n     // Wrap in res.on('finish') to ensure transaction completes\n   };\n   ```\n4. Note: Need careful handling since Prisma interactive transactions have timeout limits.",
+        "testStrategy": "Unit test validate middleware rejects invalid body and returns 400 with field errors; integration test withTenant sets PostgreSQL config vars correctly; test that RLS policies filter data within tenant transaction; test cross-tenant access is blocked.",
+        "priority": "high",
+        "dependencies": [
+          4,
+          7
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Redis client and rate limiting middleware",
+        "description": "Set up Redis client with reconnection handling and implement token bucket rate limiting per L2 Table 5 limits. Requirements: Phase S5, L2 Table 5.",
+        "details": "1. Install ioredis in apps/api.\n2. Create src/lib/redis.ts:\n   - Create Redis client with config from environment\n   - Handle reconnection with exponential backoff\n   - Export client singleton and typed commands\n   - Create pub/sub client for real-time events\n3. Create src/middleware/rate-limiter.middleware.ts:\n   - Implement sliding window rate limiter using Redis\n   - Key pattern: rate:{endpoint}:{identifier} (IP or userId)\n   - Limits from L2 Table 5:\n     * POST /auth/login: 5/minute per IP\n     * POST /auth/verify-2fa: 5/minute per IP\n     * POST /auth/forgot-password: 3/minute per IP\n     * POST /incidents: 10/minute per user\n     * General API: 100/minute per user\n   - Return 429 with Retry-After header when exceeded\n   - Factory function: rateLimiter({ points: number, duration: number, keyPrefix: string })\n4. Create rate limit presets for each endpoint category.\n5. Add bypass for health check endpoints.",
+        "testStrategy": "Unit test rate limiter correctly tracks requests in Redis; integration test that 6th login attempt within minute returns 429; test Retry-After header is set correctly; test rate limit resets after window expires.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement crypto utilities for password hashing, token generation, and encryption",
+        "description": "Create cryptographic helper functions for bcrypt password hashing (cost 12), secure token generation, AES-256-GCM encryption, and SHA-256 hashing. Requirements: Technical Architecture, BF01.",
+        "details": "1. Install bcrypt in apps/api.\n2. Create src/lib/crypto.ts:\n   ```typescript\n   import { randomBytes, createCipheriv, createDecipheriv, createHash } from 'crypto';\n   import bcrypt from 'bcrypt';\n   \n   const BCRYPT_COST = 12;\n   const AES_ALGORITHM = 'aes-256-gcm';\n   \n   export const hashPassword = (password: string): Promise<string> => bcrypt.hash(password, BCRYPT_COST);\n   export const verifyPassword = (password: string, hash: string): Promise<boolean> => bcrypt.compare(password, hash);\n   \n   export const generateToken = (bytes = 32): string => randomBytes(bytes).toString('base64url');\n   export const generateUUID = (): string => crypto.randomUUID();\n   \n   export const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex');\n   \n   export const encrypt = (plaintext: string, key: Buffer): { ciphertext: string; iv: string; tag: string } => {\n     const iv = randomBytes(16);\n     const cipher = createCipheriv(AES_ALGORITHM, key, iv);\n     let ciphertext = cipher.update(plaintext, 'utf8', 'base64');\n     ciphertext += cipher.final('base64');\n     return { ciphertext, iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64') };\n   };\n   \n   export const decrypt = (ciphertext: string, iv: string, tag: string, key: Buffer): string => {\n     const decipher = createDecipheriv(AES_ALGORITHM, key, Buffer.from(iv, 'base64'));\n     decipher.setAuthTag(Buffer.from(tag, 'base64'));\n     let plaintext = decipher.update(ciphertext, 'base64', 'utf8');\n     plaintext += decipher.final('utf8');\n     return plaintext;\n   };\n   ```\n3. Never use Math.random() for any security-related operations.\n4. Encryption key loaded from config (32 bytes for AES-256).",
+        "testStrategy": "Unit test hashPassword produces different hashes for same input (salt); test verifyPassword returns true for correct password, false for wrong; test encrypt/decrypt round-trip preserves plaintext; test hashToken produces consistent output for same input.",
+        "priority": "high",
+        "dependencies": [
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement JWT authentication utilities with access/refresh token handling",
+        "description": "Create JWT token generation and verification with pinned HS256 algorithm, 1h access tokens, and 7d refresh tokens. Requirements: BF01, Technical Architecture.",
+        "details": "1. Install jsonwebtoken, @types/jsonwebtoken in apps/api.\n2. Create src/lib/jwt.ts:\n   ```typescript\n   import jwt from 'jsonwebtoken';\n   import { config } from '../config';\n   \n   interface AccessTokenPayload {\n     sub: string;      // userId\n     org: string;      // organizationId\n     role: UserRole;\n     sv: number;       // session version\n     type: 'access';\n   }\n   \n   interface RefreshTokenPayload {\n     sub: string;\n     fam: string;      // family ID for reuse detection\n     type: 'refresh';\n   }\n   \n   export const signAccessToken = (payload: Omit<AccessTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'access' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '1h',\n     });\n   };\n   \n   export const signRefreshToken = (payload: Omit<RefreshTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'refresh' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '7d',\n     });\n   };\n   \n   export const verifyToken = <T>(token: string): T => {\n     return jwt.verify(token, config.jwt.secret, {\n       algorithms: ['HS256'],  // CRITICAL: pin algorithm\n     }) as T;\n   };\n   ```\n3. CRITICAL: Always specify algorithms array in jwt.verify to prevent algorithm confusion attacks.\n4. Create middleware/auth.middleware.ts that extracts and verifies Bearer token.",
+        "testStrategy": "Unit test signAccessToken produces valid JWT; test verifyToken rejects expired tokens; test verifyToken with wrong algorithm fails; test payload contains correct claims; test pinned algorithm prevents RS256 tokens.",
+        "priority": "high",
+        "dependencies": [
+          10
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement auth module: login and 2FA verification endpoints",
+        "description": "Create authentication endpoints for email/password login and TOTP 2FA verification with replay protection. Requirements: BF01, Phase S5.",
+        "details": "1. Install otplib in apps/api for TOTP.\n2. Create src/modules/auth/auth.repository.ts:\n   - findUserByEmail(email: string)\n   - updateLastLogin(userId: string)\n   - storeUsedTotpCode(userId: string, code: string, timestamp: number)\n   - isTotpCodeUsed(userId: string, code: string): boolean\n3. Create src/modules/auth/auth.service.ts:\n   - login(email, password): { requiresTwoFactor: boolean, tempToken?: string } | { accessToken, refreshToken }\n   - verifyTwoFactor(tempToken, totpCode): { accessToken, refreshToken }\n   - Check user is_active, verify password with bcrypt\n   - If totp_enabled, return tempToken (short-lived JWT with userId only)\n   - TOTP verification: use otplib.authenticator.verify with window: 1 (±1 step)\n   - Replay protection: store used codes in Redis with 90s TTL\n4. Create src/modules/auth/auth.controller.ts:\n   - POST /auth/login: validate input, call service, return envelope\n   - POST /auth/verify-2fa: validate tempToken + code, return tokens\n5. Create src/modules/auth/auth.router.ts with rate limiters attached.\n6. Audit log: auth.login.success, auth.login.failed, auth.2fa.success, auth.2fa.failed.",
+        "testStrategy": "Integration tests: valid credentials return tokens; invalid password returns 401; disabled user returns 401; user with 2FA gets tempToken first; valid TOTP code returns tokens; replayed TOTP code within window rejected; rate limit after 5 failed attempts.",
+        "priority": "high",
+        "dependencies": [
+          8,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implement refresh token rotation with family reuse detection",
+        "description": "Create refresh token endpoint with rotation on every use and family-based reuse detection that revokes entire token family. Requirements: BF01, Phase S5.",
+        "details": "1. Create src/modules/auth/auth.repository.ts additions:\n   - createRefreshToken(userId: string, tokenHash: string, familyId: string, expiresAt: Date)\n   - findRefreshToken(tokenHash: string)\n   - revokeToken(id: string)\n   - revokeFamily(familyId: string) - revokes ALL tokens in family\n   - isTokenRevoked(id: string): boolean\n2. Update auth.service.ts:\n   ```typescript\n   async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {\n     const tokenHash = hashToken(refreshToken);\n     const storedToken = await this.repo.findRefreshToken(tokenHash);\n     \n     if (!storedToken || storedToken.revoked_at || storedToken.expires_at < new Date()) {\n       throw new AuthenticationError('INVALID_REFRESH_TOKEN');\n     }\n     \n     // Check if token was already used (reuse detection)\n     if (storedToken.used_at) {\n       // Token reuse detected! Revoke entire family\n       await this.repo.revokeFamily(storedToken.family_id);\n       await this.auditService.log('auth.token.reuse_detected', { familyId: storedToken.family_id });\n       throw new AuthenticationError('TOKEN_REUSE_DETECTED');\n     }\n     \n     // Mark current token as used\n     await this.repo.markAsUsed(storedToken.id);\n     \n     // Issue new tokens with same family\n     const newRefreshToken = generateToken();\n     await this.repo.createRefreshToken(storedToken.user_id, hashToken(newRefreshToken), storedToken.family_id, addDays(7));\n     \n     return { accessToken: signAccessToken(...), refreshToken: newRefreshToken };\n   }\n   ```\n3. Create POST /auth/refresh endpoint.\n4. Audit: auth.refresh.success, auth.refresh.reuse_detected.",
+        "testStrategy": "Test refresh returns new token pair; test using same refresh token twice triggers family revocation; test all tokens in family become invalid after reuse; test expired refresh token rejected; test revoked token rejected.",
+        "priority": "high",
+        "dependencies": [
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement logout, password reset, and first-login password change",
+        "description": "Create endpoints for logout (revoke current token), forgot/reset password flow with secure tokens, and forced password change at first login. Requirements: BF01, Phase S5.",
+        "details": "1. Add to auth.repository.ts:\n   - createPasswordResetToken(userId, tokenHash, expiresAt)\n   - findPasswordResetToken(tokenHash)\n   - markResetTokenUsed(id)\n   - updateUserPassword(userId, passwordHash)\n   - clearMustChangePassword(userId)\n2. Add to auth.service.ts:\n   - logout(refreshToken): revoke token and optionally entire family\n   - forgotPassword(email): create token (1h expiry), queue email, return nothing (prevent enumeration)\n   - resetPassword(token, newPassword): verify token, update password, increment session_version\n   - changePassword(userId, currentPassword, newPassword): verify current, update, clear must_change_password\n3. Create endpoints:\n   - POST /auth/logout (authenticated)\n   - POST /auth/forgot-password (public, rate limited 3/min)\n   - POST /auth/reset-password (public)\n   - POST /auth/change-password (authenticated)\n4. Reset token: 32 bytes random, stored as SHA-256 hash, 1 hour expiry.\n5. Session version increment invalidates all existing JWTs.\n6. Audit: auth.logout, auth.password.reset_requested, auth.password.reset, auth.password.changed.",
+        "testStrategy": "Test logout invalidates refresh token; test forgot-password always returns 200 (no enumeration); test reset token works within 1 hour; test expired reset token rejected; test used reset token rejected; test change-password requires correct current password; test session_version increment invalidates old access tokens.",
+        "priority": "high",
+        "dependencies": [
+          13
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement TOTP 2FA setup, enable, and disable endpoints",
+        "description": "Create endpoints for setting up TOTP 2FA (generate secret, show QR), enabling with verification code, and disabling with password confirmation. Requirements: BF01, Phase S5.",
+        "details": "1. Install qrcode in apps/api for QR generation.\n2. Add to auth.repository.ts:\n   - storePendingTotpSecret(userId, encryptedSecret)\n   - getPendingTotpSecret(userId)\n   - enableTotp(userId, encryptedSecret)\n   - disableTotp(userId)\n3. Add to auth.service.ts:\n   - setupTotp(userId): generate secret, encrypt with AES-256-GCM, store as pending, return secret and QR data URL\n   - enableTotp(userId, code): verify code against pending secret, move to permanent\n   - disableTotp(userId, password): verify password, clear totp_secret and totp_enabled\n4. Create endpoints (all authenticated):\n   - POST /auth/2fa/setup: returns { secret: string, qrCodeDataUrl: string, backupCodes?: string[] }\n   - POST /auth/2fa/enable: body { code: string }, enables 2FA\n   - POST /auth/2fa/disable: body { password: string }, disables 2FA\n5. TOTP secret encrypted at rest with app encryption key.\n6. QR code: otpauth://totp/Secure360:{email}?secret={secret}&issuer=Secure360\n7. Audit: auth.2fa.setup, auth.2fa.enabled, auth.2fa.disabled.",
+        "testStrategy": "Test setup returns valid secret and QR code; test enable with correct code succeeds; test enable with wrong code fails; test disable requires correct password; test login after enable requires 2FA; test login after disable skips 2FA.",
+        "priority": "high",
+        "dependencies": [
+          12
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement audit logging service with fire-and-forget enqueue",
+        "description": "Create audit logging infrastructure with transactional outbox for reliable delivery and structured event format. Requirements: BNF19, Phase S5.",
+        "details": "1. Create src/lib/audit.ts:\n   ```typescript\n   interface AuditEvent {\n     event: string;           // noun.verb.outcome (e.g., auth.login.success)\n     entityType?: string;     // incident, user, organization\n     entityId?: string;\n     oldData?: Record<string, unknown>;\n     newData?: Record<string, unknown>;\n     metadata?: Record<string, unknown>;\n   }\n   \n   export const enqueueAudit = async (ctx: RequestContext, event: AuditEvent): Promise<void> => {\n     // Fire and forget - errors logged but not thrown\n     try {\n       await prisma.outboxEvent.create({\n         data: {\n           event_type: 'audit.write',\n           payload: {\n             ...event,\n             organization_id: ctx.orgId,\n             user_id: ctx.userId,\n             ip_address: ctx.ip,\n             user_agent: ctx.userAgent,\n             request_id: ctx.requestId,\n             timestamp: new Date().toISOString(),\n           },\n         },\n       });\n     } catch (err) {\n       ctx.log.error({ err, event: event.event }, 'Failed to enqueue audit event');\n     }\n   };\n   ```\n2. Never log tokens, passwords, TOTP codes, or personal message content.\n3. Use event naming: noun.verb.outcome (incident.created.success, auth.login.failed).\n4. Include request_id for correlation.\n5. Create audit event consumer that writes to audit_logs table (will be implemented with outbox relay).",
+        "testStrategy": "Unit test enqueueAudit creates outbox record with correct payload; test sensitive fields are not included in audit; test fire-and-forget doesn't throw on database error; integration test audit events flow to audit_logs table.",
+        "priority": "high",
+        "dependencies": [
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 17,
+        "title": "Write unit tests for auth module achieving high coverage",
+        "description": "Create comprehensive unit tests for all authentication services and utilities using Jest. Requirements: Phase S5.",
+        "details": "1. Install jest, @types/jest, ts-jest in apps/api.\n2. Create jest.config.ts with TypeScript support and coverage thresholds.\n3. Create tests/unit/auth/ directory.\n4. Test auth.service.ts:\n   - login: valid credentials, invalid password, inactive user, user with 2FA\n   - verifyTwoFactor: valid code, invalid code, replayed code, expired temp token\n   - refresh: valid token, expired token, revoked token, reuse detection\n   - logout: token revocation\n   - forgotPassword: existing user, non-existing user (no difference in response)\n   - resetPassword: valid token, expired token, used token\n   - changePassword: correct current, wrong current, must_change_password cleared\n   - setupTotp, enableTotp, disableTotp: various scenarios\n5. Test lib/crypto.ts:\n   - hashPassword and verifyPassword\n   - encrypt and decrypt round-trip\n   - hashToken determinism\n6. Test lib/jwt.ts:\n   - signAccessToken/signRefreshToken produce valid JWTs\n   - verifyToken with valid/invalid/expired tokens\n   - algorithm pinning prevents algorithm confusion\n7. Mock Prisma client and Redis for unit tests.\n8. Target: 80%+ coverage on auth module.",
+        "testStrategy": "Run npm test with coverage report; verify auth module has >80% line coverage; verify all edge cases (expired, revoked, invalid) are tested; verify mocks properly isolate units.",
+        "priority": "high",
+        "dependencies": [
+          15,
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 18,
+        "title": "Write integration tests for RLS tenant isolation",
+        "description": "Create integration tests verifying Row-Level Security properly isolates tenant data using CI service containers. Requirements: Phase S5.",
+        "details": "1. Install supertest, testcontainers in apps/api devDependencies.\n2. Create tests/integration/setup.ts:\n   - Start PostgreSQL container with testcontainers\n   - Run migrations and seed with test data\n   - Create test client with different tenant contexts\n3. Create tests/integration/rls.test.ts:\n   ```typescript\n   describe('Row-Level Security', () => {\n     const orgA = { id: 'org-a', ...testOrgA };\n     const orgB = { id: 'org-b', ...testOrgB };\n     \n     test('user in org A cannot see org B incidents', async () => {\n       const incidents = await queryAsUser(userInOrgA, 'SELECT * FROM incidents');\n       expect(incidents.every(i => i.organization_id === orgA.id)).toBe(true);\n     });\n     \n     test('user cannot insert incident into other org', async () => {\n       await expect(insertAsUser(userInOrgA, { organization_id: orgB.id, ... }))\n         .rejects.toThrow();\n     });\n     \n     test('technician role can see assigned incidents only', async () => { ... });\n     test('admin role can see all org incidents', async () => { ... });\n     test('queries without app.org_id return no rows (fail closed)', async () => { ... });\n   });\n   ```\n4. Test each role: EMPLOYEE, MANAGER, TECHNICIAN, ADMIN, SUPER_ADMIN.\n5. Add to CI workflow: start PostgreSQL service, run integration tests.",
+        "testStrategy": "Run integration tests in CI with service containers; verify each role can only access authorized data; verify cross-tenant access is blocked; verify fail-closed behavior when context not set.",
+        "priority": "high",
+        "dependencies": [
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 19,
+        "title": "Implement incidents module: create with idempotency and guided severity",
+        "description": "Create incident creation endpoint with idempotency key support, server-side severity calculation from guided questions, and reference number generation. Requirements: BF02-BF05, BF18, Phase S6.",
+        "details": "1. Create src/modules/incidents/incidents.repository.ts:\n   - create(data): insert incident with reference\n   - getNextReference(orgId): atomic counter increment, format SFC-YYYY-NNNNNN\n   - checkIdempotencyKey(key, userId): return cached response if exists\n   - storeIdempotencyKey(key, userId, response, expiresAt)\n2. Create src/modules/incidents/incidents.service.ts:\n   - create(userId, input, idempotencyKey?):\n     1. Check idempotency key, return cached response if exists\n     2. Calculate severity from guided questions (L1 D3 algorithm):\n        - Financial impact > threshold? → +1 severity level\n        - Multiple users affected? → +1 severity level\n        - Data compromised? → +1 severity level\n        - Base severity from category default\n     3. Generate reference number atomically\n     4. Insert incident with status NEW\n     5. Create initial status history entry\n     6. Store idempotency key with response (24h TTL)\n     7. Enqueue notifications for technicians\n3. Create POST /v1/incidents endpoint with Idempotency-Key header support.\n4. Zod schema: category_code, description, is_anonymous, guided_questions: { financial_impact, multiple_users, data_compromised }.\n5. Audit: incident.created.success.",
+        "testStrategy": "Test incident created with correct severity calculation; test reference number format SFC-YYYY-NNNNNN; test idempotency key returns same response on retry; test idempotency key different for different users; test category_code validated against categories table.",
+        "priority": "high",
+        "dependencies": [
+          18
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 20,
+        "title": "Implement incidents list with cursor pagination and filters",
+        "description": "Create incidents list endpoint with cursor-based pagination, status/severity/date filters, and proper DTO mapping for confidential reports. Requirements: BF06, Phase S6.",
+        "details": "1. Add to incidents.repository.ts:\n   - list(filters: IncidentFilters, cursor?: string, limit: number): { incidents, nextCursor, hasMore }\n   - Cursor: base64 encoded { id, created_at } for stable pagination\n   - Filters: status[], severity[], category_code[], date_from, date_to, assigned_to_id, reporter_id\n2. Add to incidents.service.ts:\n   - list(userId, role, filters, cursor, limit):\n     - EMPLOYEE: own incidents only\n     - MANAGER: org incidents, confidential reporter masked\n     - TECHNICIAN: assigned + unassigned org incidents\n     - ADMIN: all org incidents\n3. Create src/modules/incidents/incidents.dto.ts:\n   ```typescript\n   export const toIncidentListDTO = (incident, viewerRole) => ({\n     id: incident.id,\n     reference: incident.reference,\n     category: { code: incident.category_code, label: incident.category.label_en },\n     severity: incident.severity,\n     status: incident.status,\n     title: incident.title,\n     reporter: incident.is_anonymous && !['EMPLOYEE'].includes(viewerRole) \n       ? null \n       : { id: incident.reporter.id, name: incident.reporter.first_name },\n     assignedTo: incident.assigned_to ? { id: incident.assigned_to.id, name: incident.assigned_to.first_name } : null,\n     createdAt: incident.created_at.toISOString(),\n   });\n   ```\n4. Create GET /v1/incidents endpoint with query params.",
+        "testStrategy": "Test pagination returns correct page size and cursor; test filters apply correctly; test employee sees only own incidents; test manager sees all org incidents but not confidential reporter names; test cursor remains stable across requests.",
+        "priority": "high",
+        "dependencies": [
+          19
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 21,
+        "title": "Implement incident detail, PATCH with state machine, and status history",
+        "description": "Create incident detail endpoint and update endpoint with status state machine validation, optimistic concurrency, and history tracking. Requirements: BF06, BF09, Phase S6.",
+        "details": "1. Add to incidents.repository.ts:\n   - findById(id): incident with relations (reporter, assignee, category, status_history)\n   - update(id, data, expectedVersion): optimistic locking with version check\n   - addStatusHistory(incidentId, fromStatus, toStatus, changedById, comment?)\n2. Create src/modules/incidents/incidents.state-machine.ts:\n   ```typescript\n   const TRANSITIONS: Record<Status, Status[]> = {\n     NEW: ['ASSIGNED'],\n     ASSIGNED: ['IN_PROGRESS', 'NEW'],\n     IN_PROGRESS: ['RESOLVED', 'ASSIGNED'],\n     RESOLVED: ['CLOSED', 'IN_PROGRESS'],  // can reopen\n     CLOSED: ['IN_PROGRESS'],               // can reopen\n   };\n   \n   export const canTransition = (from: Status, to: Status): boolean => \n     TRANSITIONS[from]?.includes(to) ?? false;\n   ```\n3. Add to incidents.service.ts:\n   - getDetail(userId, role, incidentId): apply DTO masking for confidential\n   - update(userId, role, incidentId, input, version):\n     1. Validate status transition if status changed\n     2. Validate role can perform action (only TECHNICIAN/ADMIN can assign)\n     3. Update with version check (throw ConflictError if mismatch)\n     4. Record status history if changed\n     5. Auto-set assigned_to when status → ASSIGNED\n     6. Auto-set resolved_at when status → RESOLVED\n4. Create GET /v1/incidents/:id and PATCH /v1/incidents/:id endpoints.\n5. Version header: If-Match for optimistic concurrency.",
+        "testStrategy": "Test valid status transitions succeed; test invalid transitions return 400; test version mismatch returns 409 Conflict; test status history recorded on transition; test reopen from CLOSED works; test resolved_at set automatically.",
+        "priority": "high",
+        "dependencies": [
+          20
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 22,
+        "title": "Implement attachment upload with magic byte validation and encryption",
+        "description": "Create attachment upload endpoint with memory storage, magic byte verification, EXIF stripping via sharp, and AES-256-GCM encryption at rest. Requirements: BF05, Phase S6.",
+        "details": "1. Install multer, sharp, file-type in apps/api.\n2. Create src/modules/attachments/attachments.service.ts:\n   ```typescript\n   const ALLOWED_TYPES = [\n     { mime: 'image/jpeg', magic: [0xFF, 0xD8, 0xFF] },\n     { mime: 'image/png', magic: [0x89, 0x50, 0x4E, 0x47] },\n     { mime: 'image/webp', magic: [0x52, 0x49, 0x46, 0x46] },\n   ];\n   const MAX_SIZE = 2 * 1024 * 1024; // 2 MiB\n   \n   async upload(incidentId: string, file: Express.Multer.File, userId: string) {\n     // 1. Verify magic bytes\n     const detectedType = await fileTypeFromBuffer(file.buffer);\n     if (!ALLOWED_TYPES.some(t => t.mime === detectedType?.mime)) {\n       throw new ValidationError('INVALID_FILE_TYPE');\n     }\n     \n     // 2. Re-encode with sharp (strips EXIF/GPS)\n     const processed = await sharp(file.buffer)\n       .rotate() // auto-rotate based on EXIF before stripping\n       .toFormat(detectedType.ext as 'jpeg' | 'png' | 'webp')\n       .toBuffer();\n     \n     // 3. Encrypt\n     const { ciphertext, iv, tag } = encrypt(processed.toString('base64'), encryptionKey);\n     \n     // 4. Store with UUID filename\n     const fileKey = `${incidentId}/${crypto.randomUUID()}.enc`;\n     await fs.writeFile(path.join(UPLOAD_DIR, fileKey), ciphertext);\n     \n     // 5. Save metadata\n     return repo.create({ incident_id: incidentId, file_key: fileKey, encryption_iv: iv, ... });\n   }\n   ```\n3. Create POST /v1/incidents/:id/attachments with multer.memoryStorage(), limit: 5 files.\n4. Never use original filename in storage path.\n5. Create GET /v1/attachments/:id/download for authorized streaming.",
+        "testStrategy": "Test valid JPEG uploads successfully; test PNG with wrong extension but correct magic bytes accepted; test executable disguised as image rejected; test EXIF data stripped (verify with exiftool); test encrypted file cannot be read without key; test max 5 attachments per incident.",
+        "priority": "high",
+        "dependencies": [
+          19
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 23,
+        "title": "Implement messaging with internal notes and notification triggers",
+        "description": "Create incident messaging endpoint with internal notes visible only to SFC staff, and notification triggers on new messages. Requirements: BF08, Phase S6.",
+        "details": "1. Create src/modules/messages/messages.repository.ts:\n   - create(incidentId, senderId, body, isInternal)\n   - listByIncident(incidentId, includeInternal: boolean)\n2. Create src/modules/messages/messages.service.ts:\n   - send(userId, role, incidentId, body, isInternal):\n     - Only TECHNICIAN/ADMIN can send internal notes\n     - Validate user has access to incident\n     - Create message\n     - Enqueue push notification for recipient(s)\n   - list(userId, role, incidentId):\n     - EMPLOYEE: external messages only, where incident is theirs\n     - TECHNICIAN/ADMIN: all messages including internal\n3. Create src/modules/messages/messages.dto.ts:\n   - toMessageDTO: mask sender for confidential incidents\n   - For confidential: sender shows as 'Reporter' for external view\n4. Create endpoints:\n   - POST /v1/incidents/:id/messages\n   - GET /v1/incidents/:id/messages\n5. Audit: message.sent.success, message.sent.internal.\n6. Push notification payload: { type: 'new_message', incidentId, notificationId } - no message content.",
+        "testStrategy": "Test employee can send message on their incident; test employee cannot see internal notes; test technician can send internal note; test confidential incident masks sender in messages; test push notification enqueued on new message.",
+        "priority": "medium",
+        "dependencies": [
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 24,
+        "title": "Implement outbox relay and BullMQ queue infrastructure",
+        "description": "Create transactional outbox relay worker that polls outbox table and dispatches to BullMQ queues for push notifications, email, and audit writes. Requirements: Phase S6, Technical Architecture.",
+        "details": "1. Install bullmq in apps/api.\n2. Create src/worker/queues.ts:\n   ```typescript\n   export const pushQueue = new Queue('notify.push', { connection: redis });\n   export const emailQueue = new Queue('notify.email', { connection: redis });\n   export const auditQueue = new Queue('audit.write', { connection: redis });\n   export const reportsQueue = new Queue('reports.pdf', { connection: redis });\n   export const maintenanceQueue = new Queue('maintenance', { connection: redis });\n   ```\n3. Create src/worker/outbox-relay.ts:\n   ```typescript\n   const relay = async () => {\n     while (true) {\n       await prisma.$transaction(async (tx) => {\n         // SKIP LOCKED prevents duplicate processing\n         const events = await tx.$queryRaw`\n           SELECT * FROM outbox_events \n           WHERE processed_at IS NULL \n           ORDER BY created_at \n           FOR UPDATE SKIP LOCKED \n           LIMIT 100`;\n         \n         for (const event of events) {\n           const queue = getQueueForEventType(event.event_type);\n           await queue.add(event.event_type, event.payload);\n           await tx.outboxEvent.update({ where: { id: event.id }, data: { processed_at: new Date() } });\n         }\n       });\n       await sleep(500); // 500ms polling interval\n     }\n   };\n   ```\n4. Create src/worker/index.ts entry point for worker process.\n5. Add npm script: 'worker': 'tsx src/worker/index.ts'.",
+        "testStrategy": "Integration test: insert outbox event, verify it's picked up by relay within 1 second; test SKIP LOCKED prevents duplicate processing with concurrent workers; test failed dispatch is retried; test processed_at set after successful dispatch.",
+        "priority": "high",
+        "dependencies": [
+          9,
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 25,
+        "title": "Implement push notification consumer with FCM integration",
+        "description": "Create BullMQ consumer for push notifications using Firebase Admin SDK with thin payloads containing no personal data. Requirements: BF07, BNF14, BNF16, Phase S6.",
+        "details": "1. Install firebase-admin in apps/api.\n2. Create src/lib/firebase.ts:\n   - Initialize Firebase Admin with service account from config\n   - Export messaging instance\n3. Create src/worker/consumers/push.consumer.ts:\n   ```typescript\n   const pushWorker = new Worker('notify.push', async (job) => {\n     const { userId, type, incidentId, notificationId } = job.data;\n     \n     // Get user's device tokens\n     const tokens = await deviceTokenRepo.findByUserId(userId);\n     if (!tokens.length) return;\n     \n     // Thin payload - no personal data\n     const message = {\n       tokens: tokens.map(t => t.token),\n       data: {\n         type,\n         incidentId,\n         notificationId,\n       },\n       notification: {\n         title: getLocalizedTitle(type, 'fr'), // generic title\n         body: getLocalizedBody(type, 'fr'),   // generic body\n       },\n       android: {\n         priority: 'high',\n         ttl: 86400000, // 24 hours\n       },\n     };\n     \n     const response = await firebase.messaging().sendEachForMulticast(message);\n     \n     // Remove invalid tokens\n     response.responses.forEach((resp, idx) => {\n       if (!resp.success && resp.error?.code === 'messaging/invalid-registration-token') {\n         deviceTokenRepo.remove(tokens[idx].id);\n       }\n     });\n   }, { connection: redis });\n   ```\n4. Create device token registry endpoints: POST /v1/device-tokens, DELETE /v1/device-tokens/:token.\n5. Localized messages use i18n keys, fetched client-side.",
+        "testStrategy": "Integration test with Firebase emulator: verify message sent with correct structure; test invalid tokens are removed; test thin payload contains no user names or incident details; verify delivery latency < 5 seconds (BNF14).",
+        "priority": "high",
+        "dependencies": [
+          24
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 26,
+        "title": "Implement WebSocket gateway with ticket authentication and Redis Pub/Sub",
+        "description": "Create WebSocket server at /ws with single-use ticket authentication and Redis Pub/Sub for real-time event fan-out. Requirements: Phase S6, Technical Architecture.",
+        "details": "1. Install ws in apps/api.\n2. Create src/modules/realtime/ticket.service.ts:\n   - createTicket(userId): generate single-use ticket, store in Redis with 30s TTL\n   - validateTicket(ticket): check exists, delete immediately (single-use), return userId\n3. Create GET /v1/ws/ticket endpoint (authenticated) returning { ticket }.\n4. Create src/realtime/ws-server.ts:\n   ```typescript\n   const wss = new WebSocketServer({ noServer: true });\n   \n   server.on('upgrade', async (request, socket, head) => {\n     const url = new URL(request.url, 'http://localhost');\n     const ticket = url.searchParams.get('ticket');\n     \n     const userId = await ticketService.validateTicket(ticket);\n     if (!userId) {\n       socket.write('HTTP/1.1 401 Unauthorized\\r\\n\\r\\n');\n       socket.destroy();\n       return;\n     }\n     \n     wss.handleUpgrade(request, socket, head, (ws) => {\n       ws.userId = userId;\n       wss.emit('connection', ws, request);\n     });\n   });\n   ```\n5. Create src/realtime/pubsub.ts:\n   - Subscribe to Redis channels: rt:incident:*, rt:notification:*\n   - On message: broadcast to connected clients in same org\n6. Emit events on incident status change, new message, new notification.",
+        "testStrategy": "Test ticket expires after 30 seconds; test ticket only works once; test WebSocket connection established with valid ticket; test events broadcast to correct org users; test cross-org events not leaked.",
+        "priority": "medium",
+        "dependencies": [
+          9,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 27,
+        "title": "Implement notifications centre API endpoints",
+        "description": "Create endpoints for listing notifications, marking as read, and getting unread count for the in-app notification centre. Requirements: BF07, Phase S6.",
+        "details": "1. Create src/modules/notifications/notifications.repository.ts:\n   - listByUser(userId, cursor, limit): paginated, newest first\n   - markAsRead(userId, notificationId)\n   - markAllAsRead(userId)\n   - getUnreadCount(userId)\n2. Create src/modules/notifications/notifications.service.ts:\n   - list(userId, cursor, limit): return DTOs\n   - markRead(userId, notificationId)\n   - markAllRead(userId)\n   - getUnreadCount(userId): cached in Redis for 30s\n3. Create src/modules/notifications/notifications.dto.ts:\n   - toNotificationDTO: { id, type, titleKey, bodyKey, incidentId?, read: boolean, createdAt }\n   - Title/body are i18n keys, translated client-side\n4. Create endpoints:\n   - GET /v1/notifications (cursor pagination)\n   - GET /v1/notifications/unread-count\n   - PATCH /v1/notifications/:id/read\n   - POST /v1/notifications/mark-all-read\n5. Create notification when: incident assigned, status changed, new message received.",
+        "testStrategy": "Test list returns user's notifications only; test unread count accurate; test mark as read updates notification; test mark all read clears all unread; test Redis cache invalidated on mark read.",
+        "priority": "medium",
+        "dependencies": [
+          25
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 28,
+        "title": "Implement statistics endpoints with Redis caching",
+        "description": "Create statistics endpoints for user, manager, and executive dashboards with Redis caching and per-organisation cache invalidation. Requirements: BF11, BF12, BF16, Phase S7.",
+        "details": "1. Create src/modules/statistics/statistics.repository.ts:\n   - getIncidentCountsByStatus(orgId, dateRange?)\n   - getIncidentCountsBySeverity(orgId, dateRange?)\n   - getIncidentCountsByCategory(orgId, dateRange?)\n   - getIncidentTrend(orgId, period: 'day' | 'week' | 'month', count: number)\n   - getResolutionTimeStats(orgId, dateRange?)\n   - getSlaBreachCount(orgId, dateRange?)\n2. Create src/modules/statistics/statistics.service.ts:\n   - getUserStats(userId): my incidents count, by status\n   - getManagerStats(orgId): org overview with 5+ chart data sets\n   - getExecutiveStats(orgId): summary for Paul persona\n   - Cache strategy:\n     * Key: stats:{orgId}:{endpoint}:{hash(params)}\n     * TTL: 5 minutes\n     * Invalidation: bump org version key on incident change\n3. Create endpoints:\n   - GET /v1/statistics/me (EMPLOYEE)\n   - GET /v1/statistics/organisation (MANAGER, ADMIN)\n   - GET /v1/statistics/executive (ADMIN)\n4. Charts data: incidents by status (pie), by severity (bar), by category (horizontal bar), trend over time (line), resolution time distribution (histogram).",
+        "testStrategy": "Test stats reflect actual incident data; test cache hit returns same data within TTL; test cache invalidated when incident changes; test role-based access (employee can't get org stats).",
+        "priority": "medium",
+        "dependencies": [
+          20
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 29,
+        "title": "Implement PDF report generation with PDFKit",
+        "description": "Create synchronous single-incident PDF reports and asynchronous period reports using PDFKit. Requirements: BF14, Phase S7.",
+        "details": "1. Install pdfkit in apps/api.\n2. Create src/modules/reports/pdf-generator.ts:\n   ```typescript\n   export const generateIncidentPDF = async (incident: IncidentWithRelations): Promise<Buffer> => {\n     const doc = new PDFDocument();\n     const chunks: Buffer[] = [];\n     doc.on('data', chunk => chunks.push(chunk));\n     \n     // Header with logo\n     doc.image(LOGO_PATH, 50, 45, { width: 50 });\n     doc.fontSize(20).text('Incident Report', 110, 50);\n     \n     // Incident details\n     doc.fontSize(12).text(`Reference: ${incident.reference}`);\n     doc.text(`Status: ${incident.status}`);\n     doc.text(`Severity: ${incident.severity}`);\n     doc.text(`Category: ${incident.category.label_en}`);\n     doc.text(`Created: ${formatDate(incident.created_at)}`);\n     \n     // Description\n     doc.moveDown().fontSize(14).text('Description');\n     doc.fontSize(12).text(incident.description);\n     \n     // Timeline\n     doc.addPage().fontSize(14).text('Status History');\n     for (const entry of incident.status_history) {\n       doc.fontSize(10).text(`${formatDate(entry.created_at)}: ${entry.from_status} → ${entry.to_status}`);\n     }\n     \n     doc.end();\n     return Buffer.concat(chunks);\n   };\n   ```\n3. Create GET /v1/incidents/:id/report (synchronous, returns PDF).\n4. Create POST /v1/reports/period (async, creates report_job).\n5. Create BullMQ consumer for reports.pdf queue.\n6. Period report includes statistics charts rendered with pdfkit-svg.",
+        "testStrategy": "Test incident PDF contains all required sections; test PDF is valid (can be opened); test period report job created and status tracked; test completed report downloadable via report_jobs endpoint.",
+        "priority": "medium",
+        "dependencies": [
+          21,
+          28
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 30,
+        "title": "Implement organisation and user administration endpoints",
+        "description": "Create admin endpoints for managing organisations and users including 2FA reset and account deactivation. Requirements: BF15, Phase S7.",
+        "details": "1. Create src/modules/admin/organisations.repository.ts:\n   - list(cursor, limit, filters)\n   - findById(id)\n   - create(data)\n   - update(id, data)\n   - deactivate(id)\n2. Create src/modules/admin/users.repository.ts:\n   - listByOrg(orgId, cursor, limit, filters)\n   - findById(id)\n   - create(data): generate temporary password\n   - update(id, data)\n   - resetTwoFactor(id)\n   - deactivate(id)\n3. Create admin endpoints (ADMIN/SUPER_ADMIN only):\n   - GET/POST /v1/admin/organisations\n   - GET/PATCH /v1/admin/organisations/:id\n   - GET/POST /v1/admin/organisations/:orgId/users\n   - GET/PATCH /v1/admin/users/:id\n   - POST /v1/admin/users/:id/reset-2fa\n   - POST /v1/admin/users/:id/deactivate\n4. User creation: generate secure random password, set must_change_password: true.\n5. 2FA reset: clear totp_secret and totp_enabled.\n6. Deactivation: set is_active: false, revoke all refresh tokens.\n7. Audit all admin actions: admin.user.created, admin.user.2fa_reset, etc.",
+        "testStrategy": "Test only ADMIN can access admin endpoints; test user creation generates password and sends email; test 2FA reset clears TOTP; test deactivated user cannot login; test all actions create audit logs.",
+        "priority": "medium",
+        "dependencies": [
+          15,
+          18
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 31,
+        "title": "Implement audit log viewing endpoints",
+        "description": "Create endpoints for viewing audit logs with filtering by event type, user, entity, and date range. Requirements: BNF19, Phase S7.",
+        "details": "1. Create src/modules/audit/audit.repository.ts:\n   - list(orgId, filters, cursor, limit): paginated audit logs\n   - Filters: event (pattern match), user_id, entity_type, entity_id, date_from, date_to\n2. Create src/modules/audit/audit.service.ts:\n   - list(orgId, filters, cursor, limit): apply org filter via RLS, return DTOs\n3. Create src/modules/audit/audit.dto.ts:\n   - toAuditLogDTO: { id, event, user: { id, name }, entityType, entityId, changes, ipAddress, createdAt }\n   - Redact sensitive data from old_data/new_data (passwords, tokens)\n4. Create GET /v1/admin/audit-logs (ADMIN only):\n   - Query params: event, userId, entityType, entityId, from, to, cursor, limit\n5. Retention policy: audit logs kept for 2 years (Law 2024/017 compliance).\n6. No deletion endpoint - audit logs are immutable.",
+        "testStrategy": "Test list returns audit logs for organisation only; test filters apply correctly; test pagination works; test sensitive data redacted from changes; test non-admin cannot access.",
+        "priority": "medium",
+        "dependencies": [
+          16
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 32,
+        "title": "Implement health check and Prometheus metrics endpoints",
+        "description": "Create health check endpoints for load balancer probes and Prometheus metrics endpoint for observability. Requirements: Phase S7, L2 Table 23.",
+        "details": "1. Install prom-client in apps/api.\n2. Create src/lib/metrics.ts:\n   ```typescript\n   import { Registry, Counter, Histogram, Gauge } from 'prom-client';\n   \n   export const registry = new Registry();\n   \n   export const httpRequestsTotal = new Counter({\n     name: 'http_requests_total',\n     help: 'Total HTTP requests',\n     labelNames: ['method', 'path', 'status'],\n     registers: [registry],\n   });\n   \n   export const httpRequestDuration = new Histogram({\n     name: 'http_request_duration_seconds',\n     help: 'HTTP request duration',\n     labelNames: ['method', 'path'],\n     buckets: [0.01, 0.05, 0.1, 0.5, 1, 5],\n     registers: [registry],\n   });\n   \n   export const activeWebsockets = new Gauge({\n     name: 'websocket_connections_active',\n     help: 'Active WebSocket connections',\n     registers: [registry],\n   });\n   ```\n3. Create metrics middleware to track requests.\n4. Create endpoints:\n   - GET /health/live: returns 200 if process running\n   - GET /health/ready: returns 200 if DB and Redis connected\n   - GET /metrics: Prometheus format (protected, s360_metrics role only)\n5. Collect default metrics: process CPU, memory, event loop lag.\n6. Custom metrics: queue depth, cache hit rate, auth failures.",
+        "testStrategy": "Test /health/live returns 200; test /health/ready fails when DB down; test /metrics returns valid Prometheus format; test custom metrics increment correctly.",
+        "priority": "medium",
+        "dependencies": [
+          6,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 33,
+        "title": "Generate OpenAPI 3.0 specification from Zod schemas and add Swagger UI",
+        "description": "Auto-generate OpenAPI 3.0 specification from Zod schemas and serve Swagger UI for API documentation. Requirements: Phase S7, L5.",
+        "details": "1. Install @anatine/zod-openapi, swagger-ui-express in apps/api.\n2. Create src/lib/openapi.ts:\n   - Register all Zod schemas with OpenAPI extensions\n   - Generate OpenAPI document with paths from router definitions\n3. Extend Zod schemas in @secure360/shared with .openapi():\n   ```typescript\n   export const CreateIncidentInputSchema = z.object({\n     category_code: z.string().openapi({ example: 'PHI-01' }),\n     description: z.string().min(10).max(2000).openapi({ example: 'Received suspicious email...' }),\n     is_anonymous: z.boolean().default(false),\n     guided_questions: GuidedQuestionsSchema,\n   }).strict().openapi('CreateIncidentInput');\n   ```\n4. Create route metadata for OpenAPI:\n   - Tags for grouping (Auth, Incidents, Messages, Admin, etc.)\n   - Response schemas for success and error cases\n   - Security requirements (Bearer auth)\n5. Serve Swagger UI at /api-docs (development only).\n6. Export OpenAPI JSON at /v1/openapi.json.\n7. Validate generated spec with openapi-lint.",
+        "testStrategy": "Test generated OpenAPI spec passes validation; test Swagger UI loads and displays all endpoints; test try-it-out works for public endpoints; test schemas match actual request/response formats.",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          21
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 34,
+        "title": "Initialize Expo mobile app with routing, design tokens, and i18n",
+        "description": "Create Expo SDK 57 mobile app with Expo Router route groups, NativeWind styling, design tokens from shared package, and bilingual i18n. Requirements: Phase S8, BNF07.",
+        "details": "1. Run: npx create-expo-app apps/mobile --template expo-template-blank-typescript\n2. Install Expo SDK 57, expo-router, nativewind, react-native-reanimated.\n3. Configure app.json with scheme: 'secure360', plugins for router.\n4. Create route structure in app/:\n   ```\n   app/\n   ├── _layout.tsx           # Root layout with providers\n   ├── (auth)/               # Auth group (unauthenticated)\n   │   ├── _layout.tsx\n   │   ├── login.tsx\n   │   ├── verify-2fa.tsx\n   │   ├── forgot-password.tsx\n   │   └── first-login.tsx\n   ├── (app)/                # Main app group (authenticated)\n   │   ├── _layout.tsx\n   │   ├── (tabs)/           # Tab navigator\n   │   │   ├── _layout.tsx\n   │   │   ├── home.tsx\n   │   │   ├── incidents.tsx\n   │   │   └── profile.tsx\n   │   └── (report)/         # Report flow stack\n   │       ├── _layout.tsx\n   │       ├── category.tsx\n   │       ├── questions.tsx\n   │       ├── details.tsx\n   │       └── confirm.tsx\n   ```\n5. Create src/theme/ importing tokens from @secure360/shared.\n6. Configure NativeWind with custom theme from tokens.\n7. Set up i18n with expo-localization and i18next, loading keys from @secure360/shared.\n8. Create development build: eas build --profile development --platform android.",
+        "testStrategy": "Verify development build installs on Android emulator; test navigation between route groups; test design tokens apply correct colours (severity text #8F5600, #B34700); test i18n switches between fr and en.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 35,
+        "title": "Verify Expo SDK 57 compatibility with react-native-firebase and MMKV",
+        "description": "Day 1 verification that react-native-firebase messaging and react-native-mmkv v4 work with Expo SDK 57. Requirements: O2, Phase S8.",
+        "details": "1. Install @react-native-firebase/app, @react-native-firebase/messaging.\n2. Install react-native-mmkv v4.\n3. Configure expo plugins in app.json:\n   ```json\n   {\n     \"plugins\": [\n       \"@react-native-firebase/app\",\n       \"@react-native-firebase/messaging\",\n       [\"react-native-mmkv\", {}]\n     ]\n   }\n   ```\n4. Add google-services.json to project root.\n5. Create test component verifying:\n   - Firebase messaging initializes\n   - Can request notification permissions\n   - Can get FCM token\n   - MMKV storage works (set/get/delete)\n   - MMKV encryption works\n6. Build development build and test on physical Android device.\n7. Document any issues or workarounds needed.\n8. Fallback: If react-native-firebase fails, evaluate expo-notifications (requires supervisor approval).",
+        "testStrategy": "Test FCM token retrieval succeeds; test push notification received on device; test MMKV write/read round-trip; test MMKV encrypted storage with expo-secure-store key; document build size impact.",
+        "priority": "high",
+        "dependencies": [
+          34
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 36,
+        "title": "Implement mobile secure session with SecureStore and Axios refresh",
+        "description": "Create secure token storage using expo-secure-store, Axios client with automatic single-flight token refresh, and session persistence. Requirements: Phase S8, BF01.",
+        "details": "1. Install expo-secure-store, axios.\n2. Create src/lib/secure-storage.ts:\n   - Store tokens in SecureStore (keychain/keystore)\n   - Keys: 'secure360_access_token', 'secure360_refresh_token'\n3. Create src/lib/api-client.ts:\n   ```typescript\n   let isRefreshing = false;\n   let refreshSubscribers: ((token: string) => void)[] = [];\n   \n   const apiClient = axios.create({ baseURL: config.apiUrl });\n   \n   apiClient.interceptors.request.use(async (config) => {\n     const token = await secureStorage.getAccessToken();\n     if (token) config.headers.Authorization = `Bearer ${token}`;\n     return config;\n   });\n   \n   apiClient.interceptors.response.use(\n     (response) => response,\n     async (error) => {\n       if (error.response?.status === 401 && !error.config._retry) {\n         if (isRefreshing) {\n           return new Promise((resolve) => {\n             refreshSubscribers.push((token) => {\n               error.config.headers.Authorization = `Bearer ${token}`;\n               resolve(apiClient(error.config));\n             });\n           });\n         }\n         \n         isRefreshing = true;\n         error.config._retry = true;\n         \n         try {\n           const { accessToken, refreshToken } = await refreshTokens();\n           await secureStorage.setTokens(accessToken, refreshToken);\n           refreshSubscribers.forEach((cb) => cb(accessToken));\n           refreshSubscribers = [];\n           error.config.headers.Authorization = `Bearer ${accessToken}`;\n           return apiClient(error.config);\n         } finally {\n           isRefreshing = false;\n         }\n       }\n       throw error;\n     }\n   );\n   ```\n4. Handle session expiry: redirect to login, clear tokens.",
+        "testStrategy": "Test tokens stored in SecureStore (not AsyncStorage); test expired access token triggers refresh; test single-flight refresh doesn't duplicate calls; test refresh token expiry redirects to login.",
+        "priority": "high",
+        "dependencies": [
+          35
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 37,
+        "title": "Implement mobile authentication screens and flow",
+        "description": "Create login, 2FA verification, forgot password, and first login screens with Redux state management. Requirements: Phase S8, BF01, M01-M05.",
+        "details": "1. Install @reduxjs/toolkit, react-redux.\n2. Create src/store/slices/auth.slice.ts:\n   - State: { user, isAuthenticated, requiresTwoFactor, requiresPasswordChange, loading, error }\n   - Actions: login, verifyTwoFactor, forgotPassword, resetPassword, changePassword, logout\n3. Create auth screens following M01-M05 mockups:\n   - (auth)/login.tsx: email + password form, loading state, error display\n   - (auth)/verify-2fa.tsx: 6-digit code input with auto-submit\n   - (auth)/forgot-password.tsx: email input, success message\n   - (auth)/first-login.tsx: new password + confirm with requirements\n4. Implement navigation guards in _layout.tsx:\n   - Redirect to login if not authenticated\n   - Redirect to first-login if must_change_password\n   - Redirect to verify-2fa if requiresTwoFactor\n5. Add biometric prompt option for returning users (optional, stored preference).\n6. All error messages from i18n, never hardcoded.",
+        "testStrategy": "Test login flow with valid credentials; test 2FA flow redirects correctly; test invalid credentials show error; test first-login enforces password change; test forgot-password sends email; test logout clears session.",
+        "priority": "high",
+        "dependencies": [
+          36
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 38,
+        "title": "Implement encrypted MMKV Redux persistence with migrations",
+        "description": "Configure Redux persistence using encrypted MMKV storage with versioned migrations for offline data. Requirements: Phase S8, BNF08.",
+        "details": "1. Install redux-persist.\n2. Create src/lib/mmkv-storage.ts:\n   ```typescript\n   import { MMKV } from 'react-native-mmkv';\n   import * as SecureStore from 'expo-secure-store';\n   \n   const getEncryptionKey = async (): Promise<string> => {\n     let key = await SecureStore.getItemAsync('mmkv_key');\n     if (!key) {\n       key = generateSecureKey(); // crypto.getRandomValues\n       await SecureStore.setItemAsync('mmkv_key', key);\n     }\n     return key;\n   };\n   \n   export const createEncryptedMMKV = async () => {\n     const key = await getEncryptionKey();\n     return new MMKV({ id: 'secure360', encryptionKey: key });\n   };\n   ```\n3. Create MMKV storage adapter for redux-persist.\n4. Create src/store/migrations.ts:\n   ```typescript\n   export const migrations = {\n     0: (state) => state, // initial version\n     1: (state) => ({ ...state, incidents: { ...state.incidents, offlineQueue: [] } }),\n     // Add migrations as schema evolves\n   };\n   ```\n5. Configure persist in store:\n   - Whitelist: incidents (for offline), user preferences\n   - Blacklist: auth tokens (in SecureStore), loading states\n6. Add version tracking for migrations.\n7. Handle migration errors gracefully (clear and re-sync).",
+        "testStrategy": "Test data persists across app restart; test encryption key stored in SecureStore; test migration runs on version bump; test corrupted data clears and recovers; verify MMKV data encrypted on disk.",
+        "priority": "high",
+        "dependencies": [
+          35,
+          37
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 39,
+        "title": "Implement mobile incident reporting flow with guided questions",
+        "description": "Create the incident reporting flow screens (M08a-M11b) with category selection, guided severity questions, description, and photo attachment. Requirements: BF02-BF05, Phase S9.",
+        "details": "1. Create report screens following mockups:\n   - (report)/category.tsx: 9 category groups, 34 categories from shared\n   - (report)/questions.tsx: 3 yes/no guided questions for severity\n   - (report)/details.tsx: title, description (multiline), confidential toggle\n   - (report)/photos.tsx: capture/select up to 5 photos, preview, remove\n   - (report)/confirm.tsx: summary, submit button\n2. Create src/store/slices/report.slice.ts:\n   - State: { step, categoryCode, guidedQuestions, title, description, isAnonymous, photos, submitting }\n   - Actions: setCategory, setQuestions, setDetails, addPhoto, removePhoto, submit, reset\n3. Photo handling:\n   - Use expo-image-picker with MediaTypeOptions.Images\n   - Compress to max 2 MiB using expo-image-manipulator\n   - Store as base64 temporarily, upload separately\n4. Form validation with react-hook-form and Zod schemas from shared.\n5. Progress indicator showing current step.\n6. Back navigation with confirmation if data entered.\n7. Handle keyboard avoiding for description input.",
+        "testStrategy": "Test complete flow from category to submit; test all 34 categories accessible; test guided questions calculate correct severity; test photos compress to under 2 MiB; test confidential toggle stored; test back navigation preserves data.",
+        "priority": "high",
+        "dependencies": [
+          38
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 40,
+        "title": "Implement offline mutation queue with idempotency and retry",
+        "description": "Create offline mutation queue with idempotency keys, exponential backoff retry, dependencies between operations, and NEEDS_USER state for failures. Requirements: BF10, BNF08, Phase S9.",
+        "details": "1. Create src/lib/offline-queue.ts:\n   ```typescript\n   interface QueuedMutation {\n     id: string;\n     idempotencyKey: string;\n     type: 'CREATE_INCIDENT' | 'UPLOAD_ATTACHMENT' | 'SEND_MESSAGE';\n     payload: unknown;\n     dependsOn?: string;  // id of mutation that must complete first\n     status: 'PENDING' | 'IN_PROGRESS' | 'NEEDS_USER' | 'COMPLETED' | 'FAILED';\n     retryCount: number;\n     lastError?: string;\n     createdAt: number;\n   }\n   \n   class OfflineQueue {\n     async enqueue(mutation: Omit<QueuedMutation, 'id' | 'status' | 'retryCount'>): Promise<string>;\n     async process(): Promise<void>;\n     async retry(id: string): Promise<void>;\n     async remove(id: string): Promise<void>;\n   }\n   ```\n2. Create src/store/slices/offline.slice.ts for queue state.\n3. Implement processing logic:\n   - Check network connectivity (NetInfo)\n   - Process in order, respecting dependsOn\n   - Exponential backoff with jitter: delay = min(2^n * 1000 + random(0, 1000), 60000)\n   - After 5 retries, set NEEDS_USER status for manual retry\n4. Create AttachmentUploader that queues uploads after incident creation.\n5. Show queue status in UI (pending count, failed items).\n6. Trigger processing on: app foreground, network restore, manual refresh.",
+        "testStrategy": "Test mutations queue when offline; test auto-process when online; test exponential backoff delays; test dependsOn respected (upload waits for create); test NEEDS_USER after max retries; test idempotency key prevents duplicates.",
+        "priority": "high",
+        "dependencies": [
+          38,
+          39
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 41,
+        "title": "Implement mobile incidents list and detail screens",
+        "description": "Create My Incidents list screen with pull-to-refresh and incident detail screen with status timeline and conversation. Requirements: BF06, BF08, BF09, Phase S9, M12-M15.",
+        "details": "1. Create RTK Query API slice for incidents:\n   ```typescript\n   export const incidentsApi = createApi({\n     reducerPath: 'incidentsApi',\n     baseQuery: fetchBaseQuery({ baseUrl: '/v1' }),\n     tagTypes: ['Incident', 'Message'],\n     endpoints: (builder) => ({\n       getMyIncidents: builder.query({ query: (params) => ({ url: '/incidents', params }) }),\n       getIncident: builder.query({ query: (id) => `/incidents/${id}` }),\n       getMessages: builder.query({ query: (incidentId) => `/incidents/${incidentId}/messages` }),\n       sendMessage: builder.mutation({ ... }),\n     }),\n   });\n   ```\n2. Create screens:\n   - (tabs)/incidents.tsx: FlatList with cursor pagination, pull-to-refresh, empty state\n   - incident/[id].tsx: detail view with tabs (Details, Timeline, Conversation)\n3. Incident card component showing: reference, category icon, severity badge, status chip, date.\n4. Detail screen:\n   - Header with reference, severity, status\n   - Description section\n   - Attachments gallery (tap to view full)\n   - Status timeline with dates\n   - Conversation with message input\n5. Optimistic UI for sending messages.\n6. Handle offline: show cached data with 'Last synced' timestamp.",
+        "testStrategy": "Test list loads with pagination; test pull-to-refresh updates data; test detail shows all incident info; test timeline displays status changes; test message send works; test offline shows cached data.",
+        "priority": "medium",
+        "dependencies": [
+          40
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 42,
+        "title": "Implement mobile notifications centre and push handling",
+        "description": "Create in-app notifications centre screen and handle incoming push notifications with deep linking. Requirements: BF07, BNF14, BNF16, Phase S9, M16-M17.",
+        "details": "1. Create src/lib/push-notifications.ts:\n   - Register for push notifications on login\n   - Send FCM token to backend\n   - Handle foreground notifications (show in-app alert)\n   - Handle background/killed notifications (deep link on tap)\n2. Create notifications screen:\n   - (tabs)/notifications.tsx: list with unread indicator\n   - Mark as read on view\n   - Mark all read button\n3. Create NotificationItem component:\n   - Icon based on type\n   - Title and body from i18n keys\n   - Timestamp with relative formatting\n   - Unread dot indicator\n4. Deep linking configuration in app.json:\n   ```json\n   {\n     \"scheme\": \"secure360\",\n     \"android\": {\n       \"intentFilters\": [{\n         \"action\": \"VIEW\",\n         \"data\": [{ \"scheme\": \"secure360\", \"host\": \"incident\", \"pathPrefix\": \"/\" }]\n       }]\n     }\n   }\n   ```\n5. Handle deep links: secure360://incident/{id} opens incident detail.\n6. Badge count on tab icon for unread notifications.",
+        "testStrategy": "Test push notification received in foreground; test notification tap opens correct incident; test deep link from killed state works; test mark as read updates UI; test badge count accurate.",
+        "priority": "medium",
+        "dependencies": [
+          35,
+          41
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 43,
+        "title": "Complete mobile app with remaining screens and release hardening",
+        "description": "Implement remaining screens (home, profile, settings, help) and apply release build hardening. Requirements: Phase S10, BF17, M01-M21.",
+        "details": "1. Create remaining screens:\n   - (tabs)/home.tsx: dashboard summary, quick actions, recent incidents\n   - profile/index.tsx: user info, edit profile\n   - profile/security.tsx: change password, 2FA settings, biometric toggle\n   - profile/language.tsx: language selector (fr/en) with immediate switch\n   - help/index.tsx: FAQ, category descriptions, contact info\n2. Implement UI states:\n   - Loading: skeleton screens\n   - Empty: illustrations with helpful text\n   - Error: retry button, error message\n   - Offline: banner with last sync time\n   - Session expired: redirect to login with message\n3. Release hardening (eas.json production profile):\n   - Enable Hermes\n   - Enable R8/ProGuard minification\n   - Remove source maps (keep for crash reporting upload)\n   - Strip console.* calls\n   - Enable certificate pinning (TrustKit or similar)\n   - Enable root/jailbreak detection\n4. Verify APK size < 50 MB (use per-ABI splits if needed).\n5. Add version info in settings screen.",
+        "testStrategy": "Test all screens render correctly; test language switch applies immediately; test offline banner shows when disconnected; test release build passes root detection on non-rooted device; verify APK size under 50 MB.",
+        "priority": "medium",
+        "dependencies": [
+          42
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 44,
+        "title": "Initialize web dashboard with Vite, React 19, and authentication",
+        "description": "Create web dashboard app with Vite, React 19, TanStack Query, and secure authentication using HttpOnly refresh cookies. Requirements: Phase S11, W01-W03.",
+        "details": "1. Run: npm create vite@latest apps/web -- --template react-ts\n2. Install: @tanstack/react-query, zustand, react-router-dom@7, tailwindcss@4.\n3. Install shadcn/ui components: button, input, card, dialog, etc.\n4. Configure Vite proxy for /api/v1 to backend.\n5. Create src/lib/auth.ts:\n   - Store access token in memory (not localStorage)\n   - Refresh token via HttpOnly cookie (set by backend)\n   - Automatic refresh before expiry\n6. Create auth routes:\n   - /login: email + password form\n   - /verify-2fa: code input\n   - /forgot-password: email form\n7. Create protected route wrapper checking auth state.\n8. Configure Content Security Policy headers:\n   ```\n   default-src 'self';\n   script-src 'self';\n   style-src 'self' 'unsafe-inline';\n   connect-src 'self' wss://;\n   img-src 'self' data: blob:;\n   ```\n9. Create layout with sidebar navigation.",
+        "testStrategy": "Test login stores token in memory (not localStorage); test refresh cookie set as HttpOnly; test protected routes redirect to login; test CSP headers prevent inline scripts.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 45,
+        "title": "Implement web incident queue with live updates and SLA timers",
+        "description": "Create technician queue view with real-time updates via WebSocket and visual SLA timers. Requirements: BF13, Phase S11, W04-W06.",
+        "details": "1. Create src/pages/Queue.tsx:\n   - Table view with columns: Reference, Category, Severity, Status, Assigned, Created, SLA\n   - Filters: status, severity, category, assigned (me/unassigned/all)\n   - Sort by: created date, SLA remaining\n2. Create SLA timer component:\n   - Calculate time remaining based on severity and created date\n   - Visual indicator: green (>50%), yellow (25-50%), red (<25%), black (breached)\n   - Update every minute\n3. Integrate WebSocket for live updates:\n   - Connect on mount, reconnect on disconnect\n   - Handle events: incident.created, incident.updated, incident.assigned\n   - Optimistically update UI, reconcile with server data\n4. Create incident actions:\n   - Assign to me button\n   - Re-qualify severity modal\n   - Status transition buttons based on state machine\n5. Keyboard shortcuts:\n   - 'a': assign selected to me\n   - 'r': open resolve modal\n   - 'j/k': navigate list\n6. URL state sync for filters.",
+        "testStrategy": "Test queue loads incidents; test filters apply correctly; test SLA timer colours change at thresholds; test WebSocket updates UI in real-time; test keyboard shortcuts work; test URL reflects filters.",
+        "priority": "medium",
+        "dependencies": [
+          26,
+          44
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 46,
+        "title": "Implement web incident detail with conversation and internal notes",
+        "description": "Create incident detail page with full information, conversation thread, and internal notes for SFC staff. Requirements: BF08, Phase S11, W07-W10.",
+        "details": "1. Create src/pages/Incident.tsx:\n   - Header: reference, severity badge, status chip, actions dropdown\n   - Tabs: Details, Timeline, Conversation, Attachments\n2. Details tab:\n   - Category with icon\n   - Description\n   - Guided question answers\n   - Reporter (masked if confidential)\n   - Assigned technician\n3. Timeline tab:\n   - Status history with who changed and when\n   - Visual timeline with icons\n4. Conversation tab:\n   - Messages list with sender, timestamp\n   - Internal notes styled differently (yellow background)\n   - Message input with send button\n   - Toggle for internal note\n5. Attachments tab:\n   - Grid of thumbnails\n   - Click to open lightbox\n   - Download button\n6. Action modals:\n   - Assign modal: select technician from dropdown\n   - Re-qualify modal: select new severity with reason\n   - Resolve modal: resolution summary textarea\n7. Confidential handling: never show reporter name to non-reporters.",
+        "testStrategy": "Test detail loads all information; test conversation shows messages; test internal notes only for staff; test confidential masks reporter; test actions trigger correct API calls; test attachments display.",
+        "priority": "medium",
+        "dependencies": [
+          45
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 47,
+        "title": "Implement web statistics dashboard with charts",
+        "description": "Create statistics dashboard with at least 5 chart types using Recharts for manager and executive views. Requirements: BF11, BF12, BF16, Phase S11, W13-W16.",
+        "details": "1. Install recharts.\n2. Create src/pages/Statistics.tsx:\n   - Date range picker (preset: today, 7d, 30d, 90d, custom)\n   - Summary cards: total incidents, by status, avg resolution time\n3. Create chart components:\n   - PieChart: incidents by status\n   - BarChart: incidents by severity\n   - HorizontalBarChart: incidents by category (top 10)\n   - LineChart: incident trend over time\n   - Histogram: resolution time distribution\n4. Create executive summary view:\n   - Key metrics in large cards\n   - Trend arrows (up/down vs previous period)\n   - Top issues requiring attention\n5. Create manager view:\n   - Organisation-specific stats\n   - Team performance metrics\n   - Comparison to previous period\n6. Responsive layout:\n   - Desktop: 2-3 charts per row\n   - Tablet: 2 charts per row\n   - Mobile: 1 chart per row\n7. Export to PDF button using client-side PDF generation.",
+        "testStrategy": "Test charts render with data; test date range picker filters data; test all 5+ chart types display; test executive/manager views show correct data; test responsive layout adapts.",
+        "priority": "medium",
+        "dependencies": [
+          28,
+          44
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 48,
+        "title": "Implement web admin pages for organisations, users, and audit logs",
+        "description": "Create admin pages for managing organisations, users, and viewing audit logs. Requirements: BF15, BNF19, Phase S11, W17-W22.",
+        "details": "1. Create src/pages/admin/Organisations.tsx:\n   - Table: name, slug, users count, incidents count, status, actions\n   - Create organisation modal\n   - Edit organisation modal\n   - Deactivate with confirmation\n2. Create src/pages/admin/Users.tsx:\n   - Table: name, email, role, organisation, 2FA status, status, actions\n   - Create user modal (generates password, sends email)\n   - Edit user modal\n   - Reset 2FA with confirmation\n   - Deactivate with confirmation\n3. Create src/pages/admin/AuditLog.tsx:\n   - Table: timestamp, event, user, entity, IP\n   - Filters: event type, user, entity type, date range\n   - Click to expand: show changes (old → new)\n   - Export to CSV button\n4. Implement role-based access:\n   - ADMIN: own organisation users only\n   - SUPER_ADMIN: all organisations and users\n5. Add confirmation dialogs for destructive actions.\n6. Show toast notifications for success/error.",
+        "testStrategy": "Test organisation CRUD operations; test user CRUD operations; test 2FA reset works; test deactivation prevents login; test audit log filters; test role-based access restrictions.",
+        "priority": "medium",
+        "dependencies": [
+          30,
+          31,
+          44
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 49,
+        "title": "Create production Docker Compose with Nginx, monitoring, and backups",
+        "description": "Set up production Docker Compose configuration with Nginx TLS, API replicas, worker, PostgreSQL, Redis, Prometheus, Grafana, and backup job. Requirements: Phase S12, L9.",
+        "details": "1. Create infra/docker-compose.prod.yml:\n   ```yaml\n   services:\n     nginx:\n       image: nginx:1.27-alpine\n       ports: ['80:80', '443:443']\n       volumes:\n         - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro\n         - ./nginx/certs:/etc/nginx/certs:ro\n         - ./nginx/acme:/var/www/acme:ro\n       depends_on: [api]\n     api:\n       build: ../../apps/api\n       deploy:\n         replicas: 2\n         resources:\n           limits: { memory: 512M }\n       environment:\n         - NODE_ENV=production\n       secrets: [jwt_secret, db_password, encryption_key]\n     worker:\n       build: ../../apps/api\n       command: npm run worker\n       deploy:\n         resources:\n           limits: { memory: 256M }\n     postgres:\n       image: postgres:16-alpine\n       volumes:\n         - pgdata:/var/lib/postgresql/data\n       deploy:\n         resources:\n           limits: { memory: 1G }\n     redis:\n       image: redis:8-alpine\n       command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru\n     prometheus:\n       image: prom/prometheus\n       volumes:\n         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro\n     grafana:\n       image: grafana/grafana\n       volumes:\n         - grafana_data:/var/lib/grafana\n     backup:\n       image: postgres:16-alpine\n       command: /scripts/backup.sh\n       volumes:\n         - ./backup/scripts:/scripts:ro\n         - backup_data:/backups\n   ```\n2. Create Nginx config with least_conn load balancing, TLS 1.2+.\n3. Create Prometheus config scraping /metrics.\n4. Create Grafana dashboards (import existing).\n5. Create backup script with pg_dump, retention policy.",
+        "testStrategy": "Test docker compose up starts all services; test Nginx routes to API replicas; test TLS termination works; test Prometheus scrapes metrics; test Grafana dashboards load; test backup script creates valid dump.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          32
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 50,
+        "title": "Implement CI/CD with GitHub Actions for testing and deployment",
+        "description": "Create GitHub Actions workflows for CI (lint, test, type check) and CD (rolling deployment to SFC host). Requirements: Phase S12, L10.",
+        "details": "1. Create .github/workflows/ci.yml:\n   ```yaml\n   name: CI\n   on: [push, pull_request]\n   jobs:\n     lint:\n       runs-on: ubuntu-latest\n       steps:\n         - uses: actions/checkout@v4\n         - uses: actions/setup-node@v4\n           with: { node-version: 24 }\n         - run: npm ci\n         - run: npm run lint\n     typecheck:\n       runs-on: ubuntu-latest\n       steps:\n         - run: npm run typecheck\n     test:\n       runs-on: ubuntu-latest\n       services:\n         postgres:\n           image: postgres:16\n           env: { POSTGRES_PASSWORD: test }\n         redis:\n           image: redis:8\n       steps:\n         - run: npm test\n   ```\n2. Create .github/workflows/deploy.yml:\n   ```yaml\n   name: Deploy\n   on:\n     push:\n       branches: [main]\n   jobs:\n     deploy:\n       runs-on: ubuntu-latest\n       steps:\n         - uses: appleboy/ssh-action@master\n           with:\n             host: ${{ secrets.HOST }}\n             username: ${{ secrets.USER }}\n             key: ${{ secrets.SSH_KEY }}\n             script: |\n               cd /opt/secure360\n               git pull\n               docker compose -f infra/docker-compose.prod.yml pull\n               docker compose -f infra/docker-compose.prod.yml up -d --no-deps api worker\n               docker compose -f infra/docker-compose.prod.yml exec api npm run db:migrate\n   ```\n3. Configure rolling deployment (one replica at a time).\n4. Add deployment notifications to team channel.\n5. Configure branch protection requiring CI pass.",
+        "testStrategy": "Test CI runs on PR; test all checks pass on clean code; test failing lint blocks merge; test deployment triggers on main push; test rolling deployment maintains uptime.",
+        "priority": "high",
+        "dependencies": [
+          49
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 51,
+        "title": "Execute load testing for 500 concurrent users",
+        "description": "Perform load testing validating system handles 500 concurrent users with acceptable response times. Requirements: BNF09, Phase S12.",
+        "details": "1. Install k6 for load testing.\n2. Create tests/load/scenarios.js:\n   ```javascript\n   import http from 'k6/http';\n   import { check, sleep } from 'k6';\n   \n   export const options = {\n     stages: [\n       { duration: '1m', target: 100 },  // ramp up\n       { duration: '3m', target: 500 },  // peak\n       { duration: '1m', target: 0 },    // ramp down\n     ],\n     thresholds: {\n       http_req_duration: ['p(95)<500'],  // 95% under 500ms\n       http_req_failed: ['rate<0.01'],    // <1% errors\n     },\n   };\n   \n   export default function () {\n     // Login flow\n     const loginRes = http.post('/api/v1/auth/login', { email, password });\n     check(loginRes, { 'login succeeded': (r) => r.status === 200 });\n     \n     // List incidents\n     const listRes = http.get('/api/v1/incidents', { headers: { Authorization } });\n     check(listRes, { 'list succeeded': (r) => r.status === 200 });\n     \n     sleep(1);\n   }\n   ```\n3. Test scenarios:\n   - Authentication: login, refresh, logout\n   - Incidents: list, create, update\n   - Messages: send, list\n   - Statistics: dashboard queries\n4. Identify and fix bottlenecks:\n   - Database query optimization\n   - Redis caching effectiveness\n   - Connection pooling\n5. Document results: p50, p95, p99 latencies, error rate.",
+        "testStrategy": "Test system handles 500 concurrent users; verify p95 latency < 500ms; verify error rate < 1%; verify no memory leaks during sustained load; verify database connections stable.",
+        "priority": "medium",
+        "dependencies": [
+          49
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 52,
+        "title": "Execute security review and OWASP Mobile checklist",
+        "description": "Perform comprehensive security review of all critical modules and verify OWASP Mobile Application Security score >= 8/10. Requirements: BNF13, Phase S12.",
+        "details": "1. Security review per docs/AI_WORKFLOW.md §4:\n   - Auth module: token handling, 2FA, password policies\n   - Tenant isolation: RLS policies, cross-tenant tests\n   - File uploads: magic byte validation, path traversal\n   - Crypto: algorithm choices, key management\n   - Mobile: secure storage, pinning, root detection\n   - API: injection prevention, rate limiting\n2. OWASP MASVS checklist (target 8/10):\n   - MASVS-STORAGE: encrypted storage, no sensitive data in logs\n   - MASVS-CRYPTO: strong algorithms, secure random\n   - MASVS-AUTH: session management, biometric\n   - MASVS-NETWORK: TLS, certificate pinning\n   - MASVS-PLATFORM: permission minimization, deep link validation\n   - MASVS-CODE: code obfuscation, anti-tampering\n   - MASVS-RESILIENCE: root detection, debugger detection\n3. Penetration testing focus areas:\n   - SQL injection via Prisma\n   - XSS in web dashboard\n   - CSRF protection\n   - JWT algorithm confusion\n   - Insecure direct object references\n4. Document findings by severity (Critical, High, Medium, Low).\n5. Create remediation plan with priorities.",
+        "testStrategy": "Document security review findings; verify all Critical/High issues fixed; verify MASVS score >= 8/10; run automated security scanning (npm audit, Snyk); penetration test critical endpoints.",
+        "priority": "high",
+        "dependencies": [
+          43,
+          48
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 53,
+        "title": "Build and test production APK with EAS",
+        "description": "Create production Android APK using EAS Build with all hardening measures and verify on physical devices. Requirements: Phase S12, L6.",
+        "details": "1. Configure eas.json production profile:\n   ```json\n   {\n     \"build\": {\n       \"production\": {\n         \"android\": {\n           \"buildType\": \"apk\",\n           \"gradleCommand\": \":app:assembleRelease\",\n           \"env\": {\n             \"EXPO_PUBLIC_API_URL\": \"https://api.secure360.cm\"\n           }\n         },\n         \"env\": {\n           \"APP_ENV\": \"production\"\n         }\n       }\n     }\n   }\n   ```\n2. Generate upload keystore and configure signing.\n3. Build APK: eas build --platform android --profile production\n4. Verify APK:\n   - Size < 50 MB (use per-ABI splits if needed)\n   - No debug symbols\n   - ProGuard/R8 minification applied\n   - Hermes enabled\n   - Source maps uploaded to crash reporting (not in APK)\n5. Test on physical devices:\n   - Samsung Galaxy (mid-range)\n   - Low-memory device (2GB RAM)\n   - Various Android versions (10, 11, 12, 13)\n6. Test scenarios:\n   - Full reporting flow offline then sync\n   - Push notifications\n   - Deep linking\n   - Session expiry handling\n7. Perform SUS usability test with >= 5 users (BNF13).",
+        "testStrategy": "Verify APK builds successfully; verify size < 50 MB; test on 3+ physical devices; verify offline mode works; verify push notifications received; achieve SUS score >= 68 (above average).",
+        "priority": "high",
+        "dependencies": [
+          43,
+          52
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 54,
+        "title": "Create backup and restore procedure with verification",
+        "description": "Implement automated backup job with off-host storage and verified restore procedure. Requirements: O4, Phase S12.",
+        "details": "1. Create infra/backup/scripts/backup.sh:\n   ```bash\n   #!/bin/bash\n   set -euo pipefail\n   \n   TIMESTAMP=$(date +%Y%m%d_%H%M%S)\n   BACKUP_FILE=\"secure360_${TIMESTAMP}.sql.gz\"\n   \n   # Dump database\n   pg_dump -h postgres -U secure360 secure360 | gzip > /backups/${BACKUP_FILE}\n   \n   # Upload to off-host storage (within Cameroon)\n   rclone copy /backups/${BACKUP_FILE} remote:secure360-backups/\n   \n   # Cleanup old backups (keep 30 days)\n   find /backups -name '*.sql.gz' -mtime +30 -delete\n   rclone delete remote:secure360-backups/ --min-age 30d\n   \n   # Verify backup integrity\n   gunzip -t /backups/${BACKUP_FILE}\n   \n   echo \"Backup completed: ${BACKUP_FILE}\"\n   ```\n2. Create infra/backup/scripts/restore.sh:\n   ```bash\n   #!/bin/bash\n   BACKUP_FILE=$1\n   \n   # Stop API and worker\n   docker compose stop api worker\n   \n   # Restore database\n   gunzip -c ${BACKUP_FILE} | psql -h postgres -U secure360 secure360\n   \n   # Restart services\n   docker compose start api worker\n   ```\n3. Configure backup schedule: daily at 2 AM.\n4. Configure off-host target within Cameroon (Law 2024/017).\n5. Test restore procedure:\n   - Create backup\n   - Modify data\n   - Restore backup\n   - Verify data restored correctly\n6. Document RTO (Recovery Time Objective) and RPO (Recovery Point Objective).",
+        "testStrategy": "Test backup script creates valid compressed dump; test restore script recovers data correctly; test off-host upload succeeds; test old backup cleanup works; document RTO < 1 hour, RPO < 24 hours.",
+        "priority": "high",
+        "dependencies": [
+          49
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 55,
+        "title": "Create user manual and administrator documentation",
+        "description": "Write bilingual user manual (fr/en) for mobile app and administrator manual for web dashboard. Requirements: Phase S13, L11-L12.",
+        "details": "1. Create docs/user-manual/ directory.\n2. Mobile user manual (fr/en):\n   - Getting started: login, first password change, 2FA setup\n   - Reporting an incident: step-by-step with screenshots\n   - Tracking incidents: viewing status, timeline, messages\n   - Offline mode: what works, how to sync\n   - Notifications: enabling, managing\n   - Profile and settings: language, security\n   - FAQ and troubleshooting\n3. Administrator manual:\n   - Dashboard overview\n   - Queue management: assign, re-qualify, resolve\n   - Incident details: conversation, internal notes\n   - Statistics and reports\n   - User management: create, edit, deactivate, 2FA reset\n   - Organisation management\n   - Audit log review\n   - System health monitoring\n4. Use consistent formatting:\n   - Screenshots with annotations\n   - Step-by-step numbered lists\n   - Warning callouts for important notes\n5. Export as PDF for offline distribution.\n6. Include version number and last updated date.",
+        "testStrategy": "Review manual with non-technical user; verify all features documented; verify screenshots match current UI; verify both fr and en versions complete; verify PDF exports correctly.",
+        "priority": "low",
+        "dependencies": [
+          43,
+          48
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2026-10-13T22:15:08.547Z",
+      "updated": "2026-10-13T22:15:08.547Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
