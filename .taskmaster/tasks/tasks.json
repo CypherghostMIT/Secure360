@@ -4,181 +4,120 @@
       {
         "id": 1,
         "title": "Initialize shared package with Zod schemas and TypeScript configuration",
-        "description": "Create packages/shared workspace with Zod 4 schemas as single source of truth, TypeScript types, error codes (L2 Table 7), category codes (34 categories from L1 Table 12), i18n keys for shared resources only (fr/en), design tokens, computeSeverity pure function, and build with tsup to ESM/CJS. Requirements: BF02-BF05, BNF07.",
-        "status": "in-progress",
-        "dependencies": [],
+        "description": "Create packages/shared workspace with Zod schemas as single source of truth, TypeScript types, error codes, category codes (34 categories from L1 Table 12), i18n keys (fr/en), and design tokens including WCAG AA severity colours. Requirements: BF02-BF05, BNF07.",
+        "details": "1. Create packages/shared/package.json with name '@secure360/shared', exports field for ESM/CJS.\n2. Create tsconfig.json extending tsconfig.base.json with composite:true, outDir:dist.\n3. Create src/schemas/ with Zod schemas using .strict():\n   - auth.schema.ts: LoginInput, VerifyTotpInput, RefreshInput, ResetPasswordInput\n   - incident.schema.ts: CreateIncidentInput, UpdateIncidentInput, IncidentFilters\n   - user.schema.ts: CreateUserInput, UpdateUserInput\n   - organization.schema.ts: CreateOrgInput\n   - message.schema.ts: CreateMessageInput\n4. Create src/types/ inferring types from Zod schemas: export type LoginInput = z.infer<typeof LoginInputSchema>\n5. Create src/constants/error-codes.ts: AUTH_INVALID_CREDENTIALS, AUTH_2FA_REQUIRED, TENANT_FORBIDDEN, etc. per L2 Table 7.\n6. Create src/constants/categories.ts: 9 groups, 34 categories with fr/en labels, default severities (L1 Table 12 + SIM swap MOB-02).\n7. Create src/i18n/: fr.json and en.json with all UI strings, shared between mobile and web.\n8. Create src/tokens/: colors.ts (#8F5600 for Moderate text, #B34700 for High text), spacing.ts, typography.ts.\n9. Create src/index.ts barrel export.\n10. Update root tsconfig.json references array to include packages/shared.",
+        "testStrategy": "Unit tests with Vitest: validate Zod schemas accept valid input, reject invalid input; verify all 34 categories exist with both fr and en labels; verify design token values match specification; verify TypeScript compilation produces correct .d.ts files.",
         "priority": "high",
-        "details": "1. Create packages/shared/package.json with name '@secure360/shared', exports field for ESM/CJS dual build, add dependencies: zod@4, tsup, vitest.\n2. Create tsconfig.json extending ../tsconfig.base.json with composite:true, outDir:dist.\n3. Create src/schemas/ with Zod 4 schemas using .strict():\n   - auth.schema.ts: LoginInput, VerifyTotpInput, RefreshInput, ResetPasswordInput\n   - incident.schema.ts: CreateIncidentInput (categoryCode, title, description, answers {moneyLost, sharedSecret, othersAffected: 'yes'|'no'|'unknown'}, isAnonymous, optional location, optional deviceAffected, clientRequestId uuid), UpdateIncidentInput (version: int, status, severity, assignedTo, resolutionNotes), IncidentFilters\n   - user.schema.ts: CreateUserInput, UpdateUserInput\n   - organization.schema.ts: CreateOrgInput\n   - message.schema.ts: CreateMessageInput\n   - common.schema.ts: UuidParamsSchema, CursorPaginationQuerySchema (limit 1-100 default 20, cursor optional), SuccessResponseSchema ({success: true, data, message?}), ErrorResponseSchema ({success: false, error: {code, message, details?}})\n4. Create src/types/ inferring types from Zod schemas: export type LoginInput = z.infer<typeof LoginInputSchema>\n5. Create src/constants/error-codes.ts with L2 Table 7 codes mapped to HTTP status:\n   - VALIDATION_ERROR (400), UNAUTHENTICATED (401), TOKEN_EXPIRED (401), MFA_REQUIRED (401),\n   - TOKEN_REUSE_DETECTED (401), FORBIDDEN (403), NOT_FOUND (404), CONFLICT (409),\n   - PAYLOAD_TOO_LARGE (413), UNSUPPORTED_MEDIA_TYPE (415), IDEMPOTENCY_KEY_REUSED (409),\n   - RATE_LIMITED (429), INTERNAL_ERROR (500), SERVICE_UNAVAILABLE (503).\n   Note: No tenant-specific code; other orgs' objects return NOT_FOUND.\n6. Create src/constants/categories.ts: 9 groups, 34 categories with fr/en labels, default severities (L1 Table 12 + SIM swap MOB-02).\n7. Create src/constants/severities.ts: LOW, MODERATE, HIGH, CRITICAL with fr/en labels.\n8. Create src/utils/compute-severity.ts: pure function computeSeverity(categoryDefault: Severity, answers: {moneyLost: boolean, sharedSecret: boolean, othersAffected: 'yes'|'no'|'unknown'}): Severity implementing L1 section 7.3:\n   - Start from categoryDefault\n   - Each 'yes' raises one level, capped at CRITICAL\n   - moneyLost=true means at least HIGH\n   - 'unknown' counts as 'no'\n9. Create src/i18n/: fr.json and en.json with SHARED keys only: groups, categories, severities, statuses, error codes. Screen-specific text stays in apps.\n10. Create src/tokens/: colors.ts (#8F5600 Moderate text, #B34700 High text), spacing.ts, typography.ts.\n11. Create src/index.ts barrel export.\n12. Create tsup.config.ts for dual ESM/CJS build with type declarations.\n13. Add package.json scripts: build (tsup), typecheck (tsc --noEmit), test (vitest run), test:coverage (vitest run --coverage).\n14. Update root tsconfig.json references array to include packages/shared.",
-        "testStrategy": "Unit tests with Vitest:\n- Validate Zod schemas accept valid input and reject invalid input (missing fields, wrong types, strict mode rejects extra props)\n- Test CursorPaginationQuerySchema: limit defaults to 20, accepts 1-100, rejects <1 or >100\n- Test SuccessResponseSchema and ErrorResponseSchema envelope formats\n- Verify all 14 error codes exist with correct HTTP status mappings\n- Verify all 34 categories exist with both fr and en labels and valid default severities\n- Test computeSeverity exhaustively:\n  - Base case: returns categoryDefault when all answers are 'no' or 'unknown'\n  - Single yes raises one level (LOW to MODERATE, MODERATE to HIGH, HIGH to CRITICAL)\n  - Multiple yes raises multiple levels, capped at CRITICAL\n  - moneyLost=true with LOW default returns HIGH (floor)\n  - unknown treated as no\n- Verify design token values match specification (#8F5600, #B34700)\n- Verify tsup build produces ESM, CJS, and .d.ts files\n- Run typecheck to confirm .d.ts generation works",
+        "dependencies": [],
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create package.json with Zod 4 and tsup build configuration",
-            "description": "Set up packages/shared/package.json with npm workspace, Zod 4 dependency, tsup for dual ESM/CJS build, and Vitest for testing.",
+            "title": "Create packages/shared workspace with package.json and TypeScript configuration",
+            "description": "Set up the packages/shared directory structure with proper package.json exports configuration for ESM/CJS and tsconfig.json extending the base configuration with composite mode.",
             "dependencies": [],
-            "details": "Create packages/shared/package.json with name '@secure360/shared', version '0.0.0'. Add exports field for dual ESM/CJS: './': {import: './dist/index.mjs', require: './dist/index.cjs', types: './dist/index.d.ts'}. Dependencies: zod@^4.0.0. DevDependencies: tsup, vitest, @vitest/coverage-v8. Scripts: build (tsup), typecheck (tsc --noEmit), test (vitest run), test:coverage (vitest run --coverage). Create tsup.config.ts with entry: ['src/index.ts'], format: ['esm', 'cjs'], dts: true, clean: true, outExtension for .mjs/.cjs. Create tsconfig.json extending ../tsconfig.base.json with composite: true, outDir: 'dist', rootDir: 'src'.",
+            "details": "1. Create packages/shared directory structure.\n2. Create packages/shared/package.json with:\n   - name: '@secure360/shared'\n   - version: '0.0.0'\n   - type: 'module'\n   - exports field for ESM/CJS dual package support (./dist/index.js for import, ./dist/index.cjs for require)\n   - main: './dist/index.cjs'\n   - module: './dist/index.js'\n   - types: './dist/index.d.ts'\n   - files: ['dist']\n   - scripts: { 'build': 'tsc', 'typecheck': 'tsc --noEmit' }\n   - dependencies: { 'zod': '^3.23.0' }\n3. Create packages/shared/tsconfig.json extending '../tsconfig.base.json' with:\n   - composite: true\n   - outDir: './dist'\n   - rootDir: './src'\n   - declarationMap: true\n4. Create packages/shared/src/index.ts as empty barrel export file.\n5. Update root tsconfig.json references array to include { \"path\": \"./packages/shared\" }.\n6. Run 'npm install' to link workspace and install zod dependency.\n7. Verify TypeScript compilation with 'npm run typecheck -w @secure360/shared'.",
             "status": "pending",
-            "testStrategy": "Verify npm install succeeds, tsup build produces dist/index.mjs, dist/index.cjs, and dist/index.d.ts files. Run npm run typecheck and npm run test to confirm scripts work."
+            "testStrategy": "Verify npm workspace resolves @secure360/shared; verify tsc compiles without errors; verify .d.ts files generated in dist/; verify exports field allows both import and require syntax."
           },
           {
             "id": 2,
-            "title": "Implement error codes with HTTP status mappings per L2 Table 7",
-            "description": "Create src/constants/error-codes.ts with all 14 error codes from L2 Table 7, each mapped to its HTTP status code.",
+            "title": "Implement Zod schemas for auth, incident, user, organization, and message entities",
+            "description": "Create all Zod validation schemas with .strict() mode as the single source of truth, with TypeScript types inferred from schemas.",
             "dependencies": [
               1
             ],
-            "details": "Create src/constants/error-codes.ts exporting ErrorCode enum/const and httpStatusMap. Codes: VALIDATION_ERROR to 400, UNAUTHENTICATED to 401, TOKEN_EXPIRED to 401, MFA_REQUIRED to 401, TOKEN_REUSE_DETECTED to 401, FORBIDDEN to 403, NOT_FOUND to 404, CONFLICT to 409, PAYLOAD_TOO_LARGE to 413, UNSUPPORTED_MEDIA_TYPE to 415, IDEMPOTENCY_KEY_REUSED to 409, RATE_LIMITED to 429, INTERNAL_ERROR to 500, SERVICE_UNAVAILABLE to 503. Export getHttpStatus(code: ErrorCode): number helper. Note: No tenant-specific codes; requests for other orgs' resources return NOT_FOUND per security design.",
+            "details": "1. Create src/schemas/auth.schema.ts with .strict() schemas:\n   - LoginInputSchema: email (z.string().email()), password (z.string().min(8))\n   - VerifyTotpInputSchema: userId (z.string().uuid()), code (z.string().length(6))\n   - RefreshInputSchema: (empty for HttpOnly cookie refresh)\n   - ResetPasswordInputSchema: email (z.string().email())\n   - ChangePasswordInputSchema: currentPassword, newPassword with validation\n2. Create src/schemas/incident.schema.ts:\n   - CreateIncidentInputSchema: categoryCode, title (optional), description, location, isAnonymous, severity, attachments\n   - UpdateIncidentInputSchema: partial fields for technician/analyst updates\n   - IncidentFiltersSchema: status, severity, categoryCode, dateRange, organizationId\n3. Create src/schemas/user.schema.ts:\n   - CreateUserInputSchema: email, firstName, lastName, role, organizationId\n   - UpdateUserInputSchema: partial user fields\n4. Create src/schemas/organization.schema.ts:\n   - CreateOrgInputSchema: name, domain, settings\n5. Create src/schemas/message.schema.ts:\n   - CreateMessageInputSchema: incidentId, content, isInternal\n6. Create src/types/index.ts: export inferred types using z.infer<typeof Schema>.\n7. Create src/schemas/index.ts barrel export.\n8. Verify TypeScript compilation succeeds.",
             "status": "pending",
-            "testStrategy": "Unit test: verify all 14 codes exist, verify httpStatusMap returns correct status for each code, verify getHttpStatus helper works correctly, verify no additional codes beyond L2 Table 7 exist."
+            "testStrategy": "Unit tests with Vitest: test each schema accepts valid input; test each schema rejects invalid input (missing fields, wrong types, invalid formats); test .strict() rejects extra properties; verify inferred types match expected structure."
           },
           {
             "id": 3,
-            "title": "Create Zod 4 schemas for auth, incidents, users, orgs, messages with .strict()",
-            "description": "Implement all entity schemas using Zod 4 with .strict() mode, including the updated CreateIncidentInput with answers object and UpdateIncidentInput with version field.",
+            "title": "Create constants for error codes and 34 incident categories",
+            "description": "Define all error codes per L2 Table 7 specification and implement the 34 incident categories across 9 groups with French/English labels and default severities from L1 Table 12.",
             "dependencies": [
               1
             ],
-            "details": "Create src/schemas/ directory with: auth.schema.ts (LoginInputSchema with email and password, VerifyTotpInputSchema, RefreshInputSchema, ResetPasswordInputSchema); incident.schema.ts (CreateIncidentInputSchema with categoryCode string, title string, description string, answers object containing moneyLost boolean, sharedSecret boolean, and othersAffected enum of yes/no/unknown, isAnonymous boolean, location optional, deviceAffected optional, clientRequestId uuid; UpdateIncidentInputSchema with version as z.number().int(), status, severity, assignedTo optional, resolutionNotes optional; IncidentFiltersSchema); user.schema.ts (CreateUserInputSchema, UpdateUserInputSchema); organization.schema.ts (CreateOrgInputSchema); message.schema.ts (CreateMessageInputSchema). All schemas must use .strict() to reject unknown properties. Use z.string().uuid() for UUID fields.",
+            "details": "1. Create src/constants/error-codes.ts with typed constants:\n   - AUTH_INVALID_CREDENTIALS, AUTH_2FA_REQUIRED, AUTH_2FA_INVALID\n   - AUTH_TOKEN_EXPIRED, AUTH_TOKEN_INVALID, AUTH_REFRESH_REVOKED\n   - TENANT_FORBIDDEN, TENANT_NOT_FOUND\n   - VALIDATION_ERROR, NOT_FOUND, CONFLICT\n   - RATE_LIMIT_EXCEEDED, INTERNAL_ERROR\n   - Export ErrorCode type as union of all codes\n2. Create src/constants/categories.ts with 9 groups and 34 categories:\n   - MALWARE (MAL-01 to MAL-04): Ransomware, Virus, Spyware, Rootkit\n   - PHISHING (PHI-01 to PHI-05): Email, SMS (smishing), Voice (vishing), Spear-phishing, Whaling\n   - INTRUSION (INT-01 to INT-04): Unauthorized access, Brute force, SQL injection, XSS\n   - DATA (DAT-01 to DAT-04): Data breach, Data leak, Data loss, Privacy violation\n   - MOBILE (MOB-01 to MOB-03): Device theft, SIM swap, Malicious app\n   - SOCIAL (SOC-01 to SOC-04): Social engineering, Impersonation, Pretexting, Baiting\n   - NETWORK (NET-01 to NET-04): DDoS, Man-in-middle, DNS poisoning, Packet sniffing\n   - INSIDER (INS-01 to INS-03): Sabotage, Data theft, Policy violation\n   - OTHER (OTH-01 to OTH-03): Cryptojacking, Zero-day, Other\n   - Each category has: code, group, labelFr, labelEn, defaultSeverity (LOW/MODERATE/HIGH/CRITICAL)\n3. Create CategoryCode and CategoryGroup types.\n4. Create lookup functions: getCategoryByCode(), getCategoriesByGroup().\n5. Verify TypeScript compilation.",
             "status": "pending",
-            "testStrategy": "Unit tests for each schema: valid input passes, missing required fields fail, extra properties fail (strict mode), wrong types fail. Test answers object specifically for CreateIncidentInput with all three fields."
+            "testStrategy": "Unit tests: verify all 34 categories exist; verify each category has fr and en labels; verify default severities are valid enum values; verify getCategoryByCode returns correct category; verify getCategoriesByGroup returns correct subset."
           },
           {
             "id": 4,
-            "title": "Create common schemas: UUID params, pagination, response envelopes",
-            "description": "Implement reusable common schemas for UUID path params, cursor pagination query, and standard API response envelopes.",
+            "title": "Implement i18n translation files for French and English",
+            "description": "Create comprehensive i18n JSON translation files for both French (default) and English covering all UI strings shared between mobile and web applications.",
             "dependencies": [
-              1
+              1,
+              3
             ],
-            "details": "Create src/schemas/common.schema.ts with: UuidParamsSchema using .strict() with id as z.string().uuid(); CursorPaginationQuerySchema using .strict() with limit as z.coerce.number().int().min(1).max(100).default(20) and cursor as z.string().optional(); SuccessResponseSchema generic function that takes dataSchema and returns object with success as z.literal(true), data using the provided schema, and message as z.string().optional(); ErrorResponseSchema with success as z.literal(false) and error object containing code from ErrorCode enum values, message as z.string(), and details as z.unknown().optional(). Export helper createSuccessResponseSchema(dataSchema) and createErrorResponseSchema() functions.",
+            "details": "1. Create src/i18n/fr.json with French translations (default language):\n   - auth: login, logout, email, password, forgotPassword, verify2fa, resetPassword\n   - incident: title, description, location, category, severity, status, timeline, messages\n   - severity: low, moderate, high, critical\n   - status: pending, assigned, inProgress, resolved, closed\n   - errors: map all error codes to user-friendly French messages\n   - common: save, cancel, confirm, delete, edit, view, search, filter, loading, noResults\n   - validation: required, invalidEmail, minLength, maxLength\n   - notifications: newIncident, statusChanged, messageReceived\n   - Include all 34 category labels (can reference categories.ts)\n2. Create src/i18n/en.json with matching English translations.\n3. Create src/i18n/index.ts:\n   - Export TranslationKey type from fr.json structure\n   - Export translations object: { fr, en }\n   - Export getTranslation(locale, key) helper function\n4. Ensure every key in fr.json exists in en.json (and vice versa).\n5. Verify TypeScript compilation and type safety for translation keys.",
             "status": "pending",
-            "testStrategy": "Test UuidParamsSchema accepts valid UUIDs, rejects non-UUIDs. Test pagination: default limit 20, accepts 1-100, rejects 0 and 101. Test response envelopes match expected shape. Test strict mode rejects extra properties."
+            "testStrategy": "Unit tests: verify fr.json and en.json have identical key structures; verify no missing keys in either language; verify getTranslation returns correct value for both locales; verify TranslationKey type provides autocomplete for valid keys."
           },
           {
             "id": 5,
-            "title": "Create 34 incident categories with fr/en labels and default severities",
-            "description": "Implement src/constants/categories.ts with all 9 groups and 34 categories from L1 Table 12 plus SIM swap MOB-02, each with bilingual labels and default severity.",
+            "title": "Create design tokens for colors, spacing, and typography with WCAG AA compliance",
+            "description": "Implement design tokens including WCAG AA compliant severity colours (#8F5600 for Moderate text, #B34700 for High text), spacing scale, and typography settings for consistency across mobile and web.",
             "dependencies": [
               1
             ],
-            "details": "Create src/constants/categories.ts with type Category containing code string, groupCode string, labels object with fr and en strings, and defaultSeverity as Severity. Define 9 groups (PHI, IDT, ACC, FRD, MAL, SOC, MOB, PHY, OTH) with labels. Define 34 categories including SIM swap (MOB-02). Each category must have: unique code (e.g., PHI-01), groupCode reference, fr label, en label, defaultSeverity from Severity enum. Also create src/constants/severities.ts with Severity enum (LOW, MODERATE, HIGH, CRITICAL) and labels containing fr and en translations.",
+            "details": "1. Create src/tokens/colors.ts:\n   - Primary, secondary, neutral color scales (50-900)\n   - Severity text colors (WCAG AA compliant):\n     * severityLowText: appropriate dark color\n     * severityModerateText: '#8F5600'\n     * severityHighText: '#B34700'\n     * severityCriticalText: appropriate dark red\n   - Severity background colors (lighter fills for badges):\n     * severityLowBg, severityModerateBg, severityHighBg, severityCriticalBg\n   - Status colors: pending, assigned, inProgress, resolved, closed\n   - Semantic colors: success, warning, error, info\n   - Offline banner colors using #8F5600\n2. Create src/tokens/spacing.ts:\n   - Scale: 0, 1, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96\n   - Named spacing: xs, sm, md, lg, xl, 2xl\n3. Create src/tokens/typography.ts:\n   - Font families: sans, mono\n   - Font sizes: xs, sm, base, lg, xl, 2xl, 3xl\n   - Font weights: normal, medium, semibold, bold\n   - Line heights: tight, normal, relaxed\n4. Create src/tokens/index.ts barrel export.\n5. Update src/index.ts to export all tokens.\n6. Verify TypeScript compilation produces correct types.",
             "status": "pending",
-            "testStrategy": "Verify exactly 34 categories exist. Verify each category has code, groupCode, fr label, en label, and valid defaultSeverity. Verify all 9 groups defined. Verify MOB-02 SIM swap exists. Verify no duplicate codes."
+            "testStrategy": "Unit tests: verify severity text colors match specification (#8F5600, #B34700); verify all color values are valid hex codes; verify spacing scale is consistent; verify exported types allow autocomplete for token values."
           },
           {
             "id": 6,
-            "title": "Implement computeSeverity pure function per L1 section 7.3",
-            "description": "Create pure function that computes final incident severity based on category default and user answers, implementing the escalation rules from L1 section 7.3.",
-            "dependencies": [
-              5
-            ],
-            "details": "Create src/utils/compute-severity.ts with: type Answers containing moneyLost boolean, sharedSecret boolean, and othersAffected as yes/no/unknown string literal type; function computeSeverity taking categoryDefault as Severity and answers as Answers, returning Severity. Algorithm: (1) Start with categoryDefault; (2) unknown in othersAffected counts as no; (3) Count yes values from moneyLost, sharedSecret, and othersAffected equals yes; (4) Raise severity by count levels, capped at CRITICAL; (5) If moneyLost equals true, ensure result is at least HIGH. Export as named export. Function must be pure with no side effects.",
+            "title": "Create packages/shared workspace with npm and TypeScript configuration",
+            "description": "Initialize the packages/shared directory with package.json configured for @secure360/shared npm workspace and TypeScript project with composite mode for monorepo references.",
+            "dependencies": [],
+            "details": "1. Create packages/shared/package.json with:\n   - name: '@secure360/shared'\n   - type: 'module' for ESM\n   - exports field with dual ESM/CJS support (./dist/index.js, ./dist/index.cjs)\n   - main: './dist/index.cjs'\n   - module: './dist/index.js'\n   - types: './dist/index.d.ts'\n   - files: ['dist']\n   - scripts: build (tsc), typecheck (tsc --noEmit)\n   - dependencies: zod ^3.23.0\n\n2. Create packages/shared/tsconfig.json extending '../tsconfig.base.json' with:\n   - composite: true (required for project references)\n   - outDir: './dist'\n   - rootDir: './src'\n   - declarationMap: true\n   - include: ['src/**/*']\n\n3. Create src/index.ts as empty barrel export placeholder.\n\n4. Update root tsconfig.json to add references array: [{ \"path\": \"./packages/shared\" }].\n\n5. Run npm install to link workspace.",
             "status": "pending",
-            "testStrategy": "Exhaustive unit tests: categoryDefault=LOW with all no/unknown returns LOW; categoryDefault=LOW with one yes returns MODERATE; categoryDefault=LOW with two yes returns HIGH; categoryDefault=LOW with three yes returns CRITICAL; categoryDefault=HIGH with one yes returns CRITICAL; categoryDefault=CRITICAL with any yes returns CRITICAL (cap); moneyLost=true with categoryDefault=LOW returns at least HIGH; unknown treated as no in othersAffected."
+            "testStrategy": "Verify TypeScript compilation succeeds with 'npm run build -w @secure360/shared'; verify package.json exports resolve correctly for both ESM and CJS consumers; verify npm workspace links package correctly."
           },
           {
             "id": 7,
-            "title": "Create bilingual i18n files for shared keys only",
-            "description": "Implement src/i18n/fr.json and en.json with translations for shared resources only: groups, categories, severities, statuses, error codes. Screen-specific text stays in apps.",
+            "title": "Implement Zod schemas for all entities with .strict() mode",
+            "description": "Create Zod validation schemas for auth, incident, user, organization, and message entities with strict mode and inferred TypeScript types.",
             "dependencies": [
-              2,
-              5
+              6
             ],
-            "details": "Create src/i18n/ directory with: fr.json containing French translations for groups (9), categories (34), severities (4), statuses (pending/assigned/in_progress/resolved/closed), and error codes (14); en.json containing English translations for same keys. Structure: groups object with PHI etc., categories object with PHI-01 etc., severities object with LOW etc., statuses object with pending etc., errorCodes object with VALIDATION_ERROR etc. Note: UI screen text (buttons, labels, forms) stays in apps/mobile and apps/web, NOT in shared package.",
+            "details": "1. Create src/schemas/auth.schema.ts with .strict():\n   - LoginInputSchema: email (z.string().email()), password (z.string().min(8))\n   - VerifyTotpInputSchema: userId (z.string().uuid()), code (z.string().length(6))\n   - RefreshInputSchema: empty object for HttpOnly cookie refresh\n   - ResetPasswordInputSchema: email (z.string().email())\n   - ChangePasswordInputSchema: currentPassword, newPassword\n\n2. Create src/schemas/incident.schema.ts with .strict():\n   - CreateIncidentInputSchema: categoryCode, title?, description, location?, isAnonymous, severity?, attachments?\n   - UpdateIncidentInputSchema: partial update fields\n   - IncidentFiltersSchema: status?, severity?, categoryCode?, dateRange?, organizationId?\n\n3. Create src/schemas/user.schema.ts with .strict():\n   - CreateUserInputSchema: email, firstName, lastName, role, organizationId\n   - UpdateUserInputSchema: partial fields\n\n4. Create src/schemas/organization.schema.ts with CreateOrgInputSchema: name, domain, settings.\n\n5. Create src/schemas/message.schema.ts with CreateMessageInputSchema: incidentId, content, isInternal.\n\n6. Create src/types/index.ts inferring types: export type LoginInput = z.infer<typeof LoginInputSchema>.\n\n7. Create src/schemas/index.ts barrel export.",
             "status": "pending",
-            "testStrategy": "Verify fr.json and en.json have identical key structure. Verify all 9 groups, 34 categories, 4 severities, 5 statuses, 14 error codes have translations in both languages. Verify no screen-specific text included."
+            "testStrategy": "Unit tests with Vitest: verify valid inputs are accepted; verify invalid inputs are rejected with proper error messages; verify .strict() rejects unknown fields; verify inferred TypeScript types match expected structure."
           },
           {
             "id": 8,
-            "title": "Create design tokens: WCAG AA severity colors, spacing, typography",
-            "description": "Implement design tokens in src/tokens/ including WCAG AA compliant severity text colors (#8F5600 Moderate, #B34700 High), spacing scale, and typography settings.",
+            "title": "Create error codes and 34 incident categories from L1 Table 12",
+            "description": "Implement error codes from L2 Table 7 as union type and 34 incident categories across 9 groups with French/English labels and default severities.",
             "dependencies": [
-              1
+              6
             ],
-            "details": "Create src/tokens/ directory with: colors.ts containing severityTextColors with MODERATE as #8F5600 and HIGH as #B34700, severityBgColors with lighter fills for badges, statusColors, and brandColors; spacing.ts with spacing scale of 4, 8, 12, 16, 24, 32, 48, 64px; typography.ts with fontSizes, fontWeights, and lineHeights. Note per AGENTS.md: #8F5600 for Moderate text and offline banner, #B34700 for High text. Lighter amber/orange only for badge fills. All colors must meet WCAG AA contrast requirements.",
+            "details": "1. Create src/constants/error-codes.ts:\n   - Define ErrorCode union type with: AUTH_INVALID_CREDENTIALS, AUTH_2FA_REQUIRED, AUTH_2FA_INVALID, AUTH_TOKEN_EXPIRED, AUTH_TOKEN_INVALID, AUTH_REFRESH_REVOKED, TENANT_FORBIDDEN, TENANT_NOT_FOUND, VALIDATION_ERROR, NOT_FOUND, CONFLICT, RATE_LIMIT_EXCEEDED, INTERNAL_ERROR\n   - Export ERROR_CODES object mapping code to HTTP status and default message\n\n2. Create src/constants/categories.ts with 34 categories across 9 groups:\n   - MALWARE (MAL-01 to MAL-04): Ransomware, Virus, Spyware, Rootkit\n   - PHISHING (PHI-01 to PHI-05): Email, SMS, Voice, Spear-phishing, Whaling\n   - INTRUSION (INT-01 to INT-04): Unauthorized access, Brute force, SQL injection, XSS\n   - DATA (DAT-01 to DAT-04): Data breach, Data leak, Data loss, Privacy violation\n   - MOBILE (MOB-01 to MOB-03): Device theft, SIM swap (MOB-02), Malicious app\n   - SOCIAL (SOC-01 to SOC-04): Social engineering, Impersonation, Pretexting, Baiting\n   - NETWORK (NET-01 to NET-04): DDoS, Man-in-middle, DNS poisoning, Packet sniffing\n   - INSIDER (INS-01 to INS-03): Sabotage, Data theft, Policy violation\n   - OTHER (OTH-01 to OTH-03): Cryptojacking, Zero-day, Other\n\n3. Each category has: code, groupCode, labelFr, labelEn, defaultSeverity (LOW/MODERATE/HIGH/CRITICAL).\n\n4. Export lookup functions: getCategoryByCode(), getCategoriesByGroup(), getAllCategories().",
             "status": "pending",
-            "testStrategy": "Verify #8F5600 and #B34700 are correctly defined for severity text. Verify spacing values follow 4px grid. Verify all tokens exported correctly. Manual check: contrast ratios meet WCAG AA (4.5:1 for normal text)."
+            "testStrategy": "Unit tests verify: all 34 categories exist; each category has fr and en labels; category codes are unique; group totals match (4+5+4+4+3+4+4+3+3=34); MOB-02 (SIM swap) is present; lookup functions return correct results."
           },
           {
             "id": 9,
-            "title": "Create TypeScript types inferred from Zod schemas and barrel exports",
-            "description": "Generate TypeScript types from all Zod schemas using z.infer<>, create src/types/index.ts, and create src/index.ts barrel export for the entire package.",
+            "title": "Implement bilingual i18n files with complete UI strings",
+            "description": "Create French (default) and English translation files with all UI strings for auth, incidents, errors, validation, and common elements shared between mobile and web apps.",
             "dependencies": [
-              2,
-              3,
-              4,
-              5,
               6,
-              7,
               8
             ],
-            "details": "Create src/types/index.ts that re-exports inferred types from all schemas: export type LoginInput = z.infer<typeof LoginInputSchema>, export type CreateIncidentInput = z.infer<typeof CreateIncidentInputSchema>, etc. for all schemas. Create src/index.ts barrel export that exports: All schemas from src/schemas/, All types from src/types/, All constants from src/constants/ (error codes, categories, severities), computeSeverity from src/utils/, i18n from src/i18n/, tokens from src/tokens/. Update root tsconfig.json references array to include packages/shared.",
+            "details": "1. Create src/i18n/fr.json (French - default language) with nested structure:\n   - auth: login, logout, email, password, forgotPassword, verify2fa, resetPassword, changePassword\n   - incident: title, description, location, category, severity, status, timeline, messages, anonymous, attachments\n   - severity: low, moderate, high, critical\n   - status: pending, assigned, inProgress, resolved, closed\n   - errors: map all error codes from error-codes.ts to user-friendly French messages\n   - common: save, cancel, confirm, delete, edit, view, search, filter, loading, noResults, submit, back\n   - validation: required, invalidEmail, minLength, maxLength, invalidFormat\n   - notifications: newIncident, statusChanged, messageReceived, incidentAssigned\n   - categories: all 34 category labels in French\n\n2. Create src/i18n/en.json with identical structure in English.\n\n3. Create src/i18n/index.ts:\n   - Define Locale type: 'fr' | 'en'\n   - Define TranslationKey type from fr.json structure\n   - Export translations object: { fr, en }\n   - Export getTranslation(locale, key) helper with nested key support (dot notation)\n   - Export DEFAULT_LOCALE = 'fr'",
             "status": "pending",
-            "testStrategy": "Run npm run typecheck in packages/shared to verify no type errors. Run npm run build to produce dist/. Verify dist/index.d.ts exports all expected types. Test importing from @secure360/shared in a consumer app."
+            "testStrategy": "Unit tests verify: both fr.json and en.json have identical key structure; all error codes have translations; all 34 category codes have translations in both languages; getTranslation returns correct values for nested keys; DEFAULT_LOCALE is 'fr'."
           },
           {
             "id": 10,
-            "title": "Initialize packages/shared workspace with npm, TypeScript, and build configuration",
-            "description": "Create the packages/shared directory with package.json for @secure360/shared, tsconfig.json extending tsconfig.base.json with composite:true, and tsup.config.ts for dual ESM/CJS builds with type declarations.",
-            "dependencies": [],
-            "details": "1. Create packages/shared/package.json with:\n   - name: '@secure360/shared'\n   - type: 'module'\n   - exports field with './': { import: './dist/index.js', require: './dist/index.cjs', types: './dist/index.d.ts' }\n   - dependencies: zod@^3.24 (Zod 4 is in beta, use stable 3.24 with .strict())\n   - devDependencies: tsup, vitest, @vitest/coverage-v8\n   - scripts: build, typecheck, test, test:coverage\n2. Create tsconfig.json extending ../tsconfig.base.json with composite:true, outDir:'dist', rootDir:'src'\n3. Create tsup.config.ts with entry: ['src/index.ts'], format: ['esm', 'cjs'], dts: true, clean: true\n4. Create src/index.ts as barrel export placeholder\n5. Update root tsconfig.json references array to include 'packages/shared'\n6. Run npm install from root to link workspace",
-            "status": "pending",
-            "testStrategy": "Verify npm install succeeds without errors; verify npm run build in packages/shared produces dist/ with index.js, index.cjs, and index.d.ts; verify npm run typecheck passes; verify workspace is correctly linked by checking node_modules/@secure360/shared symlink."
-          },
-          {
-            "id": 11,
-            "title": "Create Zod schemas for all entities with .strict() validation",
-            "description": "Implement Zod schemas for auth, incident, user, organization, message, and common entities in src/schemas/, using .strict() mode for all object schemas to reject extra properties.",
+            "title": "Create design tokens with WCAG AA severity colors",
+            "description": "Implement design tokens for colors (including WCAG AA compliant severity text colors #8F5600 and #B34700), spacing scale, and typography settings.",
             "dependencies": [
-              10
+              6
             ],
-            "details": "Create src/schemas/ directory with:\n1. common.schema.ts:\n   - UuidParamsSchema: z.object({ id: z.string().uuid() }).strict()\n   - CursorPaginationQuerySchema: z.object({ limit: z.coerce.number().int().min(1).max(100).default(20), cursor: z.string().uuid().optional() }).strict()\n   - SuccessResponseSchema: z.object({ success: z.literal(true), data: z.unknown(), message: z.string().optional() }).strict()\n   - ErrorResponseSchema: z.object({ success: z.literal(false), error: z.object({ code: z.string(), message: z.string(), details: z.unknown().optional() }).strict() }).strict()\n2. auth.schema.ts: LoginInputSchema (email, password), VerifyTotpInputSchema (code 6 digits), RefreshInputSchema (refreshToken), ResetPasswordInputSchema (email)\n3. incident.schema.ts: CreateIncidentInputSchema (categoryCode, title 5-200 chars, description 10-4000 chars, answers object with moneyLost/sharedSecret/othersAffected, isAnonymous, optional location, optional deviceAffected, clientRequestId uuid), UpdateIncidentInputSchema (version int, status enum, severity enum, assignedTo uuid optional, resolutionNotes optional), IncidentFiltersSchema\n4. user.schema.ts: CreateUserInputSchema, UpdateUserInputSchema\n5. organization.schema.ts: CreateOrgInputSchema\n6. message.schema.ts: CreateMessageInputSchema\n7. Create src/types/index.ts inferring TypeScript types from all schemas using z.infer<typeof Schema>\n8. Export all from src/index.ts",
+            "details": "1. Create src/tokens/colors.ts with:\n   - Primary, secondary, neutral color scales (50-900 shades)\n   - Severity text colors (WCAG AA compliant):\n     * severityLowText: appropriate dark color for light backgrounds\n     * severityModerateText: '#8F5600' (WCAG AA required)\n     * severityHighText: '#B34700' (WCAG AA required)\n     * severityCriticalText: appropriate dark red\n   - Severity background colors (lighter fills for badges)\n   - Status colors: pending, assigned, inProgress, resolved, closed\n   - Semantic colors: success, warning, error, info\n   - Offline banner color: '#8F5600'\n   - Light and dark mode variants\n\n2. Create src/tokens/spacing.ts:\n   - Numeric scale: 0, 1, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96 (pixels)\n   - Named aliases: xs (4), sm (8), md (16), lg (24), xl (32), 2xl (48)\n\n3. Create src/tokens/typography.ts:\n   - Font families: sans (system-ui stack), mono (monospace stack)\n   - Font sizes: xs (12), sm (14), base (16), lg (18), xl (20), 2xl (24), 3xl (30)\n   - Font weights: normal (400), medium (500), semibold (600), bold (700)\n   - Line heights: tight (1.25), normal (1.5), relaxed (1.75)\n\n4. Create src/tokens/index.ts barrel export.\n\n5. Update src/index.ts to export all tokens, schemas, types, constants, and i18n.",
             "status": "pending",
-            "testStrategy": "Unit tests with Vitest: test each schema accepts valid input; test schemas reject invalid input (missing required fields, wrong types); test .strict() rejects extra properties; test CursorPaginationQuerySchema limit defaults to 20, accepts 1-100, rejects values outside range; test CreateIncidentInputSchema validates categoryCode format, title length 5-200, description length 10-4000."
-          },
-          {
-            "id": 12,
-            "title": "Create error codes from L2 Table 7 with HTTP status mappings",
-            "description": "Implement src/constants/error-codes.ts with all error codes mapped to appropriate HTTP status codes, following the L2 architecture specification Table 7.",
-            "dependencies": [
-              10
-            ],
-            "details": "Create src/constants/error-codes.ts:\n1. Define ErrorCode type union with all codes\n2. Define ERROR_CODES constant object with:\n   - VALIDATION_ERROR: { code: 'VALIDATION_ERROR', httpStatus: 400, messageKey: 'error.validation' }\n   - UNAUTHENTICATED: { code: 'UNAUTHENTICATED', httpStatus: 401, messageKey: 'error.unauthenticated' }\n   - TOKEN_EXPIRED: { code: 'TOKEN_EXPIRED', httpStatus: 401, messageKey: 'error.tokenExpired' }\n   - MFA_REQUIRED: { code: 'MFA_REQUIRED', httpStatus: 401, messageKey: 'error.mfaRequired' }\n   - TOKEN_REUSE_DETECTED: { code: 'TOKEN_REUSE_DETECTED', httpStatus: 401, messageKey: 'error.tokenReuse' }\n   - FORBIDDEN: { code: 'FORBIDDEN', httpStatus: 403, messageKey: 'error.forbidden' }\n   - NOT_FOUND: { code: 'NOT_FOUND', httpStatus: 404, messageKey: 'error.notFound' }\n   - CONFLICT: { code: 'CONFLICT', httpStatus: 409, messageKey: 'error.conflict' }\n   - PAYLOAD_TOO_LARGE: { code: 'PAYLOAD_TOO_LARGE', httpStatus: 413, messageKey: 'error.payloadTooLarge' }\n   - UNSUPPORTED_MEDIA_TYPE: { code: 'UNSUPPORTED_MEDIA_TYPE', httpStatus: 415, messageKey: 'error.unsupportedMediaType' }\n   - IDEMPOTENCY_KEY_REUSED: { code: 'IDEMPOTENCY_KEY_REUSED', httpStatus: 409, messageKey: 'error.idempotencyReuse' }\n   - RATE_LIMITED: { code: 'RATE_LIMITED', httpStatus: 429, messageKey: 'error.rateLimited' }\n   - INTERNAL_ERROR: { code: 'INTERNAL_ERROR', httpStatus: 500, messageKey: 'error.internal' }\n   - SERVICE_UNAVAILABLE: { code: 'SERVICE_UNAVAILABLE', httpStatus: 503, messageKey: 'error.serviceUnavailable' }\n3. Helper function getHttpStatus(code: ErrorCode): number\n4. Export from src/index.ts",
-            "status": "pending",
-            "testStrategy": "Unit tests: verify all error codes have valid HTTP status codes (400-599); verify getHttpStatus returns correct status for each code; verify ErrorCode type includes all defined codes; verify no duplicate codes exist."
-          },
-          {
-            "id": 13,
-            "title": "Create 34 incident categories with 9 groups, severities, and computeSeverity function",
-            "description": "Implement src/constants/categories.ts with 9 groups and 34 categories from L1 Table 12 including SIM swap (MOB-02), src/constants/severities.ts with 4 severity levels, and src/utils/compute-severity.ts implementing the L1 section 7.3 severity calculation logic.",
-            "dependencies": [
-              10
-            ],
-            "details": "1. Create src/constants/severities.ts:\n   - Severity enum/type: LOW, MODERATE, HIGH, CRITICAL\n   - SEVERITIES constant with fr/en labels for each level\n2. Create src/constants/categories.ts with 9 groups:\n   - PHISHING (PHI-01 to PHI-04): Email, SMS, Voice, Social media\n   - ACCOUNT (ACC-01 to ACC-05): Social media compromise, Banking compromise, Email compromise, Password leak, Identity theft\n   - MALWARE (MAL-01 to MAL-04): Virus, Ransomware, Spyware, Adware\n   - MOBILE (MOB-01 to MOB-03): Mobile money fraud, SIM swap, Mobile app fraud\n   - ONLINE_SCAM (SCM-01 to SCM-06): Investment fraud, Romance scam, Online shopping fraud, Employment scam, Lottery scam, Advance fee fraud\n   - NETWORK (NET-01 to NET-04): Unauthorized WiFi access, Network intrusion, DDoS, Man-in-the-middle\n   - DATA (DAT-01 to DAT-04): Data breach, Data leak, Privacy violation, Unauthorized access\n   - DEVICE (DEV-01 to DEV-03): Device theft, Device tampering, Unauthorized device access\n   - OTHER (OTH-01): Other incident\n   Each category has: code, groupCode, labelKey (for i18n), defaultSeverity\n3. Create src/utils/compute-severity.ts:\n   - computeSeverity(categoryDefault: Severity, answers: { moneyLost: boolean, sharedSecret: boolean, othersAffected: 'yes' | 'no' | 'unknown' }): Severity\n   - Logic: start from categoryDefault, each 'yes' answer raises one level (capped at CRITICAL), moneyLost=true means at least HIGH, 'unknown' counts as 'no'\n4. Export all from src/index.ts",
-            "status": "pending",
-            "testStrategy": "Unit tests for computeSeverity: test returns categoryDefault when all answers are 'no'/'unknown'; test moneyLost=true returns at least HIGH regardless of categoryDefault; test each 'yes' raises one level; test severity caps at CRITICAL; test 'unknown' behaves like 'no'. Test categories: verify exactly 34 categories across 9 groups; verify each category has valid defaultSeverity."
-          },
-          {
-            "id": 14,
-            "title": "Create bilingual i18n files (fr/en) for shared resources",
-            "description": "Implement src/i18n/ with fr.json and en.json containing translations for groups, categories, severities, statuses, and error codes. French is the default language.",
-            "dependencies": [
-              12,
-              13
-            ],
-            "details": "Create src/i18n/ directory:\n1. Create fr.json with:\n   - groups: { phishing: 'Hameçonnage', account: 'Compromission de compte', malware: 'Logiciels malveillants', mobile: 'Fraude mobile', onlineScam: 'Escroquerie en ligne', network: 'Attaque réseau', data: 'Violation de données', device: 'Sécurité des appareils', other: 'Autre' }\n   - categories: all 34 category labels in French\n   - severities: { low: 'Faible', moderate: 'Modéré', high: 'Élevé', critical: 'Critique' }\n   - statuses: { new: 'Nouveau', assigned: 'Assigné', inProgress: 'En cours', resolved: 'Résolu', closed: 'Fermé' }\n   - errors: all 14 error code messages in French\n2. Create en.json with:\n   - groups: { phishing: 'Phishing', account: 'Account Compromise', malware: 'Malware', mobile: 'Mobile Fraud', onlineScam: 'Online Scam', network: 'Network Attack', data: 'Data Breach', device: 'Device Security', other: 'Other' }\n   - categories: all 34 category labels in English\n   - severities: { low: 'Low', moderate: 'Moderate', high: 'High', critical: 'Critical' }\n   - statuses: { new: 'New', assigned: 'Assigned', inProgress: 'In Progress', resolved: 'Resolved', closed: 'Closed' }\n   - errors: all 14 error code messages in English\n3. Create src/i18n/index.ts exporting both files with type safety\n4. Export i18n from src/index.ts",
-            "status": "pending",
-            "testStrategy": "Unit tests: verify fr.json and en.json have identical keys; verify all 34 category codes have translations in both languages; verify all error codes have translations; verify all severity levels have translations; verify no missing keys between fr and en; verify JSON is valid and parseable."
-          },
-          {
-            "id": 15,
-            "title": "Create design tokens with WCAG AA compliant severity colors",
-            "description": "Implement src/tokens/ with colors.ts, spacing.ts, and typography.ts. Severity text colors must meet WCAG AA contrast requirements (#8F5600 for Moderate, #B34700 for High).",
-            "dependencies": [
-              10
-            ],
-            "details": "Create src/tokens/ directory:\n1. Create colors.ts:\n   - Severity text colors (WCAG AA compliant for use on light backgrounds):\n     - severityLowText: '#2D6A4F' (green-tinted)\n     - severityModerateText: '#8F5600' (amber/brown - per AGENTS.md)\n     - severityHighText: '#B34700' (orange - per AGENTS.md)\n     - severityCriticalText: '#B91C1C' (red)\n   - Severity badge fill colors (lighter versions for backgrounds):\n     - severityLowBg: '#D1FAE5'\n     - severityModerateBg: '#FEF3C7'\n     - severityHighBg: '#FFEDD5'\n     - severityCriticalBg: '#FEE2E2'\n   - Offline banner colors:\n     - offlineBannerText: '#8F5600'\n     - offlineBannerBg: '#FEF3C7'\n   - Brand colors, neutral grays, semantic colors (success, warning, error, info)\n2. Create spacing.ts: spacing scale (4, 8, 12, 16, 20, 24, 32, 40, 48, 64)\n3. Create typography.ts: font families, font sizes, line heights, font weights\n4. Create src/tokens/index.ts barrel export\n5. Export tokens from src/index.ts",
-            "status": "pending",
-            "testStrategy": "Manual verification: check #8F5600 and #B34700 contrast ratios against white background using WebAIM contrast checker (must be >= 4.5:1 for AA compliance); unit tests: verify all color values are valid hex codes; verify spacing values are numbers; verify typography values are defined."
+            "testStrategy": "Unit tests verify: severityModerateText equals '#8F5600'; severityHighText equals '#B34700'; all spacing values are numeric; typography values exist; verify token export structure matches specification; verify barrel export includes all modules."
           }
         ]
       },
@@ -190,13 +129,10 @@
         "testStrategy": "Verify npm run dev starts server on port 3000; verify TypeScript compilation succeeds with npm run build; verify ESLint catches layer violations when a controller imports a repository.",
         "priority": "high",
         "dependencies": [
-          "1"
+          1
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down Task 2 into subtasks covering: 1) Package.json setup with Express 5, TypeScript, and tsx dev server, 2) Directory structure creation (modules/auth, middleware, lib, config, types), 3) Express.d.ts type extensions for tenant context, 4) ESLint layer boundary rules to enforce Router→Controller→Service→Repository pattern. Focus on scaffolding that enforces architectural constraints."
+        "subtasks": []
       },
       {
         "id": 3,
@@ -207,10 +143,7 @@
         "priority": "high",
         "dependencies": [],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on configure docker compose for postgresql 16 and redis 8 development environment."
+        "subtasks": []
       },
       {
         "id": 4,
@@ -220,14 +153,11 @@
         "testStrategy": "Run prisma migrate dev and verify migration applies cleanly; verify RLS policies exist with \\dp in psql; write integration test that sets app.org_id and verifies queries only return matching tenant data; test that queries without app.org_id fail.",
         "priority": "high",
         "dependencies": [
-          "2",
-          "3"
+          2,
+          3
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement prisma schema with complete l2 data model and rls policies."
+        "subtasks": []
       },
       {
         "id": 5,
@@ -237,13 +167,10 @@
         "testStrategy": "Run db:seed and verify 34 categories exist with correct codes and labels in both languages; verify 5 organizations created; verify at least 2 users per org; verify sample incidents created with valid category_code references.",
         "priority": "high",
         "dependencies": [
-          "4"
+          4
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on create category seed data and fictitious test data."
+        "subtasks": []
       },
       {
         "id": 6,
@@ -253,13 +180,10 @@
         "testStrategy": "Unit test config loader with mock secrets files; unit test logger redaction (verify password field not in output); integration test that request generates unique ID and appears in response header and logs.",
         "priority": "high",
         "dependencies": [
-          "2"
+          2
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement platform kernel: configuration, logger, and request context."
+        "subtasks": []
       },
       {
         "id": 7,
@@ -269,13 +193,10 @@
         "testStrategy": "Unit test each error class produces correct status code; unit test envelope functions produce correct shape; integration test that thrown ValidationError returns 400 with proper envelope; test Prisma unique violation maps to ConflictError.",
         "priority": "high",
         "dependencies": [
-          "6"
+          6
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement error handler and api response envelope."
+        "subtasks": []
       },
       {
         "id": 8,
@@ -285,14 +206,11 @@
         "testStrategy": "Unit test validate middleware rejects invalid body and returns 400 with field errors; integration test withTenant sets PostgreSQL config vars correctly; test that RLS policies filter data within tenant transaction; test cross-tenant access is blocked.",
         "priority": "high",
         "dependencies": [
-          "4",
-          "7"
+          4,
+          7
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement zod validation middleware and tenant context middleware."
+        "subtasks": []
       },
       {
         "id": 9,
@@ -302,13 +220,10 @@
         "testStrategy": "Unit test rate limiter correctly tracks requests in Redis; integration test that 6th login attempt within minute returns 429; test Retry-After header is set correctly; test rate limit resets after window expires.",
         "priority": "high",
         "dependencies": [
-          "6"
+          6
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement redis client and rate limiting middleware."
+        "subtasks": []
       },
       {
         "id": 10,
@@ -318,13 +233,10 @@
         "testStrategy": "Unit test hashPassword produces different hashes for same input (salt); test verifyPassword returns true for correct password, false for wrong; test encrypt/decrypt round-trip preserves plaintext; test hashToken produces consistent output for same input.",
         "priority": "high",
         "dependencies": [
-          "6"
+          6
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement crypto utilities for password hashing, token generation, and encryption."
+        "subtasks": []
       },
       {
         "id": 11,
@@ -334,13 +246,10 @@
         "testStrategy": "Unit test signAccessToken produces valid JWT; test verifyToken rejects expired tokens; test verifyToken with wrong algorithm fails; test payload contains correct claims; test pinned algorithm prevents RS256 tokens.",
         "priority": "high",
         "dependencies": [
-          "10"
+          10
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement jwt authentication utilities with access/refresh token handling."
+        "subtasks": []
       },
       {
         "id": 12,
@@ -350,14 +259,11 @@
         "testStrategy": "Integration tests: valid credentials return tokens; invalid password returns 401; disabled user returns 401; user with 2FA gets tempToken first; valid TOTP code returns tokens; replayed TOTP code within window rejected; rate limit after 5 failed attempts.",
         "priority": "high",
         "dependencies": [
-          "8",
-          "11"
+          8,
+          11
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement auth module: login and 2fa verification endpoints."
+        "subtasks": []
       },
       {
         "id": 13,
@@ -365,7 +271,7 @@
         "description": "Create refresh token endpoint with rotation on every use and family-based reuse detection that revokes entire token family. Implement dual delivery: JSON body for mobile clients and HttpOnly cookie for web dashboard (same-origin /api/v1). Requirements: BF01, Phase S5, L2 §8.2, L2 §4.4.",
         "status": "pending",
         "dependencies": [
-          "12"
+          12
         ],
         "priority": "high",
         "details": "1. Create src/modules/auth/auth.repository.ts additions:\n   - createRefreshToken(userId: string, tokenHash: string, familyId: string, expiresAt: Date)\n   - findRefreshToken(tokenHash: string)\n   - revokeToken(id: string)\n   - revokeFamily(familyId: string) - revokes ALL tokens in family\n   - isTokenRevoked(id: string): boolean\n   - markAsUsed(id: string)\n\n2. Create src/lib/refresh-token-cookie.ts utility:\n   ```typescript\n   import { Response, Request } from 'express';\n   import { config } from '../config';\n\n   const COOKIE_NAME = 'refresh_token';\n   const REFRESH_PATH = '/api/v1/auth/refresh';\n\n   export const isWebClient = (req: Request): boolean => {\n     // Same-origin requests under /api/v1 are web clients\n     const origin = req.get('Origin');\n     const referer = req.get('Referer');\n     return origin === config.webOrigin || (referer?.startsWith(config.webOrigin) ?? false);\n   };\n\n   export const setRefreshTokenCookie = (res: Response, token: string): void => {\n     res.cookie(COOKIE_NAME, token, {\n       httpOnly: true,\n       secure: true,\n       sameSite: 'strict',\n       path: REFRESH_PATH,\n       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days\n     });\n   };\n\n   export const clearRefreshTokenCookie = (res: Response): void => {\n     res.clearCookie(COOKIE_NAME, { path: REFRESH_PATH });\n   };\n\n   export const getRefreshToken = (req: Request): string | undefined => {\n     // Cookie takes precedence (web), fallback to body (mobile)\n     return req.cookies?.[COOKIE_NAME] || req.body?.refreshToken;\n   };\n   ```\n\n3. Install cookie-parser in apps/api and configure in Express app.\n\n4. Update auth.service.ts:\n   ```typescript\n   async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {\n     const tokenHash = hashToken(refreshToken);\n     const storedToken = await this.repo.findRefreshToken(tokenHash);\n     \n     if (!storedToken || storedToken.revoked_at || storedToken.expires_at < new Date()) {\n       throw new AuthenticationError('INVALID_REFRESH_TOKEN');\n     }\n     \n     // Check if token was already used (reuse detection)\n     if (storedToken.used_at) {\n       // Token reuse detected! Revoke entire family\n       await this.repo.revokeFamily(storedToken.family_id);\n       await this.auditService.log('auth.token.reuse_detected', { familyId: storedToken.family_id });\n       throw new AuthenticationError('TOKEN_REUSE_DETECTED');\n     }\n     \n     // Mark current token as used\n     await this.repo.markAsUsed(storedToken.id);\n     \n     // Issue new tokens with same family\n     const newRefreshToken = generateToken();\n     await this.repo.createRefreshToken(storedToken.user_id, hashToken(newRefreshToken), storedToken.family_id, addDays(7));\n     \n     return { accessToken: signAccessToken(...), refreshToken: newRefreshToken };\n   }\n   ```\n\n5. Update auth.controller.ts for dual delivery:\n   - POST /auth/refresh reads token from cookie (web) or body (mobile)\n   - For web clients (isWebClient check): set HttpOnly cookie, omit refreshToken from JSON response\n   - For mobile clients: include refreshToken in JSON body\n   - Require X-Requested-With header for web requests as CSRF protection\n\n6. Update login and verify-2fa endpoints (auth.controller.ts) for dual delivery:\n   - For web clients: set HttpOnly refresh cookie, return only accessToken in body\n   - For mobile clients: return both accessToken and refreshToken in body\n\n7. CSRF protection middleware for refresh endpoint:\n   ```typescript\n   const csrfProtection = (req: Request, res: Response, next: NextFunction) => {\n     if (isWebClient(req)) {\n       const xRequestedWith = req.get('X-Requested-With');\n       if (xRequestedWith !== 'XMLHttpRequest') {\n         throw new AuthenticationError('CSRF_VALIDATION_FAILED');\n       }\n     }\n     next();\n   };\n   ```\n\n8. Update logout endpoint to clear the cookie for web clients.\n\n9. Audit events: auth.refresh.success, auth.refresh.reuse_detected.",
@@ -378,8 +284,7 @@
             "dependencies": [],
             "details": "Implement repository methods that interact with the refresh_tokens table from L2 data model. Use SHA-256 hashes for token storage. revokeFamily must update revoked_at for ALL tokens sharing the same family_id. Queries run within the tenant transaction context.",
             "status": "pending",
-            "testStrategy": "Unit test each repository method with mock Prisma client; test revokeFamily updates all family tokens; test hash comparison works correctly.",
-            "parentId": "undefined"
+            "testStrategy": "Unit test each repository method with mock Prisma client; test revokeFamily updates all family tokens; test hash comparison works correctly."
           },
           {
             "id": 2,
@@ -388,8 +293,7 @@
             "dependencies": [],
             "details": "Run npm install cookie-parser @types/cookie-parser in apps/api. Add cookieParser() middleware before auth routes in the Express app configuration. Ensure secure cookie settings match production requirements.",
             "status": "pending",
-            "testStrategy": "Verify cookies are correctly parsed in request handlers; test with integration tests that send cookies.",
-            "parentId": "undefined"
+            "testStrategy": "Verify cookies are correctly parsed in request handlers; test with integration tests that send cookies."
           },
           {
             "id": 3,
@@ -400,8 +304,7 @@
             ],
             "details": "Implement isWebClient() checking Origin/Referer against config.webOrigin. setRefreshTokenCookie() sets HttpOnly, Secure, SameSite=Strict, Path=/api/v1/auth/refresh, maxAge=7d. clearRefreshTokenCookie() clears with same path. getRefreshToken() reads from cookie first, then body fallback.",
             "status": "pending",
-            "testStrategy": "Unit test isWebClient with various Origin/Referer combinations; test cookie options are correctly set; test token extraction priority (cookie over body).",
-            "parentId": "undefined"
+            "testStrategy": "Unit test isWebClient with various Origin/Referer combinations; test cookie options are correctly set; test token extraction priority (cookie over body)."
           },
           {
             "id": 4,
@@ -412,8 +315,7 @@
             ],
             "details": "Verify token hash, check revoked_at and expires_at, detect reuse via used_at field, revoke family on reuse, mark current as used, create new token in same family. Generate new refresh token with crypto.randomBytes(32). Fire audit events auth.refresh.success and auth.refresh.reuse_detected.",
             "status": "pending",
-            "testStrategy": "Unit test with mocked repository; test reuse detection triggers family revocation; test audit events fire correctly; test new token inherits family_id.",
-            "parentId": "undefined"
+            "testStrategy": "Unit test with mocked repository; test reuse detection triggers family revocation; test audit events fire correctly; test new token inherits family_id."
           },
           {
             "id": 5,
@@ -424,8 +326,7 @@
             ],
             "details": "Create csrfProtection middleware in auth module. Use isWebClient() to determine if validation is needed. Reject with AuthenticationError('CSRF_VALIDATION_FAILED') if header is missing or incorrect for web clients. Mobile clients bypass this check.",
             "status": "pending",
-            "testStrategy": "Test web requests without header are rejected; test web requests with correct header pass; test mobile requests pass without header.",
-            "parentId": "undefined"
+            "testStrategy": "Test web requests without header are rejected; test web requests with correct header pass; test mobile requests pass without header."
           },
           {
             "id": 6,
@@ -437,8 +338,7 @@
             ],
             "details": "After successful authentication (non-2FA case), check isWebClient(). For web: call setRefreshTokenCookie(), return { accessToken } only. For mobile: return { accessToken, refreshToken }. Ensure existing login logic and audit events remain intact.",
             "status": "pending",
-            "testStrategy": "Test web login sets cookie and omits refreshToken from body; test mobile login includes refreshToken in body; test cookie attributes are correct.",
-            "parentId": "undefined"
+            "testStrategy": "Test web login sets cookie and omits refreshToken from body; test mobile login includes refreshToken in body; test cookie attributes are correct."
           },
           {
             "id": 7,
@@ -450,8 +350,7 @@
             ],
             "details": "After successful 2FA verification, check isWebClient(). For web: call setRefreshTokenCookie(), return { accessToken } only. For mobile: return { accessToken, refreshToken }. Maintain existing 2FA validation and audit logic.",
             "status": "pending",
-            "testStrategy": "Test web 2FA verification sets cookie and omits refreshToken from body; test mobile 2FA returns refreshToken in body.",
-            "parentId": "undefined"
+            "testStrategy": "Test web 2FA verification sets cookie and omits refreshToken from body; test mobile 2FA returns refreshToken in body."
           },
           {
             "id": 8,
@@ -465,8 +364,7 @@
             ],
             "details": "Apply csrfProtection middleware. Use getRefreshToken() to extract token. Call authService.refresh(). For web clients: setRefreshTokenCookie(newToken), return { accessToken }. For mobile: return { accessToken, refreshToken }. Apply rate limiting per L2 Table 5.",
             "status": "pending",
-            "testStrategy": "Test web refresh reads from cookie and sets new cookie; test mobile refresh reads from body and returns in body; test CSRF protection enforced for web; test rate limiting applied.",
-            "parentId": "undefined"
+            "testStrategy": "Test web refresh reads from cookie and sets new cookie; test mobile refresh reads from body and returns in body; test CSRF protection enforced for web; test rate limiting applied."
           },
           {
             "id": 9,
@@ -477,8 +375,7 @@
             ],
             "details": "After revoking the refresh token, check isWebClient(). If web client, call clearRefreshTokenCookie(res). Ensure token revocation still happens for all client types.",
             "status": "pending",
-            "testStrategy": "Test web logout clears cookie; test mobile logout doesn't send Set-Cookie header; test token is revoked in both cases.",
-            "parentId": "undefined"
+            "testStrategy": "Test web logout clears cookie; test mobile logout doesn't send Set-Cookie header; test token is revoked in both cases."
           },
           {
             "id": 10,
@@ -490,13 +387,9 @@
             ],
             "details": "Test login, verify-2fa, refresh, and logout for both client types. Verify cookie attributes (HttpOnly, Secure, SameSite, Path, Max-Age). Test CSRF protection. Test reuse detection works across client types. Test rotation maintains family_id. Use Supertest with cookie jar support.",
             "status": "pending",
-            "testStrategy": "Run full integration test suite covering all paths; verify coverage reaches 80% for auth module.",
-            "parentId": "undefined"
+            "testStrategy": "Run full integration test suite covering all paths; verify coverage reaches 80% for auth module."
           }
-        ],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement refresh token rotation with family reuse detection."
+        ]
       },
       {
         "id": 14,
@@ -506,13 +399,10 @@
         "testStrategy": "Test logout invalidates refresh token; test forgot-password always returns 200 (no enumeration); test reset token works within 1 hour; test expired reset token rejected; test used reset token rejected; test change-password requires correct current password; test session_version increment invalidates old access tokens.",
         "priority": "high",
         "dependencies": [
-          "13"
+          13
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement logout, password reset, and first-login password change."
+        "subtasks": []
       },
       {
         "id": 15,
@@ -522,13 +412,10 @@
         "testStrategy": "Test setup returns valid secret and QR code; test enable with correct code succeeds; test enable with wrong code fails; test disable requires correct password; test login after enable requires 2FA; test login after disable skips 2FA.",
         "priority": "high",
         "dependencies": [
-          "12"
+          12
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement totp 2fa setup, enable, and disable endpoints."
+        "subtasks": []
       },
       {
         "id": 16,
@@ -538,14 +425,11 @@
         "testStrategy": "Unit test enqueueAudit creates outbox record with correct payload; test sensitive fields are not included in audit; test fire-and-forget doesn't throw on database error; integration test audit events flow to audit_logs table.",
         "priority": "high",
         "dependencies": [
-          "8",
-          "9"
+          8,
+          9
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement audit logging service with fire-and-forget enqueue."
+        "subtasks": []
       },
       {
         "id": 17,
@@ -555,14 +439,11 @@
         "testStrategy": "Run npm test with coverage report; verify auth module has >80% line coverage; verify all edge cases (expired, revoked, invalid) are tested; verify mocks properly isolate units.",
         "priority": "high",
         "dependencies": [
-          "15",
-          "16"
+          15,
+          16
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on write unit tests for auth module achieving high coverage."
+        "subtasks": []
       },
       {
         "id": 18,
@@ -572,14 +453,11 @@
         "testStrategy": "Run integration tests in CI with service containers; verify each role can only access authorized data; verify cross-tenant access is blocked; verify fail-closed behavior when context not set.",
         "priority": "high",
         "dependencies": [
-          "5",
-          "8"
+          5,
+          8
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 7,
-        "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down Task 18 into subtasks: 1) Testcontainers setup for PostgreSQL with migration and seed, 2) Test helper factories for creating users/incidents across organizations, 3) Cross-tenant isolation tests (user in org A cannot see org B data), 4) Role-based access tests (EMPLOYEE, MANAGER, TECHNICIAN, ADMIN), 5) Fail-closed tests (queries without app.org_id return no rows). Each test category should verify RLS policies work correctly."
+        "subtasks": []
       },
       {
         "id": 19,
@@ -589,13 +467,10 @@
         "testStrategy": "Test incident created with correct severity calculation; test reference number format SFC-YYYY-NNNNNN; test idempotency key returns same response on retry; test idempotency key different for different users; test category_code validated against categories table.",
         "priority": "high",
         "dependencies": [
-          "18"
+          18
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 7,
-        "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down Task 19 into subtasks: 1) Repository layer with incident creation and atomic reference counter (SFC-YYYY-NNNNNN), 2) Severity calculation service using guided questions algorithm from L1 D3, 3) Idempotency key handling with Redis caching and 24h TTL, 4) Controller with Zod validation and response DTOs, 5) Integration tests covering idempotency, severity calculation, and category validation."
+        "subtasks": []
       },
       {
         "id": 20,
@@ -605,13 +480,10 @@
         "testStrategy": "Test pagination returns correct page size and cursor; test filters apply correctly; test employee sees only own incidents; test manager sees all org incidents but not confidential reporter names; test cursor remains stable across requests.",
         "priority": "high",
         "dependencies": [
-          "19"
+          19
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement incidents list with cursor pagination and filters."
+        "subtasks": []
       },
       {
         "id": 21,
@@ -621,13 +493,10 @@
         "testStrategy": "Test valid status transitions succeed; test invalid transitions return 400; test version mismatch returns 409 Conflict; test status history recorded on transition; test reopen from CLOSED works; test resolved_at set automatically.",
         "priority": "high",
         "dependencies": [
-          "20"
+          20
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement incident detail, patch with state machine, and status history."
+        "subtasks": []
       },
       {
         "id": 22,
@@ -637,13 +506,10 @@
         "testStrategy": "Test valid JPEG uploads successfully; test PNG with wrong extension but correct magic bytes accepted; test executable disguised as image rejected; test EXIF data stripped (verify with exiftool); test encrypted file cannot be read without key; test max 5 attachments per incident.",
         "priority": "high",
         "dependencies": [
-          "19"
+          19
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement attachment upload with magic byte validation and encryption."
+        "subtasks": []
       },
       {
         "id": 23,
@@ -651,7 +517,7 @@
         "description": "Create incident messaging endpoint with internal notes visible only to SFC staff, and notification triggers on new messages. For confidential incidents, ensure reporter PII (name, phone, email) is never exposed to SFC staff or managers. Requirements: BF08, Phase S6.",
         "status": "pending",
         "dependencies": [
-          "21"
+          21
         ],
         "priority": "medium",
         "details": "1. Create src/modules/messages/messages.repository.ts:\n   - create(incidentId, senderId, body, isInternal)\n   - listByIncident(incidentId, includeInternal: boolean)\n2. Create src/modules/messages/messages.service.ts:\n   - send(userId, role, incidentId, body, isInternal):\n     - Only TECHNICIAN/ADMIN can send internal notes\n     - Validate user has access to incident\n     - Create message\n     - Enqueue push notification for recipient(s)\n   - list(userId, role, incidentId):\n     - EMPLOYEE: external messages only, where incident is theirs\n     - TECHNICIAN/ADMIN: all messages including internal\n3. Create src/modules/messages/messages.dto.ts:\n   - toMessageDTO(message, incident, viewerRole):\n     - For confidential incidents (is_anonymous=true): NEVER include reporter's name, phone, or email in any response to TECHNICIAN, ADMIN, or MANAGER\n     - Sender displays as 'Confidential reporter' for all SFC staff views\n     - External messages to reporter show analyst name normally\n   - Define ConfidentialSenderDTO with only { type: 'confidential_reporter' } - no PII fields\n4. Create src/modules/messages/templates/quick-replies.ts:\n   - Define default quick reply templates in packages/shared\n   - All templates must use generic greeting \"Hello,\" only - NEVER include reporter name\n   - Examples: \"Hello, we have taken over your report.\", \"Hello, can you send a screenshot?\"\n   - Add i18n keys for fr/en: 'message.quickReply.greeting', 'message.quickReply.takenOver', etc.\n5. Create endpoints:\n   - POST /v1/incidents/:id/messages\n   - GET /v1/incidents/:id/messages\n   - GET /v1/messages/templates (returns quick reply templates)\n6. Audit: message.sent.success, message.sent.internal.\n7. Push notification payload: { type: 'new_message', incidentId, notificationId } - no message content or reporter info.\n8. Security invariant (per AGENTS.md rule 5, docs/BUILD_CHECKLIST.md, docs/CODE_REVIEW.md):\n   - Create a dedicated test file for confidential reporter masking\n   - Verify GET /v1/incidents/:id/messages for confidential incidents returns NO PII (name, phone, email) for TECHNICIAN, ADMIN, MANAGER roles\n   - Verify toMessageDTO never leaks reporter fields when is_anonymous=true",
@@ -664,8 +530,7 @@
             "dependencies": [],
             "details": "Create src/modules/messages/messages.repository.ts with: create(incidentId, senderId, body, isInternal) using $queryRaw tagged template within withTenant() context; listByIncident(incidentId, includeInternal) with RLS enforced. Follow repository pattern from existing modules. Never use $queryRawUnsafe.",
             "status": "pending",
-            "testStrategy": "Unit test repository methods with mocked Prisma client; integration test within tenant transaction verifying RLS filters by organization.",
-            "parentId": "undefined"
+            "testStrategy": "Unit test repository methods with mocked Prisma client; integration test within tenant transaction verifying RLS filters by organization."
           },
           {
             "id": 2,
@@ -676,8 +541,7 @@
             ],
             "details": "Create src/modules/messages/messages.service.ts. send() validates: only TECHNICIAN/ADMIN can set isInternal=true; user has access to incident via incident.service; enqueue push notification via BullMQ with payload { type: 'new_message', incidentId, notificationId } only. list() returns external only for EMPLOYEE (own incidents), all for TECHNICIAN/ADMIN. Never import Express.",
             "status": "pending",
-            "testStrategy": "Unit test role guards; test EMPLOYEE cannot send internal note; test notification job enqueued with correct payload (no content/PII).",
-            "parentId": "undefined"
+            "testStrategy": "Unit test role guards; test EMPLOYEE cannot send internal note; test notification job enqueued with correct payload (no content/PII)."
           },
           {
             "id": 3,
@@ -686,8 +550,7 @@
             "dependencies": [],
             "details": "Create src/modules/messages/messages.dto.ts. toMessageDTO(message, incident, viewerRole) must: if incident.is_anonymous && viewerRole in [TECHNICIAN, ADMIN, MANAGER], return sender as { type: 'confidential_reporter' } with NO name, phone, or email fields. For EMPLOYEE viewing their own messages, show analyst sender info normally. Create ConfidentialSenderDTO type in packages/shared. Follow response envelope pattern from AGENTS.md rule 5.",
             "status": "pending",
-            "testStrategy": "Unit test toMessageDTO for each role combination; explicit test that confidential incident DTO has no name/phone/email for staff roles; test normal incidents show full sender info.",
-            "parentId": "undefined"
+            "testStrategy": "Unit test toMessageDTO for each role combination; explicit test that confidential incident DTO has no name/phone/email for staff roles; test normal incidents show full sender info."
           },
           {
             "id": 4,
@@ -696,8 +559,7 @@
             "dependencies": [],
             "details": "Create packages/shared/src/templates/quick-replies.ts with predefined quick replies: 'Hello, we have taken over your report.', 'Hello, can you send a screenshot?', 'Hello, your incident is resolved.' Add i18n keys in packages/shared/src/i18n for fr/en: 'message.quickReply.takenOver', 'message.quickReply.requestScreenshot', 'message.quickReply.resolved'. Ensure NO template has {{name}} or similar placeholder per docs/BUILD_CHECKLIST.md confidential conversation requirement.",
             "status": "pending",
-            "testStrategy": "Unit test that all quick reply templates match regex /^Hello,/ and do NOT contain {{name}}, {{reporter}}, or similar placeholders; verify all i18n keys exist in fr and en.",
-            "parentId": "undefined"
+            "testStrategy": "Unit test that all quick reply templates match regex /^Hello,/ and do NOT contain {{name}}, {{reporter}}, or similar placeholders; verify all i18n keys exist in fr and en."
           },
           {
             "id": 5,
@@ -710,8 +572,7 @@
             ],
             "details": "Create src/modules/messages/messages.router.ts and messages.controller.ts. POST /v1/incidents/:id/messages with Zod schema .strict() for body { body: string, isInternal?: boolean }. GET /v1/incidents/:id/messages returns paginated messages via DTO. GET /v1/messages/templates returns quick reply templates. Auth middleware required; role guard on isInternal. Response envelope per AGENTS.md.",
             "status": "pending",
-            "testStrategy": "Integration test POST with valid/invalid body; test GET returns masked sender for confidential; test unauthorized returns 404 not 403; test templates endpoint returns all quick replies.",
-            "parentId": "undefined"
+            "testStrategy": "Integration test POST with valid/invalid body; test GET returns masked sender for confidential; test unauthorized returns 404 not 403; test templates endpoint returns all quick replies."
           },
           {
             "id": 6,
@@ -722,8 +583,7 @@
             ],
             "details": "In messages.service.ts, emit audit events after successful message creation: 'message.sent.success' for external, 'message.sent.internal' for internal notes. Include incidentId, messageId, isInternal. Per AGENTS.md rule 10: use Pino only, include requestId, NEVER log message body content or personal data.",
             "status": "pending",
-            "testStrategy": "Verify audit events emitted with correct noun.verb.outcome format; verify no message body or PII in audit payload.",
-            "parentId": "undefined"
+            "testStrategy": "Verify audit events emitted with correct noun.verb.outcome format; verify no message body or PII in audit payload."
           },
           {
             "id": 7,
@@ -734,13 +594,9 @@
             ],
             "details": "Create tests/integration/messages/confidential-masking.test.ts. Test GET /v1/incidents/:id/messages for confidential incident (is_anonymous=true) as TECHNICIAN, ADMIN, MANAGER: assert response JSON does NOT contain reporter's actual name, phone, or email anywhere (including nested objects). Use snapshot or deep property check. Per docs/BUILD_CHECKLIST.md and docs/CODE_REVIEW.md requirement.",
             "status": "pending",
-            "testStrategy": "Integration tests with real API calls; parse full response body and assert absence of any PII string matches; test multiple message thread scenarios; test quick reply responses also masked.",
-            "parentId": "undefined"
+            "testStrategy": "Integration tests with real API calls; parse full response body and assert absence of any PII string matches; test multiple message thread scenarios; test quick reply responses also masked."
           }
-        ],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement messaging with internal notes and notification triggers."
+        ]
       },
       {
         "id": 24,
@@ -750,14 +606,11 @@
         "testStrategy": "Integration test: insert outbox event, verify it's picked up by relay within 1 second; test SKIP LOCKED prevents duplicate processing with concurrent workers; test failed dispatch is retried; test processed_at set after successful dispatch.",
         "priority": "high",
         "dependencies": [
-          "9",
-          "16"
+          9,
+          16
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement outbox relay and bullmq queue infrastructure."
+        "subtasks": []
       },
       {
         "id": 25,
@@ -767,13 +620,10 @@
         "testStrategy": "Integration test with Firebase emulator: verify message sent with correct structure; test invalid tokens are removed; test thin payload contains no user names or incident details; verify delivery latency < 5 seconds (BNF14).",
         "priority": "high",
         "dependencies": [
-          "24"
+          24
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement push notification consumer with fcm integration."
+        "subtasks": []
       },
       {
         "id": 26,
@@ -783,14 +633,11 @@
         "testStrategy": "Test ticket expires after 30 seconds; test ticket only works once; test WebSocket connection established with valid ticket; test events broadcast to correct org users; test cross-org events not leaked.",
         "priority": "medium",
         "dependencies": [
-          "9",
-          "11"
+          9,
+          11
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement websocket gateway with ticket authentication and redis pub/sub."
+        "subtasks": []
       },
       {
         "id": 27,
@@ -800,13 +647,10 @@
         "testStrategy": "Test list returns user's notifications only; test unread count accurate; test mark as read updates notification; test mark all read clears all unread; test Redis cache invalidated on mark read.",
         "priority": "medium",
         "dependencies": [
-          "25"
+          25
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement notifications centre api endpoints."
+        "subtasks": []
       },
       {
         "id": 28,
@@ -816,13 +660,10 @@
         "testStrategy": "Test stats reflect actual incident data; test cache hit returns same data within TTL; test cache invalidated when incident changes; test role-based access (employee can't get org stats).",
         "priority": "medium",
         "dependencies": [
-          "20"
+          20
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement statistics endpoints with redis caching."
+        "subtasks": []
       },
       {
         "id": 29,
@@ -832,14 +673,11 @@
         "testStrategy": "Test incident PDF contains all required sections; test PDF is valid (can be opened); test period report job created and status tracked; test completed report downloadable via report_jobs endpoint.",
         "priority": "medium",
         "dependencies": [
-          "21",
-          "28"
+          21,
+          28
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement pdf report generation with pdfkit."
+        "subtasks": []
       },
       {
         "id": 30,
@@ -849,14 +687,11 @@
         "testStrategy": "Test only ADMIN can access admin endpoints; test user creation generates password and sends email; test 2FA reset clears TOTP; test deactivated user cannot login; test all actions create audit logs.",
         "priority": "medium",
         "dependencies": [
-          "15",
-          "18"
+          15,
+          18
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement organisation and user administration endpoints."
+        "subtasks": []
       },
       {
         "id": 31,
@@ -866,13 +701,10 @@
         "testStrategy": "Test list returns audit logs for organisation only; test filters apply correctly; test pagination works; test sensitive data redacted from changes; test non-admin cannot access.",
         "priority": "medium",
         "dependencies": [
-          "16"
+          16
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement audit log viewing endpoints."
+        "subtasks": []
       },
       {
         "id": 32,
@@ -882,14 +714,11 @@
         "testStrategy": "Test /health/live returns 200; test /health/ready fails when DB down; test /metrics returns valid Prometheus format; test custom metrics increment correctly.",
         "priority": "medium",
         "dependencies": [
-          "6",
-          "9"
+          6,
+          9
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement health check and prometheus metrics endpoints."
+        "subtasks": []
       },
       {
         "id": 33,
@@ -899,14 +728,11 @@
         "testStrategy": "Test generated OpenAPI spec passes validation; test Swagger UI loads and displays all endpoints; test try-it-out works for public endpoints; test schemas match actual request/response formats.",
         "priority": "medium",
         "dependencies": [
-          "1",
-          "21"
+          1,
+          21
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on generate openapi 3.0 specification from zod schemas and add swagger ui."
+        "subtasks": []
       },
       {
         "id": 34,
@@ -916,13 +742,10 @@
         "testStrategy": "Verify development build installs on Android emulator; test navigation between route groups; test design tokens apply correct colours (severity text #8F5600, #B34700); test i18n switches between fr and en.",
         "priority": "high",
         "dependencies": [
-          "1"
+          1
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 6,
-        "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down Task 34 into subtasks: 1) Expo SDK 57 project creation with expo-router and app.json configuration, 2) Route groups structure ((auth)/, (app)/, (report)/) with nested layouts, 3) NativeWind configuration with design tokens from @secure360/shared, 4) i18n setup with expo-localization and i18next loading shared translations, 5) Development build creation with EAS for Android emulator testing."
+        "subtasks": []
       },
       {
         "id": 35,
@@ -932,13 +755,10 @@
         "testStrategy": "Test FCM token retrieval succeeds; test push notification received on device; test MMKV write/read round-trip; test MMKV encrypted storage with expo-secure-store key; document build size impact.",
         "priority": "high",
         "dependencies": [
-          "34"
+          34
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on verify expo sdk 57 compatibility with react-native-firebase and mmkv."
+        "subtasks": []
       },
       {
         "id": 36,
@@ -948,13 +768,10 @@
         "testStrategy": "Test tokens stored in SecureStore (not AsyncStorage); test expired access token triggers refresh; test single-flight refresh doesn't duplicate calls; test refresh token expiry redirects to login.",
         "priority": "high",
         "dependencies": [
-          "35"
+          35
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement mobile secure session with securestore and axios refresh."
+        "subtasks": []
       },
       {
         "id": 37,
@@ -964,15 +781,12 @@
         "testStrategy": "Test login flow with valid credentials; test 2FA flow redirects correctly; test invalid credentials show error; test first-login enforces password change; test forgot-password sends email; test logout clears session.",
         "priority": "high",
         "dependencies": [
-          "36",
+          36,
           "14",
           "15"
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement mobile authentication screens and flow."
+        "subtasks": []
       },
       {
         "id": 38,
@@ -982,14 +796,11 @@
         "testStrategy": "Test data persists across app restart; test encryption key stored in SecureStore; test migration runs on version bump; test corrupted data clears and recovers; verify MMKV data encrypted on disk.",
         "priority": "high",
         "dependencies": [
-          "35",
-          "37"
+          35,
+          37
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement encrypted mmkv redux persistence with migrations."
+        "subtasks": []
       },
       {
         "id": 39,
@@ -999,13 +810,10 @@
         "testStrategy": "Test complete flow from category to submit; test all 34 categories accessible; test guided questions calculate correct severity; test photos compress to under 2 MiB; test confidential toggle stored; test back navigation preserves data.",
         "priority": "high",
         "dependencies": [
-          "38"
+          38
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement mobile incident reporting flow with guided questions."
+        "subtasks": []
       },
       {
         "id": 40,
@@ -1015,14 +823,11 @@
         "testStrategy": "Test mutations queue when offline; test auto-process when online; test exponential backoff delays; test dependsOn respected (upload waits for create); test NEEDS_USER after max retries; test idempotency key prevents duplicates.",
         "priority": "high",
         "dependencies": [
-          "38",
-          "39"
+          38,
+          39
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement offline mutation queue with idempotency and retry."
+        "subtasks": []
       },
       {
         "id": 41,
@@ -1032,13 +837,10 @@
         "testStrategy": "Test list loads with pagination; test pull-to-refresh updates data; test detail shows all incident info; test timeline displays status changes; test message send works; test offline shows cached data.",
         "priority": "medium",
         "dependencies": [
-          "40"
+          40
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement mobile incidents list and detail screens."
+        "subtasks": []
       },
       {
         "id": 42,
@@ -1048,14 +850,11 @@
         "testStrategy": "Test push notification received in foreground; test notification tap opens correct incident; test deep link from killed state works; test mark as read updates UI; test badge count accurate.",
         "priority": "medium",
         "dependencies": [
-          "35",
-          "41"
+          35,
+          41
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement mobile notifications centre and push handling."
+        "subtasks": []
       },
       {
         "id": 43,
@@ -1065,13 +864,10 @@
         "testStrategy": "Test all screens render correctly; test language switch applies immediately; test offline banner shows when disconnected; test release build passes root detection on non-rooted device; verify APK size under 50 MB.",
         "priority": "medium",
         "dependencies": [
-          "42"
+          42
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on complete mobile app with remaining screens and release hardening."
+        "subtasks": []
       },
       {
         "id": 44,
@@ -1081,15 +877,12 @@
         "testStrategy": "Test login stores token in memory (not localStorage); test refresh cookie set as HttpOnly; test protected routes redirect to login; test CSP headers prevent inline scripts.",
         "priority": "medium",
         "dependencies": [
-          "1",
+          1,
           "13",
           "15"
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 6,
-        "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down Task 44 into subtasks: 1) Vite project setup with React 19, TanStack Query, Zustand, react-router-dom v7, 2) Tailwind v4 and shadcn/ui component installation, 3) Auth module with in-memory access token and HttpOnly cookie refresh (fixing opacity:0 bug from Stitch), 4) Vite proxy configuration for /api/v1 and CSP headers, 5) Protected route wrapper and sidebar layout scaffolding."
+        "subtasks": []
       },
       {
         "id": 45,
@@ -1099,14 +892,11 @@
         "testStrategy": "Test queue loads incidents; test filters apply correctly; test SLA timer colours change at thresholds; test WebSocket updates UI in real-time; test keyboard shortcuts work; test URL reflects filters.",
         "priority": "medium",
         "dependencies": [
-          "26",
-          "44"
+          26,
+          44
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement web incident queue with live updates and sla timers."
+        "subtasks": []
       },
       {
         "id": 46,
@@ -1114,15 +904,12 @@
         "description": "Create incident detail page with full information, conversation thread, and internal notes for SFC staff. Requirements: BF08, Phase S11, W07-W10.",
         "status": "pending",
         "dependencies": [
-          "45"
+          45
         ],
         "priority": "medium",
         "details": "1. Create src/pages/Incident.tsx:\n   - Header: reference, severity badge, status chip, actions dropdown\n   - Tabs: Details, Timeline, Conversation, Attachments\n2. Details tab:\n   - Category with icon\n   - Description\n   - Guided question answers\n   - Reporter: show name if not confidential; show \"Confidential reporter\" (with lock icon) if is_anonymous=true\n   - Assigned technician\n3. Timeline tab:\n   - Status history with who changed and when\n   - Visual timeline with icons\n4. Conversation tab:\n   - Messages list with sender, timestamp\n   - For confidential incidents: always show \"Confidential reporter\" as sender name, never the actual name\n   - Internal notes styled differently (yellow/amber background, visible to SFC staff only)\n   - Message input with send button\n   - Toggle for internal note\n5. Attachments tab:\n   - Grid of thumbnails\n   - Click to open lightbox\n   - Download button; attribution shows \"Uploaded by Confidential reporter\" for anonymous incidents\n6. Action modals:\n   - Assign modal: select technician from dropdown\n   - Re-qualify modal: select new severity with reason\n   - Resolve modal: resolution summary textarea\n7. Confidential handling (CRITICAL - per docs/BUILD_CHECKLIST.md):\n   - When is_anonymous=true, display \"Confidential reporter\" everywhere the reporter would appear\n   - Never expose the actual reporter name to managers, technicians, or admins (AGENTS.md rule 5)\n   - Quick reply templates must start with \"Hello,\" without any name (never \"Hello [Name],\")\n   - Message input placeholder: \"Type a message to Confidential reporter...\" (no name)\n   - Reporter avatar should use generic initials like \"CR\" instead of name-derived initials\n8. Quick replies bar:\n   - Pre-configured templates: \"We have taken over your report\", \"Can you send a screenshot?\", \"Your incident is resolved\"\n   - No name personalization in quick replies for confidential incidents",
         "testStrategy": "Test detail loads all information; test conversation shows messages; test internal notes only visible to SFC staff (not reporters); test confidential incidents: (1) \"Confidential reporter\" shown instead of name in header, details tab, conversation sender, attachments attribution, (2) quick replies start with \"Hello,\" without name, (3) message placeholder uses \"Confidential reporter\", (4) API never returns reporter name to non-reporters for is_anonymous=true; test actions trigger correct API calls; test attachments display with correct attribution.",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement web incident detail with conversation and internal notes."
+        "subtasks": null
       },
       {
         "id": 47,
@@ -1132,14 +919,11 @@
         "testStrategy": "Test charts render with data; test date range picker filters data; test all 5+ chart types display; test executive/manager views show correct data; test responsive layout adapts.",
         "priority": "medium",
         "dependencies": [
-          "28",
-          "44"
+          28,
+          44
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement web statistics dashboard with charts."
+        "subtasks": []
       },
       {
         "id": 48,
@@ -1149,15 +933,12 @@
         "testStrategy": "Test organisation CRUD operations; test user CRUD operations; test 2FA reset works; test deactivation prevents login; test audit log filters; test role-based access restrictions.",
         "priority": "medium",
         "dependencies": [
-          "30",
-          "31",
-          "44"
+          30,
+          31,
+          44
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 6,
-        "recommendedSubtasks": 5,
-        "expansionPrompt": "Break down Task 48 into subtasks: 1) Organizations CRUD pages with table, create/edit modals, deactivation confirmation, 2) Users management with table, create (generates password), edit, 2FA reset, deactivation, 3) Audit log viewer with filters (event type, user, entity, date range) and CSV export, 4) Role-based UI guards (ADMIN vs SUPER_ADMIN visibility), 5) Toast notifications and confirmation dialogs for destructive actions."
+        "subtasks": []
       },
       {
         "id": 49,
@@ -1167,14 +948,11 @@
         "testStrategy": "Test docker compose up starts all services; test Nginx routes to API replicas; test TLS termination works; test Prometheus scrapes metrics; test Grafana dashboards load; test backup script creates valid dump.",
         "priority": "high",
         "dependencies": [
-          "3",
-          "32"
+          3,
+          32
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on create production docker compose with nginx, monitoring, and backups."
+        "subtasks": []
       },
       {
         "id": 50,
@@ -1182,7 +960,7 @@
         "description": "Create a GitHub Actions CD workflow triggered by v* tags for secure container image deployment to GHCR with rolling restart to the SFC host. CI already exists in .github/workflows/ci.yml and codeql.yml (do NOT modify). Requirements: L10, L2 section 14.",
         "status": "pending",
         "dependencies": [
-          "49"
+          49
         ],
         "priority": "high",
         "details": "CI workflows already exist with SHA-pinned actions (.github/workflows/ci.yml and codeql.yml) — do NOT recreate or modify them.\n\nThis task covers **Continuous Deployment only**:\n\n1. Create `.github/workflows/deploy.yml` triggered by `v*` tags (e.g., `v0.1.0`, `v1.0.0`):\n   - All third-party actions pinned to full commit SHAs (per docs/WORKFLOW.md §5.3)\n   - Use `ubuntu-latest` runner\n   - Set minimal `permissions` (contents: read, packages: write, id-token: write)\n\n2. Build multi-stage, non-root Docker images:\n   - Use the multi-stage Dockerfile pattern from S12 research (deps → builder → runner)\n   - Base image: `node:24-alpine`\n   - Create non-root user (`nodeuser:nodejs`, UID/GID 1001)\n   - Copy only production artifacts (dist, node_modules, prisma)\n   - Include HEALTHCHECK directive\n   - Build args for version tagging: `--build-arg VERSION=${{ github.ref_name }}`\n\n3. Scan images with Trivy before push:\n   - Use `aquasecurity/trivy-action` (SHA-pinned)\n   - Fail on HIGH/CRITICAL vulnerabilities\n   - Output SARIF for GitHub Security tab\n   - Scan both `api` and `worker` images\n\n4. Push to GitHub Container Registry (GHCR):\n   - Login with `docker/login-action` (SHA-pinned)\n   - Tag images: `ghcr.io/${{ github.repository }}/api:${{ github.ref_name }}` and `:latest`\n   - Same for `worker` image\n   - Use `docker/build-push-action` (SHA-pinned) with cache\n\n5. Manual approval via GitHub Environment:\n   - Create `production` environment in repository settings\n   - Add required reviewers\n   - Add deployment protection rules\n   - Job uses `environment: production` to gate deployment\n\n6. Run database migrations with owner role:\n   - SSH into SFC host after approval\n   - Run `npx prisma migrate deploy` with `DATABASE_URL` using the owner role (`s360_owner`)\n   - Migrations run before container restart to ensure schema is ready\n\n7. Rolling restart over SSH:\n   - Use `appleboy/ssh-action` (SHA-pinned)\n   - Sequence: api_a → health check (30s) → api_b → health check → worker\n   - Health check: `curl -sf http://localhost:3000/health`\n   - If health check fails, abort and trigger rollback\n   - Pull new images before restart: `docker compose pull api worker`\n\n8. Smoke test after deployment:\n   - Hit `/health` and `/v1/status` endpoints\n   - Verify response status 200\n   - Verify version matches deployed tag\n\n9. Automatic rollback on failure:\n   - If smoke test fails, SSH back and redeploy previous tag\n   - Store previous tag in job output or use `git describe --tags --abbrev=0 HEAD^`\n   - Send notification to team channel on rollback\n\n10. Required GitHub Secrets:\n    - `SSH_HOST`: SFC server hostname\n    - `SSH_USER`: Deployment user\n    - `SSH_PRIVATE_KEY`: Ed25519 private key for SSH\n    - `DEPLOY_PATH`: Path to docker-compose on server (e.g., `/opt/secure360`)\n\n11. Deployment notifications:\n    - On success: Post to team channel with version, commit SHA, and changelog link\n    - On failure/rollback: Post alert with error details",
@@ -1195,8 +973,7 @@
             "dependencies": [],
             "details": "Create the workflow file with:\n- `on: push: tags: ['v*']` trigger\n- Minimal permissions block\n- Concurrency group to prevent parallel deploys\n- Reference existing SHA pins from ci.yml for consistency\n- Add workflow_dispatch for manual triggers with version input",
             "status": "pending",
-            "testStrategy": "Verify workflow appears in Actions tab; test with v0.0.1-test tag",
-            "parentId": "undefined"
+            "testStrategy": "Verify workflow appears in Actions tab; test with v0.0.1-test tag"
           },
           {
             "id": 2,
@@ -1207,8 +984,7 @@
             ],
             "details": "Implement three-stage build:\n1. `deps` stage: Install all dependencies with npm ci\n2. `builder` stage: Copy source, generate Prisma client, run build\n3. `runner` stage: node:24-alpine, create nodeuser (1001:1001), copy only dist/node_modules/prisma, set USER nodeuser, add HEALTHCHECK\n\nAdd .dockerignore to exclude node_modules, .git, tests, docs",
             "status": "pending",
-            "testStrategy": "Build locally with `docker build -t api:test .`; verify image size <200MB; verify `docker run api:test whoami` returns nodeuser",
-            "parentId": "undefined"
+            "testStrategy": "Build locally with `docker build -t api:test .`; verify image size <200MB; verify `docker run api:test whoami` returns nodeuser"
           },
           {
             "id": 3,
@@ -1219,8 +995,7 @@
             ],
             "details": "Use aquasecurity/trivy-action pinned to SHA:\n- Scan type: image\n- Severity: HIGH,CRITICAL\n- Exit code: 1 on findings\n- Upload SARIF to GitHub Security tab\n- Cache Trivy DB for faster runs",
             "status": "pending",
-            "testStrategy": "Intentionally use vulnerable base image and verify workflow fails; check Security tab shows findings",
-            "parentId": "undefined"
+            "testStrategy": "Intentionally use vulnerable base image and verify workflow fails; check Security tab shows findings"
           },
           {
             "id": 4,
@@ -1231,8 +1006,7 @@
             ],
             "details": "Use docker/login-action and docker/build-push-action (SHA-pinned):\n- Login with GITHUB_TOKEN\n- Build with cache-from/cache-to for layer caching\n- Tag with version (${{ github.ref_name }}) and latest\n- Push api and worker images to ghcr.io/${{ github.repository }}/*",
             "status": "pending",
-            "testStrategy": "After successful run, verify images visible in GitHub Packages with correct tags",
-            "parentId": "undefined"
+            "testStrategy": "After successful run, verify images visible in GitHub Packages with correct tags"
           },
           {
             "id": 5,
@@ -1243,8 +1017,7 @@
             ],
             "details": "In repository settings:\n- Create 'production' environment\n- Add required reviewers (repository owner)\n- Enable 'Wait timer' if desired (optional)\n- In workflow, add `environment: production` to deploy job\n- This gates SSH deployment until approved",
             "status": "pending",
-            "testStrategy": "Trigger deploy workflow and verify it pauses at approval step; approve and verify it continues",
-            "parentId": "undefined"
+            "testStrategy": "Trigger deploy workflow and verify it pauses at approval step; approve and verify it continues"
           },
           {
             "id": 6,
@@ -1255,8 +1028,7 @@
             ],
             "details": "SSH to server and run:\n- cd $DEPLOY_PATH\n- Export DATABASE_URL with owner credentials from Docker secrets\n- Run `docker compose exec -T api npx prisma migrate deploy`\n- Check exit code and fail workflow if migrations fail\n- Log migration output for debugging",
             "status": "pending",
-            "testStrategy": "Create test migration; verify it applies during deploy; check migration history table",
-            "parentId": "undefined"
+            "testStrategy": "Create test migration; verify it applies during deploy; check migration history table"
           },
           {
             "id": 7,
@@ -1267,8 +1039,7 @@
             ],
             "details": "Using appleboy/ssh-action (SHA-pinned):\n```bash\ncd $DEPLOY_PATH\ndocker compose pull api worker\ndocker compose up -d --no-deps api_a\nsleep 10\ncurl -sf http://localhost:3000/health || exit 1\ndocker compose up -d --no-deps api_b\nsleep 10\ncurl -sf http://localhost:3001/health || exit 1\ndocker compose up -d --no-deps worker\n```\nStore previous image digest for rollback",
             "status": "pending",
-            "testStrategy": "Deploy to staging; monitor logs during restart; verify zero-downtime with continuous health checks",
-            "parentId": "undefined"
+            "testStrategy": "Deploy to staging; monitor logs during restart; verify zero-downtime with continuous health checks"
           },
           {
             "id": 8,
@@ -1279,8 +1050,7 @@
             ],
             "details": "After rolling restart completes:\n- curl https://api.secure360.cm/health\n- curl https://api.secure360.cm/v1/status\n- Verify both return 200\n- Parse response and verify version matches ${{ github.ref_name }}\n- Set job output for rollback decision",
             "status": "pending",
-            "testStrategy": "Deploy intentionally broken build; verify smoke test fails and triggers rollback",
-            "parentId": "undefined"
+            "testStrategy": "Deploy intentionally broken build; verify smoke test fails and triggers rollback"
           },
           {
             "id": 9,
@@ -1291,8 +1061,7 @@
             ],
             "details": "Create rollback job with `if: failure()`:\n- Determine previous tag: `git describe --tags --abbrev=0 HEAD^`\n- SSH to server\n- Pull previous image tag\n- Run same rolling restart sequence with old images\n- Send alert notification about rollback",
             "status": "pending",
-            "testStrategy": "Fail smoke test intentionally; verify rollback executes and restores previous version",
-            "parentId": "undefined"
+            "testStrategy": "Fail smoke test intentionally; verify rollback executes and restores previous version"
           },
           {
             "id": 10,
@@ -1304,13 +1073,9 @@
             ],
             "details": "Add notification steps:\n- On success: Post version, commit SHA, changelog link, deployment time\n- On failure: Post error message, logs link, rollback status\n- Use webhook or GitHub Action for Slack/Discord/Teams\n- Include environment (production) and deployer info",
             "status": "pending",
-            "testStrategy": "Trigger successful and failed deploys; verify notifications appear in team channel with correct info",
-            "parentId": "undefined"
+            "testStrategy": "Trigger successful and failed deploys; verify notifications appear in team channel with correct info"
           }
-        ],
-        "complexity": 8,
-        "recommendedSubtasks": 10,
-        "expansionPrompt": "Task 50 already has 10 subtasks defined covering: deploy.yml creation, multi-stage Dockerfile, Trivy scanning, GHCR push, production environment with manual approval, Prisma migrations with owner role, rolling restart with health checks, smoke tests, automatic rollback, and deployment notifications. The existing subtask breakdown is comprehensive and should be used."
+        ]
       },
       {
         "id": 51,
@@ -1320,13 +1085,10 @@
         "testStrategy": "Test system handles 500 concurrent users; verify p95 latency < 500ms; verify error rate < 1%; verify no memory leaks during sustained load; verify database connections stable.",
         "priority": "medium",
         "dependencies": [
-          "49"
+          49
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on execute load testing for 500 concurrent users."
+        "subtasks": []
       },
       {
         "id": 52,
@@ -1334,16 +1096,13 @@
         "description": "Perform comprehensive security review of all critical modules and verify OWASP Mobile Application Security score >= 8/10. Requirements: BNF12, Phase S12.",
         "status": "pending",
         "dependencies": [
-          "43",
-          "48"
+          43,
+          48
         ],
         "priority": "high",
         "details": "1. Security review per docs/AI_WORKFLOW.md §5.2:\n   - Auth module: token handling, 2FA (±1 step, replay protection), password policies (bcrypt 12)\n   - Tenant isolation: RLS policies, cross-tenant tests, withTenant() usage\n   - File uploads: magic byte validation, path traversal, EXIF stripping, AES-256-GCM encryption\n   - Crypto: algorithm choices (AES-256-GCM, HS256 JWT), key management via Docker secrets\n   - Mobile: SecureStore for tokens, encrypted MMKV, certificate pinning, root detection (O1 from BUILD_CHECKLIST)\n   - API: injection prevention (Zod .strict(), Prisma only), rate limiting (L2 Table 5)\n2. OWASP MASVS checklist (target ≥ 8/10):\n   - MASVS-STORAGE: encrypted MMKV storage, no sensitive data in logs, SecureStore for tokens\n   - MASVS-CRYPTO: AES-256-GCM, crypto.randomUUID/randomBytes, no Math.random()\n   - MASVS-AUTH: JWT session management, biometric step-up, refresh rotation with family detection\n   - MASVS-NETWORK: TLS 1.2+, certificate pinning in release builds\n   - MASVS-PLATFORM: permission minimization, deep link validation\n   - MASVS-CODE: Hermes, R8 obfuscation, console stripped, no source maps\n   - MASVS-RESILIENCE: root detection, debugger detection (verify libraries from O1)\n3. Penetration testing focus areas (OWASP API Top 10 / Mobile Top 10 per AI_WORKFLOW.md §5.2):\n   - SQL injection via Prisma (verify $queryRawUnsafe never used)\n   - XSS in web dashboard (CSP enforcement)\n   - CSRF protection\n   - JWT algorithm confusion (algorithms pinned in jwt.verify)\n   - Insecure direct object references (RLS bypass, other-tenant access)\n   - Confidential reporter leaks (DTO masking for is_anonymous)\n4. Document findings by severity (Blocker/Major/Minor per AI_WORKFLOW.md §5.2):\n   - Each finding: file:line, attack/failure scenario, fix\n   - Explicitly note what could not be assessed\n5. Verify every item in docs/BUILD_CHECKLIST.md is closed:\n   - L3 items: contrast tokens, web login visibility, confidential conversation, French variants\n   - L2 items: O1–O8 open items (pinning, root detection, Firebase messaging, MMKV, SMTP, backup, DNS, RAM, Prisma overhead)\n   - Repository items: publication approval\n   - L1 items: supervisor sign-off, interviews, hotline numbers\n6. Create remediation plan with priorities (Critical/High fixes first).",
         "testStrategy": "Document security review findings with file:line references; verify all Blocker/Major issues fixed before release; verify MASVS score >= 8/10 with documented evidence per category; run automated security scanning (npm audit, Snyk); penetration test critical endpoints (auth, incidents, attachments); verify every item in docs/BUILD_CHECKLIST.md is checked off or has a documented exception; cross-reference findings against OWASP API Top 10 and Mobile Top 10.",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on execute security review and owasp mobile checklist."
+        "subtasks": null
       },
       {
         "id": 53,
@@ -1353,14 +1112,11 @@
         "testStrategy": "Verify APK builds successfully; verify size < 50 MB; test on 3+ physical devices; verify offline mode works; verify push notifications received; achieve SUS score >= 68 (above average).",
         "priority": "high",
         "dependencies": [
-          "43",
-          "52"
+          43,
+          52
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on build and test production apk with eas."
+        "subtasks": []
       },
       {
         "id": 54,
@@ -1370,13 +1126,10 @@
         "testStrategy": "Test backup script creates valid compressed dump; test restore script recovers data correctly; test off-host upload succeeds; test old backup cleanup works; document RTO < 1 hour, RPO < 24 hours.",
         "priority": "high",
         "dependencies": [
-          "49"
+          49
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down Task 54 into subtasks: 1) Backup shell script with pg_dump, gzip, and rclone upload to Cameroon-hosted off-site storage, 2) Restore script with service stop/start and psql import, 3) Docker Compose backup service configuration with daily cron at 2 AM, 4) Verification test procedure with documented RTO (<1 hour) and RPO (<24 hours). Include retention policy (30 days)."
+        "subtasks": []
       },
       {
         "id": 55,
@@ -1386,14 +1139,11 @@
         "testStrategy": "Review manual with non-technical user; verify all features documented; verify screenshots match current UI; verify both fr and en versions complete; verify PDF exports correctly.",
         "priority": "low",
         "dependencies": [
-          "43",
-          "48"
+          43,
+          48
         ],
         "status": "pending",
-        "subtasks": [],
-        "complexity": 4,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down Task 55 into subtasks: 1) Mobile user manual (fr/en) covering login, 2FA, reporting flow, offline mode, notifications, profile settings with screenshots, 2) Administrator manual covering dashboard, queue management, user management, audit logs, system health with screenshots, 3) PDF export and version tracking. Focus on non-technical users for mobile manual."
+        "subtasks": []
       },
       {
         "id": 56,
@@ -1403,17 +1153,14 @@
         "testStrategy": "## Email Consumer Tests\n1. **SMTP Connection Test**: Verify transporter connects with STARTTLS on port 587; test fallback behavior on connection failure.\n2. **Template Rendering Tests**: Unit test each template (password-reset, critical-incident-alert, token-reuse-alert) renders correctly for both fr and en locales; verify no missing interpolation variables.\n3. **Job Processing Test**: Integration test that enqueuing to notify.email results in transporter.sendMail being called with correct parameters.\n4. **Retry Behavior Test**: Test that failed job retries with exponential backoff (1min, 2min, 4min, 8min, 16min).\n5. **Dead-Letter Test**: Test that job failing all 5 attempts is moved to notify.email:dlq Redis sorted set.\n6. **Rate Limiting Test**: Verify limiter allows max 10 emails/second.\n7. **Sensitive Data Redaction Test**: Verify email addresses are redacted in logs.\n\n## Maintenance Scheduler Tests\n1. **SLA Breach Scanner Test**: \n   - Create incidents with different severities at various ages\n   - Run sla-breach-scan job\n   - Verify incidents exceeding SLA get sla_breached_at set and incident.sla_breached event in outbox\n   - Verify incidents within SLA are not marked\n\n2. **Auto-Close Test**:\n   - Create RESOLVED incidents with resolved_at > 7 days ago\n   - Run auto-close-resolved job\n   - Verify status changed to CLOSED, closed_at set\n   - Verify incidents resolved < 7 days ago remain RESOLVED\n\n3. **Token Purge Tests**:\n   - Create expired and valid refresh_tokens and password_reset_tokens\n   - Run purge job\n   - Verify only expired/revoked/used tokens deleted\n\n4. **Idempotency Key Purge Test**:\n   - Create expired and valid idempotency keys\n   - Run purge job\n   - Verify only expired keys deleted\n\n5. **Outbox Purge Test**:\n   - Create processed outbox events older than 7 days\n   - Create processed outbox events within 7 days\n   - Verify only old processed events deleted; unprocessed events retained regardless of age\n\n6. **Notification Purge Test**:\n   - Create notifications older than 90 days and newer\n   - Run purge job\n   - Verify only notifications > 90 days deleted\n\n7. **Repeatable Job Registration Test**: Verify all repeatable jobs registered with correct cron patterns and timezone (Africa/Douala).\n\n8. **Concurrency Test**: Verify maintenance worker runs jobs sequentially (concurrency: 1) to prevent database conflicts.",
         "status": "pending",
         "dependencies": [
-          "24",
-          "9",
-          "6",
-          "1",
-          "21"
+          24,
+          9,
+          6,
+          1,
+          21
         ],
         "priority": "high",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement email consumer and maintenance scheduler in worker."
+        "subtasks": []
       },
       {
         "id": 57,
@@ -1423,14 +1170,11 @@
         "testStrategy": "1. **Benchmark Reproducibility**: Run the benchmark 3 times with identical configuration; verify p95 variance is < 10%.\n\n2. **Pool Exhaustion Test**: Temporarily set pool to 2 connections and verify benchmark fails with connection timeout errors, confirming pool limit is being respected.\n\n3. **Connection Count Verification**: During benchmark, query pg_stat_activity and verify active connection count does not exceed configured pool limit + 2 (buffer for admin connections).\n\n4. **Transaction Isolation Test**: During load, run a manual query to verify RLS context is correctly set in each transaction (no cross-tenant leakage under concurrent load).\n\n5. **Documentation Review**: Verify ADR document in docs/decisions/ contains: test date, Node/Prisma versions, pool configuration tested, p50/p95/p99 results at 50 RPS, final recommended pool size, and rationale.\n\n6. **Budget Compliance**: Sum all role connection limits and verify total <= 60 (max_connections budget from L2 Table 20).",
         "status": "pending",
         "dependencies": [
-          "4",
-          "8"
+          4,
+          8
         ],
         "priority": "medium",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on benchmark prisma interactive transaction overhead and tune connection pool."
+        "subtasks": []
       },
       {
         "id": 58,
@@ -1440,17 +1184,14 @@
         "testStrategy": "## 1. Unit Tests (Vitest + React Testing Library)\n\n### 1.1 Reports Page\n- `ReportGeneratorCard.test.tsx`:\n  - Renders form with all fields\n  - Validates required fields before submission\n  - Calls createReport mutation on submit\n  - Shows loading state during submission\n- `ReportListTable.test.tsx`:\n  - Renders list of reports with correct columns\n  - Displays Ready/Generating/Failed badges correctly\n  - Download button triggers blob download for Ready reports\n  - Retry button calls retry mutation for Failed reports\n  - Filter input filters table rows\n- `ReportStatusBadge.test.tsx`:\n  - Renders green badge for COMPLETED status\n  - Renders blue badge with spinner for PROCESSING status\n  - Renders red badge for FAILED status with error message\n\n### 1.2 Client Dashboard\n- `ClientDashboard.test.tsx`:\n  - Renders organization header with correct org name\n  - Displays 4 KPI cards with correct values\n  - Charts receive correct data props\n- `LatestIncidentsTable.test.tsx`:\n  - **Critical test**: Confidential incidents show \"Confidential reporter\" badge instead of reporter name\n  - Manager role cannot see reporter name for is_anonymous=true incidents\n  - Non-confidential incidents show reporter name normally\n- `WeeklyReportsChart.test.tsx`:\n  - Renders Recharts components with weekly data\n  - Displays legend for Reported/Resolved series\n\n### 1.3 Settings Page\n- `ProfileForm.test.tsx`:\n  - Pre-fills form with current user data\n  - Email field is disabled\n  - Language radio buttons work\n  - Save button calls updateProfile mutation\n- `TotpReenrollment.test.tsx`:\n  - Requires password verification before showing QR\n  - Renders QR code with TOTP URI\n  - Copy button copies manual key\n  - Verifies 6-digit code before saving\n  - Success toast on successful enrolment\n- `PasswordChangeForm.test.tsx`:\n  - Validates password policy requirements in real-time\n  - Confirms new password matches confirmation\n  - Calls changePassword mutation on submit\n- `SessionsTable.test.tsx`:\n  - Renders list of active sessions\n  - Current session shows \"Active now\" badge\n  - Terminate button calls deleteSession mutation\n  - \"Sign out all\" button calls deleteAllSessions mutation\n- `NotificationPreferences.test.tsx`:\n  - Toggles call updatePreferences mutation\n  - Toast appears on preference change\n\n### 1.4 Interface States\n- `ConnectionBanner.test.tsx`:\n  - Shows when connection status is disconnected\n  - Hides when connection is restored\n  - Reconnect button calls reconnect function\n- `ErrorBanner.test.tsx`:\n  - Displays error message and HTTP code\n  - Retry button calls retry function\n- `TableSkeleton.test.tsx`:\n  - Renders correct number of skeleton rows\n  - Skeleton rows have pulse animation class\n- `EmptyState.test.tsx`:\n  - Renders with search_off icon\n  - Clear filters button calls clearFilters function\n- `SessionExpiredModal.test.tsx`:\n  - Appears when session is expired\n  - Password input allows re-authentication\n  - Sign in button calls re-auth function\n\n### 1.5 Login Page Fix\n- `Login.test.tsx`:\n  - Sign In button is visible (not opacity: 0)\n  - Forgot Password link is visible\n  - Both elements are clickable\n\n## 2. Integration Tests (Playwright)\n\n### 2.1 Reports Flow\n```typescript\ntest('generate and download period report', async ({ page }) => {\n  await page.goto('/reports');\n  await page.getByRole('radio', { name: /period report/i }).check();\n  await page.selectOption('#organizationSelect', 'kamdem');\n  await page.fill('[aria-label=\"Period Start Date\"]', '01/10/2026');\n  await page.fill('[aria-label=\"Period End Date\"]', '31/10/2026');\n  await page.getByRole('button', { name: /generate pdf/i }).click();\n  // Wait for job to appear in table\n  await expect(page.getByText(/Generating/)).toBeVisible();\n  // Wait for completion (mock or use short timeout)\n  await expect(page.getByText(/Ready/)).toBeVisible({ timeout: 30000 });\n  // Download\n  const [download] = await Promise.all([\n    page.waitForEvent('download'),\n    page.getByRole('link', { name: /download/i }).click()\n  ]);\n  expect(download.suggestedFilename()).toMatch(/\\.pdf$/);\n});\n```\n\n### 2.2 Client Dashboard Confidential Masking\n```typescript\ntest('manager cannot see confidential reporter name', async ({ page }) => {\n  // Login as manager\n  await loginAsManager(page);\n  await page.goto('/dashboard');\n  // Find confidential incident\n  const row = page.locator('tr:has-text(\"Confidential reporter\")');\n  await expect(row).toBeVisible();\n  // Verify no actual name is shown for this incident\n  await expect(row.getByText(/Jean|Marie|Paul/)).not.toBeVisible();\n});\n```\n\n### 2.3 TOTP Re-enrolment Flow\n```typescript\ntest('re-enrol TOTP authenticator', async ({ page }) => {\n  await page.goto('/settings#security');\n  await page.getByRole('button', { name: /set up again/i }).click();\n  // Verify password required\n  await expect(page.getByLabel(/current password/i)).toBeVisible();\n  await page.fill('[id=\"current-pwd\"]', 'CurrentPassword123!');\n  // QR code should appear\n  await expect(page.locator('svg[viewbox]')).toBeVisible(); // QR code\n  await expect(page.getByText(/SFC-AUTH-/)).toBeVisible(); // Manual key\n  // Enter TOTP code\n  await page.fill('[maxlength=\"6\"]', '123456');\n  await page.getByRole('button', { name: /verify and save/i }).click();\n});\n```\n\n### 2.4 Session Termination\n```typescript\ntest('terminate other session', async ({ page }) => {\n  await page.goto('/settings#security');\n  // Find other session row\n  const otherSession = page.locator('tr:has-text(\"SFC Mobile Companion\")');\n  await otherSession.getByRole('button', { name: /terminate/i }).click();\n  await expect(page.getByText(/session terminated/i)).toBeVisible();\n});\n```\n\n### 2.5 Login Page Visibility Fix\n```typescript\ntest('login page elements are visible', async ({ page }) => {\n  await page.goto('/login');\n  const signInButton = page.getByRole('button', { name: /sign in/i });\n  const forgotLink = page.getByRole('link', { name: /forgot password/i });\n  \n  // Check visibility (not hidden by opacity)\n  await expect(signInButton).toBeVisible();\n  await expect(forgotLink).toBeVisible();\n  \n  // Verify computed opacity is not 0\n  const buttonOpacity = await signInButton.evaluate(el => \n    window.getComputedStyle(el).opacity\n  );\n  expect(parseFloat(buttonOpacity)).toBeGreaterThan(0);\n});\n```\n\n## 3. Visual Regression Tests\n- Capture screenshots of all interface states\n- Compare against baseline from Stitch PNG renders\n- Run on CI with Percy or Playwright visual comparisons\n\n## 4. API Contract Tests\n- Mock API responses match RTK Query expectations\n- Error handling for network failures\n- Report job polling stops on completion/failure\n\n## 5. Accessibility Tests (axe-core)\n```typescript\ntest('reports page is accessible', async ({ page }) => {\n  await page.goto('/reports');\n  const results = await new AxeBuilder({ page }).analyze();\n  expect(results.violations).toEqual([]);\n});\n```\n\n## 6. Manual Testing Checklist\n- [ ] Reports page renders without console errors\n- [ ] Report generation shows loading state\n- [ ] Completed reports download as valid PDFs\n- [ ] Client dashboard shows correct organization data\n- [ ] Confidential reporters are never shown by name to managers\n- [ ] Settings tabs switch correctly\n- [ ] TOTP QR code scans successfully with authenticator app\n- [ ] Password change validates all policy requirements\n- [ ] Session termination works for other sessions\n- [ ] Toast notifications appear and auto-dismiss\n- [ ] Login Sign In button and Forgot Password link are visible\n- [ ] All states (loading, empty, error) display correctly\n- [ ] French/English language toggle works across all pages",
         "status": "pending",
         "dependencies": [
-          "1",
-          "29",
-          "28",
-          "44",
-          "47"
+          1,
+          29,
+          28,
+          44,
+          47
         ],
         "priority": "medium",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement remaining web dashboard pages: reports, client manager, settings, and interface states."
+        "subtasks": []
       },
       {
         "id": 59,
@@ -1460,17 +1201,14 @@
         "testStrategy": "## 1. Performance Test Verification (BNF01)\n\n### Screen Load Time Tests\n- **Method**: Automated timing using `performance.now()` or `Date.now()` markers\n- **Criteria**: All measured screens must load in < 2000ms (median of 5 runs)\n- **Pass condition**: 100% of critical screens (Login, Home, Incidents List, Report Flow) meet threshold\n- **Documentation**: Record raw timing data in CSV format for each screen\n\n### Report Submission Tests\n- **Method**: End-to-end timing from submit button press to success confirmation\n- **Network condition**: Verified 3G throttling (750/250 Kbps, 100ms RTT)\n- **Test cases**:\n  1. Text-only report: < 3000ms expected\n  2. Single photo (1.5MB): < 5000ms target\n  3. Five photos (7.5MB total): < 5000ms after compression\n- **Pass condition**: All scenarios complete within 5 seconds\n\n## 2. Push Notification Latency Verification (BNF14)\n\n### Test Procedure\n1. Trigger 20 notifications from web dashboard (vary types: assignment, message, status change)\n2. Record server-side timestamp in notification payload metadata\n3. Record client-side receive timestamp in `messaging().onMessage`\n4. Calculate latency for each notification\n\n### Pass Criteria\n- Median latency: < 3000ms (comfortable margin)\n- 95th percentile: < 5000ms (requirement threshold)\n- Maximum observed: < 10000ms (acceptable outlier)\n\n### Verification\n- Cross-check server logs with mobile logs using correlation IDs\n- Verify FCM delivery receipts match expected count\n\n## 3. SUS Usability Validation (BNF13)\n\n### Participant Requirements\n- Minimum 5 participants (per SUS methodology guidelines)\n- Mix of technical and non-technical users\n- At least 2 participants unfamiliar with the system (fresh user perspective)\n\n### Task Completion Criteria\n- All 7 test tasks completed by each participant\n- Note any tasks where assistance was required\n\n### Score Calculation Verification\n- Calculate individual SUS scores using standard formula\n- Calculate mean score across all participants\n- **Pass condition**: Mean SUS score > 70\n\n### Evidence Requirements\n- Completed SUS questionnaire forms (paper or digital)\n- Task completion times (optional, for additional insights)\n- Qualitative feedback notes\n\n## 4. Report Validation\n\n### Documentation Checklist\n- [ ] Test environment fully described (device model, OS, RAM, network config)\n- [ ] All raw measurement data included\n- [ ] Statistical summaries (median, min, max, p95) calculated\n- [ ] Pass/fail status for each requirement clearly stated\n- [ ] Date and version information recorded\n- [ ] Tester signature/identification\n\n### Integration with L9 Deliverable\n- Report must be PDF-exportable for inclusion in L9 test report\n- Follow template structure defined in Spec §9.2 (L9: 20-25 pages)\n- Include screenshots and charts where appropriate",
         "status": "pending",
         "dependencies": [
-          "25",
-          "42",
-          "43",
-          "52",
-          "53"
+          25,
+          42,
+          43,
+          52,
+          53
         ],
         "priority": "high",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on performance and usability validation for test report l9."
+        "subtasks": []
       },
       {
         "id": 60,
@@ -1480,25 +1218,16 @@
         "testStrategy": "## 1. Content Completeness Verification\n\n### L13 Report Checklist\n- [ ] All 10 chapters present with required sections\n- [ ] Front matter complete (abstract, acknowledgements, TOC, glossary)\n- [ ] Page count within 60-80 pages (PDF)\n- [ ] All figures and tables numbered with captions\n- [ ] Bibliography contains all cited sources\n- [ ] Appendices A-E included\n- [ ] Code snippets have syntax highlighting and file path references\n\n### L13 Cross-Reference Validation\n- [ ] Decision records D1-D9 match L1 document\n- [ ] Architecture diagrams consistent with L2 document\n- [ ] UI screenshots match L3 mockups and current implementation\n- [ ] Performance metrics match L9 test report\n- [ ] API catalogue matches deployed endpoints\n\n### L14 Presentation Checklist\n- [ ] Exactly 15-20 slides\n- [ ] Title slide includes all required elements\n- [ ] Architecture diagrams readable at 1024x768 minimum\n- [ ] AI statistics match PR analysis CSV\n- [ ] Demo screenshots current\n- [ ] No slides with more than 6 bullet points\n\n## 2. AI Tier Data Accuracy\n\n### PR Analysis Verification\n```bash\n# Verify script output matches manual count\ngh pr list --state merged --limit 100 --json number,title,body \\\n  | jq '.[] | select(.body | contains(\"AI tier used\"))' \\\n  | wc -l\n# Compare with ai-tier-analysis.csv row count\n```\n\n### Cross-Check with docs/AI_WORKFLOW.md\n- [ ] Security-critical PRs correctly tagged as Tier 1\n- [ ] Module assignments match AI_WORKFLOW.md §2 table\n\n## 3. Rendering Quality\n\n### PDF Output Tests\n- [ ] L13 PDF renders without errors (no missing fonts, broken images)\n- [ ] All diagrams appear at correct resolution (300 DPI minimum)\n- [ ] Page numbers sequential\n- [ ] TOC links work in PDF viewer\n- [ ] Headers/footers consistent\n\n### Presentation Export Tests\n- [ ] Slides render correctly in PDF viewer\n- [ ] Diagrams legible at full-screen projection (1920x1080)\n- [ ] Animations/transitions work (if using reveal.js)\n- [ ] Speaker notes included (if applicable)\n\n## 4. Academic Standards Review\n\n### Citation Check\n- [ ] All external sources cited\n- [ ] No plagiarized content\n- [ ] Code attributions where applicable\n\n### Language Review\n- [ ] Professional academic tone\n- [ ] No informal language or contractions\n- [ ] French abstract proofread by native speaker\n- [ ] Consistent terminology throughout\n\n## 5. Supervisor Review Simulation\n\n### Key Questions to Address\n- [ ] How does Secure360 differ from existing solutions?\n- [ ] Why PostgreSQL RLS over application-level filtering?\n- [ ] How did AI assistance affect code quality?\n- [ ] What security vulnerabilities were found and fixed?\n- [ ] What would you do differently?\n\n### Ensure Report Answers\n- [ ] Comparative analysis in Chapter 2\n- [ ] RLS justification in Chapter 4\n- [ ] AI impact analysis in Chapter 7\n- [ ] Security findings in Chapter 8\n- [ ] Lessons learned in Chapter 10\n\n## 6. Integration with Prior Deliverables\n\n### Consistency Check\n- [ ] L13 references match L1-L12 document versions\n- [ ] No contradictions between report and prior deliverables\n- [ ] Evolution from requirements (L1) to implementation accurately traced\n\n### File Dependency Verification\n```bash\n# Ensure all referenced files exist\ngrep -oE 'docs/reference/deliverables/[^)]+' docs/deliverables/L13_Internship_Report.md \\\n  | while read f; do test -f \"$f\" || echo \"Missing: $f\"; done\n```",
         "status": "pending",
         "dependencies": [
-          "55",
-          "59"
+          55,
+          59
         ],
         "priority": "medium",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on write internship report (l13) and defence presentation (l14)."
+        "subtasks": []
       }
     ],
     "metadata": {
-      "version": "1.0.0",
-      "lastModified": "2026-10-18T07:30:02.478Z",
-      "taskCount": 60,
-      "completedCount": 0,
-      "tags": [
-        "master"
-      ],
-      "created": "2026-10-18T07:41:13.596Z",
+      "created": "2026-10-13T22:15:08.547Z",
+      "updated": "2026-10-15T18:42:55.024Z",
       "description": "Tasks for master context"
     }
   }
