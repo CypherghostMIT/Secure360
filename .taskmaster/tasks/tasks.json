@@ -213,7 +213,7 @@
         "expansionPrompt": "Break down this task with a focus on configure docker compose for postgresql 16 and redis 8 development environment."
       },
       {
-        "id": "4",
+        "id": 4,
         "title": "Implement Prisma schema with complete L2 data model and RLS policies",
         "description": "Create Prisma schema for all entities (organizations, users, incidents, etc.) with PostgreSQL Row-Level Security policies, forced RLS, database role grants, and CHECK constraints for enum-like fields. Requirements: Technical Architecture, Phase S5, BNF19.",
         "status": "pending",

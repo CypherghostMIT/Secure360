@@ -38,6 +38,9 @@ const BIDI = [
   '\u2067',
   '\u2068',
   '\u2069',
+  '\u200E',
+  '\u200F',
+  '\u061C',
 ];
 // C0 controls (NUL, BEL, ESC, DEL) and C1 controls (NEL, CSI) are all \p{Cc}.
 const CONTROLS = ['\u0000', '\u0007', '\u001B', '\u007F', '\u0085', '\u009B'];
@@ -241,4 +244,114 @@ describe('password transformation (all password fields)', () => {
     ko(PasswordSchema, 'é'.repeat(12));
     ko(PasswordSchema, `${prefix}abcdef`);
   });
+});
+
+describe('bidi marks (LRM, RLM, ALM)', () => {
+  it.each([
+    ['LRM U+200E', 0x200e],
+    ['RLM U+200F', 0x200f],
+    ['ALM U+061C', 0x061c],
+  ])('rejects %s in single-line and multiline text', (_name, codePoint) => {
+    const mark = String.fromCodePoint(codePoint);
+    ko(text({ min: 1, max: 50 }), `SFC${mark}abc`);
+    ko(text({ min: 1, max: 50, multiline: true }), `SFC${mark}abc`);
+    ko(text({ max: 50 }), mark);
+  });
+});
+
+describe('lone surrogates (Unicode category Cs)', () => {
+  const high = String.fromCharCode(0xd800);
+  const low = String.fromCharCode(0xdfff);
+
+  it.each([
+    ['high U+D800', high],
+    ['low U+DFFF', low],
+  ])('rejects a %s alone and inside otherwise valid text', (_name, surrogate) => {
+    for (const schema of [text({ min: 1, max: 50 }), text({ min: 1, max: 50, multiline: true })]) {
+      ko(schema, surrogate);
+      ko(schema, `Faux e-mail ${surrogate} reçu`);
+    }
+  });
+
+  it.each([
+    ['high U+D800', high],
+    ['low U+DFFF', low],
+  ])('rejects a %s alone and inside otherwise valid passwords', (_name, surrogate) => {
+    ko(PasswordSchema, surrogate);
+    ko(PasswordSchema, `Aa1abcdefgh${surrogate}`);
+    ko(ExistingPasswordSchema, surrogate);
+    ko(LoginInputSchema, { email: 'a@example.com', password: `Aa1abcdefgh${surrogate}` });
+  });
+
+  it('rejects a reversed pair but keeps real astral characters (emoji)', () => {
+    ko(text({ min: 1, max: 50 }), `ab${low}${high}cd`);
+    const emoji = String.fromCodePoint(0x1f600);
+    ok(text({ min: 1, max: 50 }), `Merci ${emoji}`);
+    ok(PasswordSchema, `Aa1abcdefgh${emoji}`);
+  });
+});
+
+describe('visible length ignores spaces hidden between zero-width characters', () => {
+  it('rejects a required value that is only zero-width characters and spaces', () => {
+    const zw = String.fromCharCode(0x200b);
+    ko(text({ min: 1, max: 50 }), `${zw} ${zw}`);
+    ko(text({ min: 3, max: 50 }), `${zw}a b`.replace('b', ''));
+    ok(text({ min: 3, max: 50 }), `${zw}a b`);
+  });
+});
+
+describe('optional single-line fields (location, deviceAffected)', () => {
+  const zw = String.fromCharCode(0x200b);
+  const bom = String.fromCharCode(0xfeff);
+  const base = {
+    categoryCode: 'MSG-01',
+    title: 'Faux e-mail',
+    description: 'Lien cliqué',
+    answers: { moneyLost: 'no', sharedSecret: 'no', othersAffected: 'no' },
+    clientRequestId: UUID_V4,
+  };
+
+  it.each(['location', 'deviceAffected'])('%s: absent stays absent', (field) => {
+    expect(field in CreateIncidentInputSchema.parse(base)).toBe(false);
+  });
+
+  it.each(['location', 'deviceAffected'])(
+    '%s: empty, blank or zero-width-only input becomes undefined',
+    (field) => {
+      for (const blank of ['', '   ', '\t', zw, `${zw} ${bom}`, ` ${zw}${zw} `]) {
+        const parsed = CreateIncidentInputSchema.parse({ ...base, [field]: blank }) as Record<
+          string,
+          unknown
+        >;
+        expect(parsed[field], JSON.stringify(blank)).toBeUndefined();
+      }
+    },
+  );
+
+  it.each(['location', 'deviceAffected'])(
+    '%s: a present value keeps the text() rules and is trimmed',
+    (field) => {
+      const parsed = CreateIncidentInputSchema.parse({ ...base, [field]: '  Douala  ' }) as Record<
+        string,
+        unknown
+      >;
+      expect(parsed[field]).toBe('Douala');
+      expect(
+        (CreateIncidentInputSchema.parse({ ...base, [field]: 'a' }) as Record<string, unknown>)[
+          field
+        ],
+      ).toBe('a');
+      ok(CreateIncidentInputSchema, { ...base, [field]: 'a'.repeat(200) });
+      ko(CreateIncidentInputSchema, { ...base, [field]: 'a'.repeat(201) });
+      for (const bad of [
+        'Dou\nala',
+        'Dou\u0000ala',
+        `Dou${String.fromCharCode(0x202e)}ala`,
+        null,
+        42,
+      ]) {
+        ko(CreateIncidentInputSchema, { ...base, [field]: bad });
+      }
+    },
+  );
 });

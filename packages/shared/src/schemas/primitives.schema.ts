@@ -1,8 +1,13 @@
 import { z } from 'zod';
 
 // Non-global regexes for .test(): a /g regex keeps lastIndex between calls and would skip matches.
-const BIDI_CONTROL = /[\u202A-\u202E\u2066-\u2069]/;
+// Overrides, embeddings and isolates (U+202A-202E, U+2066-2069) and the LRM, RLM and ALM marks: all reorder
+// what is displayed, which is how "Trojan Source"-style spoofing works.
+const BIDI_CONTROL = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/;
 const ANY_CONTROL = /\p{Cc}/u;
+// An unpaired UTF-16 surrogate is not a character: UTF-8 encoders replace it with U+FFFD, so the stored text or
+// hashed password would differ from what was validated, and different inputs would collide.
+const LONE_SURROGATE = /\p{Cs}/u;
 const CONTROL_EXCEPT_TAB_LF = /(?![\t\n])\p{Cc}/u;
 const ZERO_WIDTH = /[\u200B-\u200D\uFEFF]/g;
 
@@ -12,6 +17,9 @@ interface TextOptions {
   // Description and message bodies may contain line breaks and tabs; every other field is single-line.
   multiline?: boolean;
 }
+
+// What a reader actually sees: without zero-width characters and the spaces they were hiding between.
+const visible = (value: string) => value.replace(ZERO_WIDTH, '').trim();
 
 /**
  * The one helper for user-entered text. NFC so the same visible text is stored once; NUL and other control
@@ -27,8 +35,22 @@ export function text({ min = 0, max, multiline = false }: TextOptions) {
     .trim()
     .refine((value) => !forbiddenControl.test(value), { message: 'text.control_character' })
     .refine((value) => !BIDI_CONTROL.test(value), { message: 'text.bidi_control' })
-    .refine((value) => value.replace(ZERO_WIDTH, '').length >= min, { message: 'text.too_short' })
+    .refine((value) => !LONE_SURROGATE.test(value), { message: 'text.invalid_character' })
+    .refine((value) => visible(value).length >= min, { message: 'text.too_short' })
     .max(max);
+}
+
+/**
+ * Optional single-line text (e.g. incident location): empty, blank or zero-width-only input means "not given"
+ * and becomes undefined, so the database never stores an invisible value. A present value has the text() rules
+ * and at least 1 visible character.
+ */
+export function optionalText(max: number) {
+  return z
+    .string()
+    .transform((value) => (visible(value.normalize('NFC')) === '' ? undefined : value))
+    .pipe(text({ min: 1, max }).optional())
+    .optional();
 }
 
 // Format schemas such as z.email() validate before a chained .trim(), so normalise first and pipe into the format.
@@ -36,6 +58,10 @@ export function text({ min = 0, max, multiline = false }: TextOptions) {
 export const EmailSchema = z.string().trim().toLowerCase().max(254).pipe(z.email());
 
 export const UuidSchema = z.uuid();
+
+// Client-generated UUID v4 used as an idempotency key: lowercased so that one UUID is one key whatever case the
+// client sends (a case change must replay the stored response, not create a duplicate).
+export const UuidV4Schema = z.string().trim().toLowerCase().pipe(z.uuidv4());
 
 // bcrypt ignores everything after 72 bytes, so a longer password would silently lose its tail.
 const BCRYPT_MAX_BYTES = 72;
@@ -57,13 +83,15 @@ function utf8ByteLength(value: string): number {
  * silently change it (a deliberate leading or trailing space would be lost), and any client or future endpoint
  * that did not trim the same way would then fail to log in with the password the user actually chose.
  * NFC because keyboards may produce composed or decomposed accents for the same visible password.
- * Control characters (NUL included) are rejected: some bcrypt implementations stop at NUL.
+ * Control characters (NUL included) are rejected: some bcrypt implementations stop at NUL. Lone surrogates are
+ * rejected because they all encode to U+FFFD, so distinct passwords would hash the same.
  */
 const passwordInput = () =>
   z
     .string()
     .normalize('NFC')
     .refine((value) => !ANY_CONTROL.test(value), { message: 'password.control_character' })
+    .refine((value) => !LONE_SURROGATE.test(value), { message: 'password.invalid_character' })
     .refine((value) => utf8ByteLength(value) <= BCRYPT_MAX_BYTES, {
       message: 'password.too_long',
     });

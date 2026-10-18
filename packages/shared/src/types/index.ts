@@ -92,4 +92,3 @@ export type UpdateOrgInput = z.infer<typeof UpdateOrgInputSchema>;
 
 export type CreateMessageInput = z.infer<typeof CreateMessageInputSchema>;
 export type CreateStaffMessageInput = z.infer<typeof CreateStaffMessageInputSchema>;
-export type CreateStaffMessagePayload = z.input<typeof CreateStaffMessageInputSchema>;

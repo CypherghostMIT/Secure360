@@ -387,6 +387,28 @@ describe('UpdateMeInputSchema (PATCH /users/me)', () => {
 });
 
 describe('request headers', () => {
+  it('normalises the Idempotency-Key case so one UUID is one key', () => {
+    const lower = 'abcdef01-2345-4678-89ab-cdef01234567';
+    const upper = lower.toUpperCase();
+    expect(IdempotencyKeyHeaderSchema.parse(upper)).toBe(lower);
+    expect(IdempotencyKeyHeaderSchema.parse(upper)).toBe(IdempotencyKeyHeaderSchema.parse(lower));
+    expect(IdempotencyKeyHeaderSchema.parse(` ${upper} `)).toBe(lower);
+  });
+
+  it('normalises clientRequestId the same way', () => {
+    const lower = 'abcdef01-2345-4678-89ab-cdef01234567';
+    const forms = [lower, lower.toUpperCase(), 'ABCDEF01-2345-4678-89ab-CDEF01234567'];
+    const ids = forms.map(
+      (id) => CreateIncidentInputSchema.parse({ ...incident, clientRequestId: id }).clientRequestId,
+    );
+    expect(new Set(ids)).toEqual(new Set([lower]));
+    // Still v4 only, whatever the case.
+    rejects(CreateIncidentInputSchema, {
+      ...incident,
+      clientRequestId: '00000000-0000-1000-8000-000000000001'.toUpperCase(),
+    });
+  });
+
   it('requires a UUID v4 Idempotency-Key', () => {
     accepts(IdempotencyKeyHeaderSchema, UUID_V4);
     for (const key of [

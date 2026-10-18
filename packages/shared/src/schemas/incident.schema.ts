@@ -3,7 +3,7 @@ import { CategoryCodeSchema, CategoryGroupSchema } from '../constants/categories
 import { SeveritySchema } from '../constants/severities.js';
 import { IncidentStatusSchema } from '../constants/statuses.js';
 import { paginationShape } from './common.schema.js';
-import { text, UuidSchema } from './primitives.schema.js';
+import { optionalText, text, UuidSchema, UuidV4Schema } from './primitives.schema.js';
 
 export const GuidedAnswerSchema = z.enum(['yes', 'no', 'unknown']);
 
@@ -28,10 +28,10 @@ export const CreateIncidentInputSchema = z
     answers: SeverityAnswersSchema,
     reporterSeverity: SeveritySchema.optional(),
     isAnonymous: z.boolean().default(false),
-    location: text({ max: 200 }).optional(),
-    deviceAffected: text({ max: 200 }).optional(),
+    location: optionalText(200),
+    deviceAffected: optionalText(200),
     // Generated on the device so offline retries map to one server record (L2 §7.3).
-    clientRequestId: z.uuidv4(),
+    clientRequestId: UuidV4Schema,
   })
   .strict();
 
