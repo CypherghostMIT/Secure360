@@ -215,19 +215,16 @@
       {
         "id": 4,
         "title": "Implement Prisma schema with complete L2 data model and RLS policies",
-        "description": "Create Prisma schema for all entities (organizations, users, incidents, etc.) with PostgreSQL Row-Level Security policies, forced RLS, and database role grants. Requirements: Technical Architecture, Phase S5, BNF19.",
-        "details": "1. Install prisma, @prisma/client in apps/api.\n2. Create apps/api/prisma/schema.prisma with all models:\n   - Organization: id (uuid), name, slug, is_active, created_at, updated_at\n   - User: id, organization_id, email, password_hash, first_name, last_name, role (enum), totp_secret (encrypted), totp_enabled, session_version, must_change_password, is_active, created_at\n   - Incident: id, organization_id, reporter_id, reference (SFC-YYYY-NNNNNN), category_code, severity (Low/Moderate/High/Critical), title, description, is_anonymous, status (NEW/ASSIGNED/IN_PROGRESS/RESOLVED/CLOSED), assigned_to_id, version, resolved_at, closed_at, deleted_at, created_at, updated_at\n   - IncidentCategory: code (PK), group_code, label_fr, label_en, default_severity, sort_order\n   - IncidentStatusHistory: id, incident_id, from_status, to_status, changed_by_id, comment, created_at\n   - IncidentMessage: id, incident_id, sender_id, body, is_internal, created_at\n   - Attachment: id, incident_id, message_id, file_key, encryption_iv, original_name, mime_type, size_bytes, created_at\n   - Notification: id, user_id, incident_id, type, title_key, body_key, read_at, created_at\n   - AuditLog: id, organization_id, user_id, event, entity_type, entity_id, old_data, new_data, ip_address, user_agent, created_at\n   - RefreshToken: id, user_id, token_hash, family_id, expires_at, revoked_at, created_at\n   - PasswordResetToken: id, user_id, token_hash, expires_at, used_at, created_at\n   - DeviceToken: id, user_id, token, platform, created_at\n   - OutboxEvent: id, event_type, payload, processed_at, created_at\n   - IdempotencyKey: key (PK), user_id, response, expires_at, created_at\n   - ReportJob: id, organization_id, requested_by_id, type, parameters, status, file_key, error, created_at, completed_at\n   - IncidentReferenceCounter: organization_id (PK), year, counter\n3. Create migration with RLS policies in raw SQL:\n   - Enable RLS: ALTER TABLE users ENABLE ROW LEVEL SECURITY; ALTER TABLE users FORCE ROW LEVEL SECURITY;\n   - Policies: CREATE POLICY tenant_isolation ON users USING (organization_id::text = current_setting('app.org_id', true));\n   - Grants: GRANT SELECT, INSERT, UPDATE ON users TO s360_app; REVOKE ALL ON users FROM PUBLIC;",
-        "testStrategy": "Run prisma migrate dev and verify migration applies cleanly; verify RLS policies exist with \\dp in psql; write integration test that sets app.org_id and verifies queries only return matching tenant data; test that queries without app.org_id fail.",
-        "priority": "high",
+        "description": "Create Prisma schema for all entities (organizations, users, incidents, etc.) with PostgreSQL Row-Level Security policies, forced RLS, database role grants, and CHECK constraints for enum-like fields. Requirements: Technical Architecture, Phase S5, BNF19.",
+        "status": "pending",
         "dependencies": [
           "2",
           "3"
         ],
-        "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement prisma schema with complete l2 data model and rls policies."
+        "priority": "high",
+        "details": "1. Install prisma, @prisma/client in apps/api.\n2. Create apps/api/prisma/schema.prisma with all models:\n   - Organization: id (uuid), name, slug, is_active, created_at, updated_at\n   - User: id, organization_id, email, password_hash, first_name, last_name, role (enum), totp_secret (encrypted), totp_enabled, session_version, must_change_password, is_active, created_at\n   - Incident: id, organization_id, reporter_id, reference (SFC-YYYY-NNNNNN), category_code, severity (LOW/MEDIUM/HIGH/CRITICAL), title, description, is_anonymous, status (NEW/ASSIGNED/IN_PROGRESS/RESOLVED/CLOSED), assigned_to_id, **version (integer NOT NULL DEFAULT 1, for optimistic concurrency control)**, resolved_at, closed_at, deleted_at, created_at, updated_at\n   - IncidentCategory: code (PK), group_code, label_fr, label_en, default_severity (with CHECK constraint), sort_order\n   - IncidentStatusHistory: id, incident_id, from_status, to_status, changed_by_id, comment, created_at\n   - IncidentMessage: id, incident_id, sender_id, body, is_internal, created_at\n   - Attachment: id, incident_id, message_id, file_key, encryption_iv, original_name, mime_type, size_bytes, created_at\n   - Notification: id, user_id, incident_id, type, title_key, body_key, read_at, created_at\n   - AuditLog: id, organization_id, user_id, event, entity_type, entity_id, old_data, new_data, ip_address, user_agent, created_at\n   - RefreshToken: id, user_id, token_hash, family_id, expires_at, revoked_at, created_at\n   - PasswordResetToken: id, user_id, token_hash, expires_at, used_at, created_at\n   - DeviceToken: id, user_id, token, platform, created_at\n   - OutboxEvent: id, event_type, payload, processed_at, created_at\n   - IdempotencyKey: key (PK), user_id, response, expires_at, created_at\n   - ReportJob: id, organization_id, requested_by_id, type, parameters, status, file_key, error, created_at, completed_at\n   - IncidentReferenceCounter: organization_id (PK), year, counter\n3. Incident.version for optimistic concurrency (L2 §4.4):\n   - Column definition: `version INTEGER NOT NULL DEFAULT 1`\n   - Incremented atomically on every UPDATE using `WHERE version = :expectedVersion` and `SET version = version + 1`\n   - When the expected version does not match (0 rows affected), return 409 Conflict\n   - Aligns with UpdateIncidentInputSchema in packages/shared/src/schemas/incident.schema.ts:42 which validates version as z.number().int().min(1).max(2_147_483_647)\n4. Create migration with RLS policies, CHECK constraints, and version handling in raw SQL:\n   - Enable RLS: ALTER TABLE users ENABLE ROW LEVEL SECURITY; ALTER TABLE users FORCE ROW LEVEL SECURITY;\n   - Policies: CREATE POLICY tenant_isolation ON users USING (organization_id::text = current_setting('app.org_id', true));\n   - Grants: GRANT SELECT, INSERT, UPDATE ON users TO s360_app; REVOKE ALL ON users FROM PUBLIC;\n   - Defence-in-depth CHECK constraint on incident_categories.default_severity (security review M1):\n     ```sql\n     ALTER TABLE incident_categories\n       ADD CONSTRAINT chk_incident_categories_default_severity\n       CHECK (default_severity IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL'));\n     ```\n     This ensures that only valid severity values matching SEVERITIES from packages/shared/src/constants/severities.ts can be stored, complementing the runtime validation in computeSeverity() (packages/shared/src/utils/compute-severity.ts:9-12) which throws RangeError for invalid values.\n   - CHECK constraint on incidents.version:\n     ```sql\n     ALTER TABLE incidents\n       ADD CONSTRAINT chk_incidents_version_positive\n       CHECK (version >= 1);\n     ```",
+        "testStrategy": "Run prisma migrate dev and verify migration applies cleanly; verify RLS policies exist with \\dp in psql; write integration test that sets app.org_id and verifies queries only return matching tenant data; test that queries without app.org_id fail; verify CHECK constraint on incident_categories.default_severity by attempting INSERT/UPDATE with invalid severity (should fail) and valid severities LOW/MEDIUM/HIGH/CRITICAL (should succeed); verify constraint exists with \\d incident_categories in psql; test optimistic concurrency on incidents.version: (1) create incident with version=1, (2) update with correct version succeeds and increments to version=2, (3) concurrent update with stale version=1 fails with 409 Conflict, (4) verify CHECK constraint rejects version < 1.",
+        "subtasks": null
       },
       {
         "id": 5,
@@ -501,18 +498,60 @@
       {
         "id": 14,
         "title": "Implement logout, password reset, and first-login password change",
-        "description": "Create endpoints for logout (revoke current token), forgot/reset password flow with secure tokens, and forced password change at first login. Requirements: BF01, Phase S5.",
-        "details": "1. Add to auth.repository.ts:\n   - createPasswordResetToken(userId, tokenHash, expiresAt)\n   - findPasswordResetToken(tokenHash)\n   - markResetTokenUsed(id)\n   - updateUserPassword(userId, passwordHash)\n   - clearMustChangePassword(userId)\n2. Add to auth.service.ts:\n   - logout(refreshToken): revoke token and optionally entire family\n   - forgotPassword(email): create token (1h expiry), queue email, return nothing (prevent enumeration)\n   - resetPassword(token, newPassword): verify token, update password, increment session_version\n   - changePassword(userId, currentPassword, newPassword): verify current, update, clear must_change_password\n3. Create endpoints:\n   - POST /auth/logout (authenticated)\n   - POST /auth/forgot-password (public, rate limited 3/min)\n   - POST /auth/reset-password (public)\n   - POST /auth/change-password (authenticated)\n4. Reset token: 32 bytes random, stored as SHA-256 hash, 1 hour expiry.\n5. Session version increment invalidates all existing JWTs.\n6. Audit: auth.logout, auth.password.reset_requested, auth.password.reset, auth.password.changed.",
-        "testStrategy": "Test logout invalidates refresh token; test forgot-password always returns 200 (no enumeration); test reset token works within 1 hour; test expired reset token rejected; test used reset token rejected; test change-password requires correct current password; test session_version increment invalidates old access tokens.",
-        "priority": "high",
+        "description": "Create endpoints for logout (revoke current token), forgot/reset password flow with secure tokens, and forced password change at first login. All password-setting endpoints (reset, set-password, change-password) must reject common passwords using a local blocklist bundled with the API. Requirements: BF01, Phase S5.",
+        "status": "pending",
         "dependencies": [
           "13"
         ],
-        "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement logout, password reset, and first-login password change."
+        "priority": "high",
+        "details": "1. Create common password blocklist:\n   - Add data/common-passwords.txt to apps/api containing 10,000+ common passwords (e.g., from SecLists/HIBP)\n   - Create src/lib/password-blocklist.ts: load list at startup into a Set for O(1) lookup\n   - Export isCommonPassword(normalizedPassword: string): boolean\n   - Passwords arrive NFC-normalised and at most 72 bytes (validated by PasswordSchema in packages/shared/src/schemas/primitives.schema.ts)\n   - Data residency: no external API calls, all checks are local\n\n2. Add to auth.repository.ts:\n   - createPasswordResetToken(userId, tokenHash, expiresAt)\n   - findPasswordResetToken(tokenHash)\n   - markResetTokenUsed(id)\n   - updateUserPassword(userId, passwordHash)\n   - clearMustChangePassword(userId)\n\n3. Add to auth.service.ts:\n   - logout(refreshToken): revoke token and optionally entire family\n   - forgotPassword(email): create token (1h expiry), queue email, return nothing (prevent enumeration)\n   - resetPassword(token, newPassword): verify token, call isCommonPassword(newPassword), update password, increment session_version\n   - changePassword(userId, currentPassword, newPassword): verify current, call isCommonPassword(newPassword), update, clear must_change_password\n   - All password-setting methods reject common passwords with error code COMMON_PASSWORD before hashing\n\n4. Create endpoints:\n   - POST /auth/logout (authenticated)\n   - POST /auth/forgot-password (public, rate limited 3/min)\n   - POST /auth/reset-password (public) - uses ResetPasswordInputSchema from packages/shared/src/schemas/auth.schema.ts\n   - POST /auth/change-password (authenticated) - uses ChangePasswordInputSchema from packages/shared/src/schemas/auth.schema.ts\n\n5. Reset token: 32 bytes random, stored as SHA-256 hash, 1 hour expiry.\n\n6. Session version increment invalidates all existing JWTs.\n\n7. Audit: auth.logout, auth.password.reset_requested, auth.password.reset, auth.password.changed.\n\n8. Add COMMON_PASSWORD error code to packages/shared/src/constants/error-codes.ts with fr/en i18n messages.",
+        "testStrategy": "Test logout invalidates refresh token; test forgot-password always returns 200 (no enumeration); test reset token works within 1 hour; test expired reset token rejected; test used reset token rejected; test change-password requires correct current password; test session_version increment invalidates old access tokens; test common password rejection: '123456', 'password', 'qwerty', 'azerty' are rejected; test blocklist lookup is case-insensitive (NFC-normalised input); test non-common password accepted; test blocklist loads at startup without external API calls; test COMMON_PASSWORD error code returned with appropriate message.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create common password blocklist infrastructure",
+            "description": "Create the local password blocklist file and loader module in apps/api for O(1) common password checks without external API calls.",
+            "dependencies": [],
+            "details": "1. Create apps/api/data/common-passwords.txt with 10,000+ common passwords (source from SecLists/HIBP top passwords)\n2. Create apps/api/src/lib/password-blocklist.ts:\n   - Load list at startup into a Set<string> (lowercase for case-insensitive matching)\n   - Export isCommonPassword(normalizedPassword: string): boolean that lowercases and checks the Set\n   - Passwords are already NFC-normalised by PasswordSchema\n3. Add COMMON_PASSWORD to error-codes.ts with i18n keys\n4. Ensure no external API calls (data residency requirement)",
+            "status": "pending",
+            "testStrategy": "Unit tests: verify blocklist loads from file at startup; test isCommonPassword returns true for '123456', 'password', 'qwerty', 'azerty'; test case-insensitive ('PASSWORD' matches 'password'); test non-common password returns false; test no network calls during check."
+          },
+          {
+            "id": 2,
+            "title": "Implement logout endpoint with token revocation",
+            "description": "Create POST /auth/logout endpoint that revokes the current refresh token and optionally the entire token family.",
+            "dependencies": [
+              1
+            ],
+            "details": "1. Add to auth.repository.ts: revokeRefreshToken(tokenHash), revokeTokenFamily(familyId)\n2. Add to auth.service.ts: logout(refreshToken) - revoke token, optionally family\n3. Create POST /auth/logout controller (authenticated)\n4. Audit event: auth.logout\n5. Return 204 No Content on success",
+            "status": "pending",
+            "testStrategy": "Test logout invalidates refresh token; test revoked token cannot be used for refresh; test audit event created; test requires authentication."
+          },
+          {
+            "id": 3,
+            "title": "Implement forgot/reset password flow with common password check",
+            "description": "Create forgot password and reset password endpoints with secure token handling and common password rejection.",
+            "dependencies": [
+              1,
+              2
+            ],
+            "details": "1. Add to auth.repository.ts:\n   - createPasswordResetToken(userId, tokenHash, expiresAt)\n   - findPasswordResetToken(tokenHash)\n   - markResetTokenUsed(id)\n   - updateUserPassword(userId, passwordHash)\n2. Add to auth.service.ts:\n   - forgotPassword(email): create 32-byte random token, store SHA-256 hash, 1h expiry, queue email, always return void (no enumeration)\n   - resetPassword(token, newPassword): verify token validity, call isCommonPassword(newPassword) rejecting with COMMON_PASSWORD if true, hash password, update user, increment session_version, mark token used\n3. Create endpoints using schemas from packages/shared/src/schemas/auth.schema.ts:\n   - POST /auth/forgot-password (public, rate limited 3/min) - ForgotPasswordInputSchema\n   - POST /auth/reset-password (public) - ResetPasswordInputSchema\n4. Audit: auth.password.reset_requested, auth.password.reset",
+            "status": "pending",
+            "testStrategy": "Test forgot-password always returns 200 (no enumeration for invalid emails); test reset token works within 1 hour; test expired reset token rejected; test used reset token rejected; test common passwords ('password123', '123456789') rejected with COMMON_PASSWORD error; test session_version increment invalidates old access tokens."
+          },
+          {
+            "id": 4,
+            "title": "Implement change password with common password check and must_change_password handling",
+            "description": "Create POST /auth/change-password endpoint for authenticated users with current password verification, common password rejection, and first-login flag clearing.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "1. Add to auth.repository.ts: clearMustChangePassword(userId)\n2. Add to auth.service.ts:\n   - changePassword(userId, currentPassword, newPassword): verify current password matches, call isCommonPassword(newPassword) rejecting with COMMON_PASSWORD if true, check newPassword differs from current, hash and update password, clear must_change_password flag, increment session_version\n3. Create POST /auth/change-password controller using ChangePasswordInputSchema from packages/shared/src/schemas/auth.schema.ts\n4. Requires authentication\n5. Audit: auth.password.changed",
+            "status": "pending",
+            "testStrategy": "Test change-password requires correct current password; test common passwords rejected with COMMON_PASSWORD error; test new password must differ from current; test must_change_password flag cleared after change; test session_version increment invalidates old tokens; test audit event created."
+          }
+        ]
       },
       {
         "id": 15,
@@ -600,18 +639,80 @@
       {
         "id": 20,
         "title": "Implement incidents list with cursor pagination and filters",
-        "description": "Create incidents list endpoint with cursor-based pagination, status/severity/date filters, and proper DTO mapping for confidential reports. Requirements: BF06, Phase S6.",
-        "details": "1. Add to incidents.repository.ts:\n   - list(filters: IncidentFilters, cursor?: string, limit: number): { incidents, nextCursor, hasMore }\n   - Cursor: base64 encoded { id, created_at } for stable pagination\n   - Filters: status[], severity[], category_code[], date_from, date_to, assigned_to_id, reporter_id\n2. Add to incidents.service.ts:\n   - list(userId, role, filters, cursor, limit):\n     - EMPLOYEE: own incidents only\n     - MANAGER: org incidents, confidential reporter masked\n     - TECHNICIAN: assigned + unassigned org incidents\n     - ADMIN: all org incidents\n3. Create src/modules/incidents/incidents.dto.ts:\n   ```typescript\n   export const toIncidentListDTO = (incident, viewerRole) => ({\n     id: incident.id,\n     reference: incident.reference,\n     category: { code: incident.category_code, label: incident.category.label_en },\n     severity: incident.severity,\n     status: incident.status,\n     title: incident.title,\n     reporter: incident.is_anonymous && !['EMPLOYEE'].includes(viewerRole) \n       ? null \n       : { id: incident.reporter.id, name: incident.reporter.first_name },\n     assignedTo: incident.assigned_to ? { id: incident.assigned_to.id, name: incident.assigned_to.first_name } : null,\n     createdAt: incident.created_at.toISOString(),\n   });\n   ```\n4. Create GET /v1/incidents endpoint with query params.",
-        "testStrategy": "Test pagination returns correct page size and cursor; test filters apply correctly; test employee sees only own incidents; test manager sees all org incidents but not confidential reporter names; test cursor remains stable across requests.",
-        "priority": "high",
+        "description": "Create incidents list endpoint with cursor-based pagination, status/severity/date filters, and proper DTO mapping for confidential reports. Cursors must be HMAC-signed for tamper detection and validated with VALIDATION_ERROR on garbage/invalid input. Requirements: BF06, Phase S6.",
+        "status": "pending",
         "dependencies": [
           "19"
         ],
-        "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement incidents list with cursor pagination and filters."
+        "priority": "high",
+        "details": "1. Create `packages/shared/src/utils/cursor.ts`:\n   - Define `CursorPayload = { createdAt: string (ISO datetime), id: string (uuid) }` type\n   - Export `encodeCursor(payload: CursorPayload, hmacKey: Buffer): string` - JSON stringify, base64url encode, then append HMAC-SHA256 signature (base64url)\n   - Export `decodeCursor(cursor: string, hmacKey: Buffer): CursorPayload | null` - verify HMAC first, then decode; return null on any failure (never throw)\n   - Validate decoded payload with Zod: `{ createdAt: z.iso.datetime(), id: UuidSchema }` - reject if invalid\n   - Re-export from `packages/shared/src/index.ts`\n\n2. Add `CURSOR_HMAC_KEY` secret:\n   - In `.env.example` add `CURSOR_HMAC_KEY=CHANGE_ME_generate_with_openssl_rand_base64_32`\n   - Read from `/run/secrets/cursor_hmac_key` in production or `process.env.CURSOR_HMAC_KEY` in dev (following existing pattern from AGENTS.md rule #6)\n   - Load in API startup config alongside JWT_SECRET\n\n3. Add to `apps/api/src/modules/incidents/incidents.repository.ts`:\n   - `list(filters: z.infer<typeof IncidentFiltersSchema>, cursorPayload?: CursorPayload, limit: number)` \n   - Returns `{ incidents, nextCursor: CursorPayload | null, hasMore: boolean }`\n   - Use keyset pagination: `WHERE (created_at, id) < (cursor.createdAt, cursor.id) ORDER BY created_at DESC, id DESC`\n   - Leverage existing `IncidentFiltersSchema` fields: status, severity, categoryCode, group, assignedTo, createdFrom, createdTo\n\n4. Add to `apps/api/src/modules/incidents/incidents.service.ts`:\n   - `list(userId, role, filters, cursor?: string, limit)` method\n   - Decode cursor using `decodeCursor()` with injected HMAC key; if cursor provided but invalid → throw VALIDATION_ERROR with details path `['cursor']`\n   - Role-based visibility (RLS enforces tenant, service enforces role):\n     - USER: own incidents only (reporter_id = userId)\n     - MANAGER: org incidents, confidential reporter masked in DTO\n     - TECHNICIAN: assigned + unassigned org incidents\n     - ADMIN: all org incidents\n   - Encode `nextCursor` with `encodeCursor()` before returning\n\n5. Create `apps/api/src/modules/incidents/incidents.dto.ts`:\n   ```typescript\n   export const toIncidentListDTO = (incident, viewerRole: UserRole) => ({\n     id: incident.id,\n     reference: incident.reference,\n     category: { code: incident.category_code, label: incident.category.label_en },\n     severity: incident.severity,\n     status: incident.status,\n     title: incident.title,\n     // is_anonymous hides reporter from MANAGER/TECHNICIAN/ADMIN per AGENTS.md rule #5\n     reporter: incident.is_anonymous && viewerRole !== 'USER'\n       ? null\n       : { id: incident.reporter.id, name: incident.reporter.first_name },\n     assignedTo: incident.assigned_to\n       ? { id: incident.assigned_to.id, name: incident.assigned_to.first_name }\n       : null,\n     createdAt: incident.created_at.toISOString(),\n   });\n   ```\n\n6. Create GET `/v1/incidents` endpoint:\n   - Controller validates query with `IncidentFiltersSchema` (already in shared)\n   - Returns `listResponse()` envelope with `{ success, data, meta: { nextCursor } }`\n   - nextCursor is HMAC-signed string or null",
+        "testStrategy": "1. Unit tests for `cursor.ts` in `packages/shared/tests/cursor.test.ts`:\n   - encodeCursor produces valid base64url with signature\n   - decodeCursor returns payload for valid cursor\n   - decodeCursor returns null for: garbage, truncated, wrong HMAC, invalid JSON, missing fields, createdAt not ISO, id not UUID\n   - Different HMAC keys produce different signatures\n2. API integration tests:\n   - GET /v1/incidents returns 200 with paginated results\n   - Invalid cursor returns 400 VALIDATION_ERROR (never 500)\n   - Tampered cursor returns 400 VALIDATION_ERROR\n   - Employee sees only own incidents\n   - Manager sees all org incidents but confidential reporter is null\n   - Pagination returns correct page size and valid nextCursor\n   - Cursor remains stable (same cursor returns same position)\n   - Filters (status, severity, categoryCode, createdFrom/To) apply correctly\n   - Cross-tenant access blocked by RLS",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create HMAC-signed cursor utility in packages/shared",
+            "description": "Implement encodeCursor and decodeCursor functions in packages/shared/src/utils/cursor.ts with HMAC-SHA256 signature validation and Zod payload validation.",
+            "dependencies": [],
+            "details": "Create cursor.ts with:\n- CursorPayload type: { createdAt: string (ISO), id: string (UUID) }\n- encodeCursor(payload, hmacKey): JSON stringify payload, base64url encode, compute HMAC-SHA256 of encoded data, append signature separated by '.'\n- decodeCursor(cursor, hmacKey): split on '.', verify HMAC, decode base64url, parse JSON, validate with Zod schema { createdAt: z.iso.datetime(), id: UuidSchema }, return null on any failure\n- Use Node crypto.createHmac('sha256', hmacKey) for signing\n- Export from packages/shared/src/index.ts",
+            "status": "pending",
+            "testStrategy": "Unit tests: valid round-trip, garbage returns null, truncated returns null, wrong key returns null, invalid JSON returns null, invalid createdAt/id returns null, different keys produce different signatures"
+          },
+          {
+            "id": 2,
+            "title": "Add CURSOR_HMAC_KEY secret configuration",
+            "description": "Add CURSOR_HMAC_KEY to .env.example and configure API to load from Docker secrets in production or environment variable in development.",
+            "dependencies": [
+              1
+            ],
+            "details": "Add to .env.example: CURSOR_HMAC_KEY=CHANGE_ME_generate_with_openssl_rand_base64_32\nIn API config module (following existing JWT_SECRET pattern):\n- Production: read from /run/secrets/cursor_hmac_key\n- Development: read from process.env.CURSOR_HMAC_KEY\n- Validate key is present at startup, fail fast if missing\n- Convert to Buffer for use with crypto.createHmac",
+            "status": "pending",
+            "testStrategy": "Startup fails if CURSOR_HMAC_KEY not configured; config test verifies secret loaded correctly"
+          },
+          {
+            "id": 3,
+            "title": "Implement incidents repository list method with keyset pagination",
+            "description": "Add list method to incidents.repository.ts using keyset pagination on (created_at, id) with support for all IncidentFiltersSchema fields.",
+            "dependencies": [
+              2
+            ],
+            "details": "Add to incidents.repository.ts:\n- list(filters, cursorPayload?, limit) method\n- Use Prisma findMany with where clause combining: status, severity, categoryCode (category_code), group, assignedTo (assigned_to_id), createdFrom/To (created_at range)\n- Keyset pagination: if cursorPayload provided, add WHERE (created_at < cursor.createdAt) OR (created_at = cursor.createdAt AND id < cursor.id)\n- ORDER BY created_at DESC, id DESC\n- Fetch limit + 1 to determine hasMore\n- Return { incidents: Incident[], nextCursor: CursorPayload | null, hasMore: boolean }",
+            "status": "pending",
+            "testStrategy": "Repository tests: returns incidents in correct order, keyset pagination returns correct window, filters apply correctly, hasMore accurate at boundaries"
+          },
+          {
+            "id": 4,
+            "title": "Implement incidents service list method with role-based filtering",
+            "description": "Add list method to incidents.service.ts handling cursor decoding, role-based visibility rules, and cursor encoding for response.",
+            "dependencies": [
+              1,
+              3
+            ],
+            "details": "Add to incidents.service.ts:\n- list(userId, role, filters, cursor?, limit) method\n- If cursor provided: decode with decodeCursor(cursor, hmacKey); if null, throw error with code VALIDATION_ERROR and details [{path: 'cursor', code: 'invalid'}]\n- Apply role-based filters:\n  - USER: add reporter_id = userId to filters\n  - MANAGER: no extra filter (RLS handles org), mask reporter in DTO\n  - TECHNICIAN: assigned_to_id = userId OR assigned_to_id IS NULL\n  - ADMIN: no extra filter (RLS handles org)\n- Call repository.list()\n- Encode nextCursor with encodeCursor() if not null\n- Return { incidents: IncidentListDTO[], nextCursor: string | null }",
+            "status": "pending",
+            "testStrategy": "Service tests: USER sees only own, MANAGER sees all org, TECHNICIAN sees assigned + unassigned, invalid cursor returns VALIDATION_ERROR, tampered cursor returns VALIDATION_ERROR"
+          },
+          {
+            "id": 5,
+            "title": "Create incident list DTO mapper with confidential reporter handling",
+            "description": "Create incidents.dto.ts with toIncidentListDTO function that masks reporter for anonymous incidents when viewed by non-reporters.",
+            "dependencies": [],
+            "details": "Create apps/api/src/modules/incidents/incidents.dto.ts:\n- Import UserRole from packages/shared\n- toIncidentListDTO(incident, viewerRole: UserRole) function\n- Return object with: id, reference, category (code + label), severity, status, title, reporter (null if is_anonymous AND viewerRole !== 'USER'), assignedTo, createdAt (ISO string)\n- Per AGENTS.md rule #5: confidential reports never expose reporter to managers/technicians/admins",
+            "status": "pending",
+            "testStrategy": "Unit tests: anonymous incident shows reporter=null for MANAGER/TECHNICIAN/ADMIN, shows reporter for USER (own report), non-anonymous shows reporter for all roles"
+          },
+          {
+            "id": 6,
+            "title": "Create GET /v1/incidents endpoint with validation",
+            "description": "Implement incidents list controller and router with IncidentFiltersSchema validation and listResponse envelope.",
+            "dependencies": [
+              4,
+              5
+            ],
+            "details": "Create controller method:\n- Validate query params with IncidentFiltersSchema (already in shared, includes pagination)\n- Extract userId, role from req.user (set by auth middleware)\n- Call service.list(userId, role, filters, cursor, limit)\n- Map incidents through toIncidentListDTO(incident, role)\n- Return listResponse format: { success: true, data: incidents[], meta: { nextCursor } }\n\nAdd route:\n- GET /v1/incidents - authenticated, all roles",
+            "status": "pending",
+            "testStrategy": "Integration tests: 200 with valid response envelope, query params validated, invalid params return 400, authentication required, pagination works end-to-end"
+          }
+        ]
       },
       {
         "id": 21,
@@ -844,19 +945,80 @@
       {
         "id": 30,
         "title": "Implement organisation and user administration endpoints",
-        "description": "Create admin endpoints for managing organisations and users including 2FA reset and account deactivation. Requirements: BF15, Phase S7.",
-        "details": "1. Create src/modules/admin/organisations.repository.ts:\n   - list(cursor, limit, filters)\n   - findById(id)\n   - create(data)\n   - update(id, data)\n   - deactivate(id)\n2. Create src/modules/admin/users.repository.ts:\n   - listByOrg(orgId, cursor, limit, filters)\n   - findById(id)\n   - create(data): generate temporary password\n   - update(id, data)\n   - resetTwoFactor(id)\n   - deactivate(id)\n3. Create admin endpoints (ADMIN/SUPER_ADMIN only):\n   - GET/POST /v1/admin/organisations\n   - GET/PATCH /v1/admin/organisations/:id\n   - GET/POST /v1/admin/organisations/:orgId/users\n   - GET/PATCH /v1/admin/users/:id\n   - POST /v1/admin/users/:id/reset-2fa\n   - POST /v1/admin/users/:id/deactivate\n4. User creation: generate secure random password, set must_change_password: true.\n5. 2FA reset: clear totp_secret and totp_enabled.\n6. Deactivation: set is_active: false, revoke all refresh tokens.\n7. Audit all admin actions: admin.user.created, admin.user.2fa_reset, etc.",
-        "testStrategy": "Test only ADMIN can access admin endpoints; test user creation generates password and sends email; test 2FA reset clears TOTP; test deactivated user cannot login; test all actions create audit logs.",
-        "priority": "medium",
+        "description": "Create admin endpoints for managing organisations and users including 2FA reset and account deactivation. Requirements: BF15, Phase S7. Service layer must enforce: PROVIDER organisation cannot be deactivated or have its type changed; only Admins create users; TECHNICIAN and ADMIN roles are restricted to the PROVIDER organisation only.",
+        "status": "pending",
         "dependencies": [
           "15",
           "18"
         ],
-        "status": "pending",
-        "subtasks": [],
-        "complexity": 5,
-        "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement organisation and user administration endpoints."
+        "priority": "medium",
+        "details": "1. Create src/modules/admin/organisations.repository.ts:\n   - list(cursor, limit, filters)\n   - findById(id)\n   - create(data): use CreateOrgInputSchema which enforces ClientOrganizationType only (COMPANY, ADMINISTRATION, NGO)\n   - update(id, data)\n   - deactivate(id)\n\n2. Create src/modules/admin/organisations.service.ts with business rules:\n   - PROVIDER organisation (type='PROVIDER', SFC) cannot be deactivated - reject with 403 and error code\n   - PROVIDER organisation type cannot be changed via update - UpdateOrgInputSchema already uses ClientOrganizationTypeSchema\n   - Use existing schemas from packages/shared: CreateOrgInputSchema, UpdateOrgInputSchema\n\n3. Create src/modules/admin/users.repository.ts:\n   - listByOrg(orgId, cursor, limit, filters)\n   - findById(id)\n   - create(data): generate temporary password using crypto.randomBytes()\n   - update(id, data)\n   - resetTwoFactor(id)\n   - deactivate(id)\n\n4. Create src/modules/admin/users.service.ts with business rules:\n   - Only ADMIN role can call these endpoints\n   - TECHNICIAN and ADMIN roles can only be assigned to users in the PROVIDER organisation (packages/shared/src/schemas/user.schema.ts:10-11)\n   - When creating/updating user: if role is TECHNICIAN or ADMIN, verify target organisation type is PROVIDER\n   - Use existing schemas: CreateUserInputSchema, UpdateUserInputSchema from packages/shared\n\n5. Create admin endpoints (ADMIN only, checked via middleware):\n   - GET /v1/admin/organisations - list with cursor pagination\n   - POST /v1/admin/organisations - create client organisation (ClientOrganizationType only)\n   - GET /v1/admin/organisations/:id - get organisation details\n   - PATCH /v1/admin/organisations/:id - update, reject type change for PROVIDER\n   - POST /v1/admin/organisations/:id/deactivate - deactivate, reject for PROVIDER\n   - GET /v1/admin/organisations/:orgId/users - list users in organisation\n   - POST /v1/admin/organisations/:orgId/users - create user with role validation\n   - GET /v1/admin/users/:id - get user details\n   - PATCH /v1/admin/users/:id - update with role validation\n   - POST /v1/admin/users/:id/reset-2fa - clear TOTP\n   - POST /v1/admin/users/:id/deactivate - deactivate user\n\n6. User creation flow:\n   - Generate secure random password: crypto.randomBytes(32).toString('base64url')\n   - Set must_change_password: true\n   - Send email with set-password link (single-use)\n\n7. 2FA reset implementation:\n   - Clear totp_secret and set totp_enabled: false\n   - User must re-enroll on next login\n\n8. Deactivation implementation:\n   - Set is_active: false\n   - Revoke all refresh tokens for the user (delete from tokens table/Redis)\n   - Deactivated user cannot login (checked in auth service)\n\n9. Audit logging (fire-and-forget pattern):\n   - admin.organisation.created\n   - admin.organisation.updated\n   - admin.organisation.deactivated\n   - admin.user.created\n   - admin.user.updated\n   - admin.user.2fa_reset\n   - admin.user.deactivated",
+        "testStrategy": "Test ADMIN-only access: non-admin users receive 403. Test organisation endpoints: create only accepts ClientOrganizationType; PROVIDER organisation cannot be deactivated (expect 403); PROVIDER organisation type cannot be changed. Test user role rules: TECHNICIAN/ADMIN roles can only be assigned to PROVIDER organisation users (expect 400 for other org types). Test user creation: generates secure password, sets must_change_password, triggers email. Test 2FA reset: clears totp_secret and totp_enabled. Test deactivation: sets is_active false, revokes refresh tokens, prevents subsequent login. Test all actions create audit logs with correct event names. Test tenant isolation via RLS for all queries.",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create organisation repository with CRUD operations",
+            "description": "Implement organisations.repository.ts in src/modules/admin with list, findById, create, update, and deactivate methods using Prisma within tenant transaction context.",
+            "dependencies": [],
+            "details": "Repository layer handles Prisma queries only. Methods: list(cursor, limit, filters) returns paginated results; findById(id) returns single org; create(data) inserts new org; update(id, data) patches fields; deactivate(id) sets is_active=false. All queries must run inside withTenant() context for RLS. Never bypass tenant isolation.",
+            "status": "pending",
+            "testStrategy": "Unit test each repository method with mock Prisma client. Verify correct SQL generated for pagination, filtering, and RLS compliance."
+          },
+          {
+            "id": 2,
+            "title": "Create organisation service with PROVIDER protection rules",
+            "description": "Implement organisations.service.ts with business rules: PROVIDER organisation cannot be deactivated or have its type changed. Use CreateOrgInputSchema and UpdateOrgInputSchema from packages/shared.",
+            "dependencies": [
+              1
+            ],
+            "details": "Service layer enforces business rules. On deactivate: check if org.type === 'PROVIDER', return 403 with appropriate error code. On update: if trying to change type and org.type === 'PROVIDER', reject. All org creation uses ClientOrganizationType only (enforced by schema). Fire audit events: admin.organisation.created, admin.organisation.updated, admin.organisation.deactivated.",
+            "status": "pending",
+            "testStrategy": "Test deactivate rejects PROVIDER org with 403. Test update rejects type change for PROVIDER. Test create validates against ClientOrganizationType only. Test audit events fired correctly."
+          },
+          {
+            "id": 3,
+            "title": "Create user repository with CRUD and 2FA/deactivation methods",
+            "description": "Implement users.repository.ts in src/modules/admin with listByOrg, findById, create, update, resetTwoFactor, and deactivate methods.",
+            "dependencies": [],
+            "details": "Repository methods: listByOrg(orgId, cursor, limit, filters) for paginated user list; findById(id) for single user; create(data) inserts user; update(id, data) patches fields; resetTwoFactor(id) clears totp_secret and sets totp_enabled=false; deactivate(id) sets is_active=false and returns user id for token revocation. Use crypto.randomBytes(32).toString('base64url') for temp password generation in create.",
+            "status": "pending",
+            "testStrategy": "Unit test repository methods. Verify temp password generation uses crypto module. Verify resetTwoFactor clears both TOTP fields. Verify deactivate returns id for downstream token cleanup."
+          },
+          {
+            "id": 4,
+            "title": "Create user service with role restriction rules for TECHNICIAN/ADMIN",
+            "description": "Implement users.service.ts enforcing that TECHNICIAN and ADMIN roles can only be assigned to users in the PROVIDER organisation. Handle user creation with password email, 2FA reset, and deactivation with token revocation.",
+            "dependencies": [
+              2,
+              3
+            ],
+            "details": "Business rules per packages/shared/src/schemas/user.schema.ts:10-11: when role is TECHNICIAN or ADMIN, verify target organisation type is PROVIDER, else return 400. Create flow: generate temp password, set must_change_password=true, send set-password email. 2FA reset: call resetTwoFactor repo method. Deactivate: set is_active=false, revoke all refresh tokens. Fire audit events: admin.user.created, admin.user.updated, admin.user.2fa_reset, admin.user.deactivated.",
+            "status": "pending",
+            "testStrategy": "Test TECHNICIAN/ADMIN role assignment fails for non-PROVIDER orgs (400). Test role assignment succeeds for PROVIDER org. Test create sends email and sets must_change_password. Test deactivate revokes all tokens. Test audit events."
+          },
+          {
+            "id": 5,
+            "title": "Create admin routes and controller with ADMIN-only middleware",
+            "description": "Implement admin routes for organisations and users with ADMIN role check middleware. Wire controller methods to service layer following Router→Controller→Service→Repository pattern.",
+            "dependencies": [
+              4
+            ],
+            "details": "Routes: GET/POST /v1/admin/organisations, GET/PATCH /v1/admin/organisations/:id, POST /v1/admin/organisations/:id/deactivate, GET/POST /v1/admin/organisations/:orgId/users, GET/PATCH /v1/admin/users/:id, POST /v1/admin/users/:id/reset-2fa, POST /v1/admin/users/:id/deactivate. All routes require ADMIN role middleware. Controllers do HTTP only: validate request with Zod schemas, call service, return DTO in standard envelope format.",
+            "status": "pending",
+            "testStrategy": "Integration tests: verify non-ADMIN gets 403. Test all routes return correct response envelope. Test validation errors return 400 with details. Test successful operations return correct DTOs."
+          },
+          {
+            "id": 6,
+            "title": "Add comprehensive integration tests for admin endpoints",
+            "description": "Write Jest + Supertest integration tests covering all admin endpoints, role restrictions, PROVIDER protection, and audit logging.",
+            "dependencies": [
+              5
+            ],
+            "details": "Test scenarios: 1) Non-admin user cannot access any admin endpoint (403). 2) PROVIDER org deactivation rejected (403). 3) PROVIDER org type change rejected (400). 4) TECHNICIAN/ADMIN role on non-PROVIDER org rejected (400). 5) User creation generates password, sends email, sets must_change_password. 6) 2FA reset clears TOTP fields. 7) Deactivated user cannot login. 8) All operations create correct audit logs. 9) Tenant isolation: admin cannot see/modify other tenant's data.",
+            "status": "pending",
+            "testStrategy": "Run full integration test suite with test database. Verify all assertions pass. Check audit log entries in database after each operation."
+          }
+        ]
       },
       {
         "id": 31,

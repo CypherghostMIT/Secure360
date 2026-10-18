@@ -41,6 +41,15 @@ export function listResponse<T extends z.ZodType>(itemSchema: T) {
     .strict();
 }
 
+// Only the location and kind of each validation failure: never the rejected value, a stack or a database
+// error, so 5xx responses expose no internal detail (L2 Table 7).
+export const ValidationIssueSchema = z
+  .object({
+    path: z.string(),
+    code: z.string(),
+  })
+  .strict();
+
 export const ErrorResponseSchema = z
   .object({
     success: z.literal(false),
@@ -48,9 +57,13 @@ export const ErrorResponseSchema = z
       .object({
         code: ErrorCodeSchema,
         message: z.string(),
-        details: z.unknown().optional(),
+        details: z.array(ValidationIssueSchema).optional(),
       })
-      .strict(),
+      .strict()
+      .refine((error) => error.details === undefined || error.code === 'VALIDATION_ERROR', {
+        message: 'error.details_only_for_validation',
+        path: ['details'],
+      }),
   })
   .strict();
 

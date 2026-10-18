@@ -21,6 +21,7 @@ import type {
   CursorPaginationQuerySchema,
   ErrorResponseSchema,
   UuidParamsSchema,
+  ValidationIssueSchema,
 } from '../schemas/common.schema.js';
 import type {
   CreateIncidentInputSchema,
@@ -29,9 +30,20 @@ import type {
   SeverityAnswersSchema,
   UpdateIncidentInputSchema,
 } from '../schemas/incident.schema.js';
-import type { CreateMessageInputSchema } from '../schemas/message.schema.js';
+import type {
+  AcceptLanguageSchema,
+  IdempotencyKeyHeaderSchema,
+} from '../schemas/headers.schema.js';
+import type {
+  CreateMessageInputSchema,
+  CreateStaffMessageInputSchema,
+} from '../schemas/message.schema.js';
 import type { CreateOrgInputSchema, UpdateOrgInputSchema } from '../schemas/organization.schema.js';
-import type { CreateUserInputSchema, UpdateUserInputSchema } from '../schemas/user.schema.js';
+import type {
+  CreateUserInputSchema,
+  UpdateMeInputSchema,
+  UpdateUserInputSchema,
+} from '../schemas/user.schema.js';
 
 // Every type is inferred from a schema; none is written by hand.
 // `z.infer` is the parsed value the server works with. `*Payload` (z.input) is what a client may send
@@ -58,6 +70,9 @@ export type UuidParams = z.infer<typeof UuidParamsSchema>;
 export type CursorPaginationQuery = z.infer<typeof CursorPaginationQuerySchema>;
 export type CursorPaginationQueryPayload = z.input<typeof CursorPaginationQuerySchema>;
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+export type ValidationIssue = z.infer<typeof ValidationIssueSchema>;
+export type IdempotencyKeyHeader = z.infer<typeof IdempotencyKeyHeaderSchema>;
+export type AcceptLanguage = z.infer<typeof AcceptLanguageSchema>;
 
 export type GuidedAnswer = z.infer<typeof GuidedAnswerSchema>;
 export type SeverityAnswers = z.infer<typeof SeverityAnswersSchema>;
@@ -70,9 +85,10 @@ export type IncidentFiltersPayload = z.input<typeof IncidentFiltersSchema>;
 export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
 export type CreateUserPayload = z.input<typeof CreateUserInputSchema>;
 export type UpdateUserInput = z.infer<typeof UpdateUserInputSchema>;
+export type UpdateMeInput = z.infer<typeof UpdateMeInputSchema>;
 
 export type CreateOrgInput = z.infer<typeof CreateOrgInputSchema>;
 export type UpdateOrgInput = z.infer<typeof UpdateOrgInputSchema>;
 
 export type CreateMessageInput = z.infer<typeof CreateMessageInputSchema>;
-export type CreateMessagePayload = z.input<typeof CreateMessageInputSchema>;
+export type CreateStaffMessageInput = z.infer<typeof CreateStaffMessageInputSchema>;

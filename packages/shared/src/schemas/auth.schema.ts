@@ -1,12 +1,17 @@
 import { z } from 'zod';
-import { EmailSchema, OpaqueTokenSchema, PasswordSchema } from './primitives.schema.js';
+import {
+  EmailSchema,
+  ExistingPasswordSchema,
+  OpaqueTokenSchema,
+  PasswordSchema,
+} from './primitives.schema.js';
 
 // Login does not apply the password policy: a wrong password must get UNAUTHENTICATED, not a policy hint.
-// Existing passwords are never trimmed either, so they compare with the hash exactly as typed (see PasswordSchema).
+// It still applies the shared password transformation (NFC, no control characters, 72 bytes), never trimming.
 export const LoginInputSchema = z
   .object({
     email: EmailSchema,
-    password: z.string().min(1).max(128),
+    password: ExistingPasswordSchema,
   })
   .strict();
 
@@ -39,7 +44,7 @@ export const ResetPasswordInputSchema = z
 
 export const ChangePasswordInputSchema = z
   .object({
-    currentPassword: z.string().min(1).max(128),
+    currentPassword: ExistingPasswordSchema,
     newPassword: PasswordSchema,
   })
   .strict();

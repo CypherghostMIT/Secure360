@@ -3,15 +3,15 @@ import {
   ClientOrganizationTypeSchema,
   SubscriptionPlanSchema,
 } from '../constants/organizations.js';
-import { EmailSchema, trimmed } from './primitives.schema.js';
+import { EmailSchema, text } from './primitives.schema.js';
 
-// Client types only: PROVIDER (SFC) is seeded, never created or assigned through the API.
+// Admin only (L1 Table 10). Client types only: PROVIDER (SFC) is seeded, never created or assigned through the API.
 export const CreateOrgInputSchema = z
   .object({
-    name: trimmed(2, 150),
+    name: text({ min: 2, max: 150 }),
     type: ClientOrganizationTypeSchema,
-    sector: trimmed(1, 100),
-    city: trimmed(1, 100),
+    sector: text({ min: 1, max: 100 }),
+    city: text({ min: 1, max: 100 }),
     contactEmail: EmailSchema,
     subscriptionPlan: SubscriptionPlanSchema,
   })
@@ -19,10 +19,10 @@ export const CreateOrgInputSchema = z
 
 export const UpdateOrgInputSchema = z
   .object({
-    name: trimmed(2, 150).optional(),
+    name: text({ min: 2, max: 150 }).optional(),
     type: ClientOrganizationTypeSchema.optional(),
-    sector: trimmed(1, 100).optional(),
-    city: trimmed(1, 100).optional(),
+    sector: text({ min: 1, max: 100 }).optional(),
+    city: text({ min: 1, max: 100 }).optional(),
     contactEmail: EmailSchema.optional(),
     subscriptionPlan: SubscriptionPlanSchema.optional(),
     isActive: z.boolean().optional(),
