@@ -50,3 +50,6 @@ docs/reference/**
 # Task Master local state (tasks.json and the PRD ARE committed)
 .taskmaster/reports/
 .taskmaster/*.log
+
+# Review diffs (gh pr diff > pr.diff) — never commit them
+*.diff
