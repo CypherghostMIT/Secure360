@@ -19,6 +19,14 @@ else
   echo "✖ gitleaks not installed or not on the PATH of this shell (see docs/WORKFLOW.md §2.1)"; fail=1
 fi
 
+# NEW: also scan files that are not committed yet (new or modified), like the pre-commit hook does.
+step "Secrets (working tree, including uncommitted files)"
+if command -v gitleaks >/dev/null 2>&1; then
+  run bash -c 'gitleaks dir . --redact --no-banner 2>/dev/null || gitleaks detect --no-git --source . --redact --no-banner'
+else
+  echo "✖ gitleaks not installed or not on the PATH of this shell (see docs/WORKFLOW.md §2.1)"; fail=1
+fi
+
 step "Static analysis (Semgrep)"
 if command -v semgrep >/dev/null 2>&1; then
   run semgrep scan --error --quiet \

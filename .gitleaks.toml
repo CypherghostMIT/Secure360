@@ -27,5 +27,9 @@ description = "Example files contain placeholders only"
 paths = [
   '''(^|/)\.env\.example$''',
   '''(^|/)docs/.*\.md$''',
+  '''(^|/)node_modules/''',
+  '''(^|/)\.git/''',
+  '''(^|/)docs/reference/''',
+  '''(^|/)(dist|coverage)/''',
 ]
 regexes = ['''CHANGE_ME''', '''<placeholder>''']
