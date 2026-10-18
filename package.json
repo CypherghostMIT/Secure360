@@ -21,7 +21,11 @@
     "test": "node scripts/ws.mjs test",
     "test:coverage": "node scripts/ws.mjs test:coverage",
     "audit:deps": "npm audit --audit-level=high",
-    "verify": "bash scripts/verify.sh"
+    "verify": "bash scripts/verify.sh",
+    "dev:secrets": "bash scripts/dev-secrets.sh",
+    "dev:up": "docker compose -f infra/compose.dev.yml up -d --wait",
+    "dev:down": "docker compose -f infra/compose.dev.yml down",
+    "dev:reset": "bash scripts/dev-reset.sh"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs,cjs}": [

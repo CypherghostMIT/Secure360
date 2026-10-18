@@ -13,7 +13,8 @@ keywords = ["jwt", "signing"]
 [[rules]]
 id = "secure360-database-url"
 description = "PostgreSQL connection string with a password"
-regex = '''postgres(?:ql)?://[^:\s]+:[^@\s]+@[^\s'"]+'''
+# The password part may not start with "$": shell variables and templates are not secrets.
+regex = '''postgres(?:ql)?://[^:\s]+:[^@\s$][^@\s]*@[^\s'"]+'''
 keywords = ["postgres"]
 
 [[rules]]

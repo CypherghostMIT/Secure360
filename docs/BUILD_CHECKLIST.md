@@ -27,6 +27,11 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **O7** Retention periods and SLA targets aligned with SFC contracts and Law 2024/017.
 - [ ] **O8** (S5 spike) Measure the overhead of one Prisma interactive transaction per request; tune the pool.
 
+## Task 49 — Production Docker Compose
+
+- [ ] **Production secrets:** ensure secret files are readable by the container users (postgres uid 70, redis uid 999)
+      on Linux — mode 600 with host ownership will not work; use a root init step or matching ownership.
+
 ## Repository and publication
 
 - [ ] Ask the supervisor whether the specification and the deliverables (L1–L3) may be published in this public
