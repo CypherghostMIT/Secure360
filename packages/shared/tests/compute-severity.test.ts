@@ -116,3 +116,38 @@ describe('resolveInitialSeverity (L1 D3 with L2 §8.3)', () => {
     expect(resolveInitialSeverity(computed, 'LOW')).toBe('HIGH');
   });
 });
+
+describe('invalid severities fail closed (security review M1)', () => {
+  // Category defaults are read from the database at runtime; these casts simulate a bad config row.
+  const INVALID = ['MODERATE', 'low', '', 'BOGUS', undefined, null, 2] as unknown as Severity[];
+
+  it('computeSeverity throws instead of returning undefined or LOW', () => {
+    for (const bad of INVALID) {
+      expect(() => computeSeverity(bad, NONE)).toThrow(RangeError);
+      expect(() => computeSeverity(bad, answers('no', 'yes', 'no'))).toThrow(RangeError);
+      expect(() => computeSeverity(bad, answers('yes', 'yes', 'yes'))).toThrow(RangeError);
+    }
+  });
+
+  it('resolveInitialSeverity throws on an invalid computed value', () => {
+    for (const bad of INVALID) {
+      expect(() => resolveInitialSeverity(bad)).toThrow(RangeError);
+      expect(() => resolveInitialSeverity(bad, 'LOW')).toThrow(RangeError);
+    }
+  });
+
+  it('resolveInitialSeverity throws on an invalid supplied reporterSeverity', () => {
+    for (const bad of INVALID.filter((value) => value !== undefined)) {
+      expect(() => resolveInitialSeverity('HIGH', bad)).toThrow(RangeError);
+    }
+  });
+
+  it('names the offending input in the error', () => {
+    expect(() => computeSeverity('MODERATE' as Severity, NONE)).toThrow(
+      'Invalid categoryDefault: MODERATE',
+    );
+    expect(() => resolveInitialSeverity('HIGH', 'BOGUS' as Severity)).toThrow(
+      'Invalid reporterSeverity: BOGUS',
+    );
+  });
+});

@@ -3,7 +3,7 @@ import { CategoryCodeSchema, CategoryGroupSchema } from '../constants/categories
 import { SeveritySchema } from '../constants/severities.js';
 import { IncidentStatusSchema } from '../constants/statuses.js';
 import { paginationShape } from './common.schema.js';
-import { optionalTrimmed, trimmed, UuidSchema } from './primitives.schema.js';
+import { text, UuidSchema } from './primitives.schema.js';
 
 export const GuidedAnswerSchema = z.enum(['yes', 'no', 'unknown']);
 
@@ -22,14 +22,14 @@ export const SeverityAnswersSchema = z
 export const CreateIncidentInputSchema = z
   .object({
     categoryCode: CategoryCodeSchema,
-    title: trimmed(3, 150),
+    title: text({ min: 3, max: 150 }),
     // Non-empty only: non-technical reporters write short texts.
-    description: trimmed(1, 5000),
+    description: text({ min: 1, max: 5000, multiline: true }),
     answers: SeverityAnswersSchema,
     reporterSeverity: SeveritySchema.optional(),
     isAnonymous: z.boolean().default(false),
-    location: optionalTrimmed(200),
-    deviceAffected: optionalTrimmed(200),
+    location: text({ max: 200 }).optional(),
+    deviceAffected: text({ max: 200 }).optional(),
     // Generated on the device so offline retries map to one server record (L2 §7.3).
     clientRequestId: z.uuidv4(),
   })
@@ -38,11 +38,12 @@ export const CreateIncidentInputSchema = z
 // Staff only (route guard). Allowed status transitions are checked in the incidents service, not here.
 export const UpdateIncidentInputSchema = z
   .object({
-    version: z.number().int().min(0),
+    // Optimistic concurrency (L2 §4.4). Starts at 1; the max keeps the value inside a PostgreSQL integer.
+    version: z.number().int().min(1).max(2_147_483_647),
     status: IncidentStatusSchema.optional(),
     severity: SeveritySchema.optional(),
     assignedTo: UuidSchema.nullable().optional(),
-    resolutionNotes: trimmed(1, 5000).optional(),
+    resolutionNotes: text({ min: 1, max: 5000, multiline: true }).optional(),
   })
   .strict()
   .refine((input) => Object.keys(input).some((key) => key !== 'version'), {
