@@ -27,6 +27,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run build -w @secure360/shared
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
@@ -67,6 +68,8 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+        if: hashFiles('apps/api/package.json') != ''
+      - run: npm run build -w @secure360/shared
         if: hashFiles('apps/api/package.json') != ''
       - run: npm run test:integration --workspace apps/api --if-present
         if: hashFiles('apps/api/package.json') != ''

@@ -21,9 +21,10 @@ if (workspaces.length === 0) {
 }
 for (const ws of workspaces) {
   process.stdout.write(`\n▶ ${ws}: npm run ${script}\n`);
-  const result = spawnSync('npm', ['run', script, '--workspace', ws], {
-    stdio: 'inherit',
-    shell: process.platform === 'win32',
-  });
+  // Run npm through Node itself (npm_execpath = npm's CLI script): no shell, so arguments are never re-parsed.
+  const npmCli = process.env.npm_execpath;
+  const result = npmCli
+    ? spawnSync(process.execPath, [npmCli, 'run', script, '--workspace', ws], { stdio: 'inherit' })
+    : spawnSync('npm', ['run', script, '--workspace', ws], { stdio: 'inherit' });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
