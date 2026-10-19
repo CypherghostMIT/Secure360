@@ -9,3 +9,4 @@ apps/mobile/ios
 design/
 docs/reference/
 .taskmaster/
+apps/api/src/generated/

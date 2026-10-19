@@ -7,6 +7,7 @@ step() { printf '\n\033[1;34m▶ %s\033[0m\n' "$1"; }
 run() { "$@" || { printf '\033[1;31m✖ failed: %s\033[0m\n' "$*"; fail=1; }; }
 
 step "Build shared package"; run npm run build -w @secure360/shared
+step "Prisma client";  run npm run db:generate -w @secure360/api
 step "Format";        run npm run format:check
 step "Lint";          run npm run lint
 step "Types";         run npm run typecheck

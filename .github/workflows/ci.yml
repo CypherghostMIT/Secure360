@@ -28,13 +28,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build -w @secure360/shared
+      # Type-aware lint and typecheck need the generated Prisma client (git-ignored).
+      - run: npm run db:generate -w @secure360/api
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:coverage
 
   # Integration tests against real PostgreSQL + Redis (RLS tests live here — L2 §7.4).
-  # Enable once apps/api has a "test:integration" script.
+  # The suite's global setup connects as the bootstrap superuser, creates the four least-privilege roles with
+  # random passwords, recreates secure360_test owned by s360_owner, migrates as s360_owner and tests as s360_app.
   integration:
     name: Integration (PostgreSQL + Redis)
     runs-on: ubuntu-latest
@@ -43,15 +46,16 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: s360_owner
-          POSTGRES_DB: secure360_test
-          # Throw-away database inside this CI job only: no password, so no credential-like
+          # Bootstrap superuser only, as in infra/compose.dev.yml. Migrations and tests never run as it.
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+          # Throw-away cluster inside this CI job only: no password, so no credential-like
           # string is ever committed. Real environments always use passwords (Docker secrets).
           POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U s360_owner" --health-interval 5s --health-timeout 5s --health-retries 10
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
       redis:
         image: redis:8
         ports:
@@ -59,20 +63,17 @@ jobs:
         options: >-
           --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      DATABASE_URL: postgresql://s360_owner@localhost:5432/secure360_test
+      TEST_DATABASE_ADMIN_URL: postgresql://postgres@localhost:5432/secure360_test
       REDIS_URL: redis://localhost:6379
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4 (Pinned commit SHA)
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v4 (Pinned commit SHA)
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-        if: hashFiles('apps/api/package.json') != ''
-      - run: npm run build -w @secure360/shared
-        if: hashFiles('apps/api/package.json') != ''
-      - run: npm run test:integration --workspace apps/api --if-present
-        if: hashFiles('apps/api/package.json') != ''
+      # pretest:integration builds @secure360/shared and generates the Prisma client.
+      - run: npm run test:integration -w @secure360/api
 
   dependencies:
     name: Dependency audit
