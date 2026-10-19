@@ -120,6 +120,31 @@ Because PRs are squash-merged with their title, `main` reads like a changelog �
 
 Never bypass hooks with `--no-verify`. If a hook is wrong, fix the hook in its own PR.
 
+### 3.3 Local services
+
+PostgreSQL 16 and Redis 8 run in Docker (`infra/compose.dev.yml`), bound to `127.0.0.1` only. Run from Git Bash.
+
+| Command               | What it does                                                                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev:secrets` | Once. Creates the password files in `infra/secrets/` (git-ignored, mode 600; existing files are kept) and prints `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `REDIS_URL` for your `.env`.                                                                         |
+| `npm run dev:up`      | Starts both services and waits until they are healthy. On the first start, `infra/postgres/init/01-roles.sh` creates the roles `s360_owner` (migrations), `s360_app` (API), `s360_worker` (worker) and `s360_metrics` (monitoring). The app never uses `postgres`. |
+| `npm run dev:down`    | Stops the services; data is kept in the named volumes.                                                                                                                                                                                                             |
+| `npm run dev:reset`   | Asks for confirmation, then stops the services and **deletes all local data** (volumes).                                                                                                                                                                           |
+
+The roles and the init settings (`POSTGRES_INITDB_ARGS`, `infra/postgres/init/`) are applied only when the database
+volume is empty, so a secret file or an init setting changed later has no effect until you run `npm run dev:reset`,
+then `npm run dev:up`. Password authentication applies everywhere, including `docker exec … psql`.
+
+Host ports default to 5432 (PostgreSQL) and 6379 (Redis). If one is already used — for example by a Redis or
+PostgreSQL installed as a Windows service — choose another with `POSTGRES_HOST_PORT` / `REDIS_HOST_PORT`. Compose
+reads them from the shell environment, not from the root `.env`, so export them in Git Bash before `dev:up` and
+`dev:secrets` (which prints the URLs with those ports):
+
+```bash
+export REDIS_HOST_PORT=16379
+npm run dev:up && npm run dev:secrets
+```
+
 ## 4. Definition of done (per pull request)
 
 - Acceptance criteria of the issue met; requirement IDs in the PR description.
