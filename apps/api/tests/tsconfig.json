@@ -1,0 +1,10 @@
+{
+  // Tests live outside rootDir "src", so they need their own project: used by typecheck, ts-jest and ESLint.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "types": ["node", "jest"]
+  },
+  "include": ["../src/**/*", "./**/*"]
+}

@@ -27,10 +27,15 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **O7** Retention periods and SLA targets aligned with SFC contracts and Law 2024/017.
 - [ ] **O8** (S5 spike) Measure the overhead of one Prisma interactive transaction per request; tune the pool.
 
+## Task 7 — Error handling
+
+- [ ] Replace Express default HTML error pages (413 and others) with the JSON envelope; never expose stack traces.
+
 ## Task 49 — Production Docker Compose
 
 - [ ] **Production secrets:** ensure secret files are readable by the container users (postgres uid 70, redis uid 999)
       on Linux — mode 600 with host ownership will not work; use a root init step or matching ownership.
+- [ ] API behind Nginx: `TRUST_PROXY=1`.
 
 ## Repository and publication
 
