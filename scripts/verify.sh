@@ -6,6 +6,7 @@ fail=0
 step() { printf '\n\033[1;34m▶ %s\033[0m\n' "$1"; }
 run() { "$@" || { printf '\033[1;31m✖ failed: %s\033[0m\n' "$*"; fail=1; }; }
 
+step "Build shared package"; run npm run build -w @secure360/shared
 step "Format";        run npm run format:check
 step "Lint";          run npm run lint
 step "Types";         run npm run typecheck
@@ -19,10 +20,15 @@ else
   echo "✖ gitleaks not installed or not on the PATH of this shell (see docs/WORKFLOW.md §2.1)"; fail=1
 fi
 
-# NEW: also scan files that are not committed yet (new or modified), like the pre-commit hook does.
+# Scan every file Git could commit (tracked + new, non-ignored) — not git-ignored local secrets (.env, infra/secrets).
 step "Secrets (working tree, including uncommitted files)"
 if command -v gitleaks >/dev/null 2>&1; then
-  run bash -c 'gitleaks dir . --redact --no-banner 2>/dev/null || gitleaks detect --no-git --source . --redact --no-banner'
+  scan_dir="$(mktemp -d)"
+  git ls-files -z --cached --others --exclude-standard \
+    | tar --null --ignore-failed-read -T - -cf - 2>/dev/null \
+    | tar -xf - -C "$scan_dir"
+  run bash -c "gitleaks dir '$scan_dir' --redact --no-banner 2>/dev/null || gitleaks detect --no-git --source '$scan_dir' --redact --no-banner"
+  rm -rf "$scan_dir"
 else
   echo "✖ gitleaks not installed or not on the PATH of this shell (see docs/WORKFLOW.md §2.1)"; fail=1
 fi
