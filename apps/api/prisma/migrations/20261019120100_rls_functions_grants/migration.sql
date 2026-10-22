@@ -7,6 +7,16 @@
 -- NULL, every predicate is false or NULL, and no row is visible or writable: the system fails closed.
 
 -- ---------------------------------------------------------------------------------------------------------------
+-- 0. Default privileges
+-- ---------------------------------------------------------------------------------------------------------------
+-- Objects s360_owner creates from here on grant nothing to anyone until a grant says so. Functions are the case
+-- that matters: PostgreSQL grants EXECUTE to PUBLIC by default. (Functions of extensions created later by
+-- s360_owner are affected too; grant them explicitly if needed.)
+ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE ALL ON TABLES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE ALL ON SEQUENCES FROM PUBLIC;
+ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+
+-- ---------------------------------------------------------------------------------------------------------------
 -- 1. Context helpers
 -- ---------------------------------------------------------------------------------------------------------------
 -- NULLIF: once a transaction-local setting has gone out of scope, current_setting(..., true) returns '' rather
@@ -30,6 +40,43 @@ CREATE FUNCTION public.app_role() RETURNS text
 CREATE FUNCTION public.app_is_staff() RETURNS boolean
   LANGUAGE sql STABLE PARALLEL SAFE
   AS $$ SELECT COALESCE(public.app_role() IN ('TECHNICIAN', 'ADMIN'), false) $$;
+
+-- Incident visibility (L2 Table 14) in one place: the incidents policy and app_can_notify() both use it, so the
+-- two can never disagree.
+CREATE FUNCTION public.app_can_see_incident(p_organization_id uuid, p_reporter_id uuid) RETURNS boolean
+  LANGUAGE sql STABLE PARALLEL SAFE
+  AS $$
+    SELECT COALESCE(
+      public.app_is_staff()
+      OR (
+        p_organization_id = public.app_org_id()
+        AND (public.app_role() = 'MANAGER' OR p_reporter_id = public.app_user_id())
+      ),
+      false)
+  $$;
+
+-- Notification recipient check (used by notifications_insert). SECURITY DEFINER because the recipient is usually
+-- invisible to the actor under RLS (a reporter cannot see the analyst's row); it returns a boolean only, and only
+-- about an incident the caller can already see. A recipient qualifies when they are the reporter, a user of the
+-- incident's organisation, or SFC staff (staff role in the PROVIDER organisation).
+CREATE FUNCTION public.app_can_notify(p_recipient uuid, p_incident uuid) RETURNS boolean
+  LANGUAGE sql STABLE SECURITY DEFINER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+    SELECT EXISTS (
+      SELECT 1
+        FROM public.incidents i
+        JOIN public.users r ON r.id = p_recipient
+        JOIN public.organizations ro ON ro.id = r.organization_id
+       WHERE i.id = p_incident
+         AND public.app_can_see_incident(i.organization_id, i.reporter_id)
+         AND (
+           r.id = i.reporter_id
+           OR r.organization_id = i.organization_id
+           OR (r.role IN ('TECHNICIAN', 'ADMIN') AND ro.type = 'PROVIDER')
+         )
+    )
+  $$;
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- 2. Row-Level Security: enabled and forced on every table (the owner is subject to it too)
@@ -101,13 +148,7 @@ CREATE POLICY incident_categories_update ON public.incident_categories FOR UPDAT
 -- incidents (L2 Table 14): staff all; MANAGER their organisation; USER their own reports.
 -- A report is always created by its reporter in their own organisation; only staff update incidents.
 CREATE POLICY incidents_select ON public.incidents FOR SELECT
-  USING (
-    public.app_is_staff()
-    OR (
-      organization_id = public.app_org_id()
-      AND (public.app_role() = 'MANAGER' OR reporter_id = public.app_user_id())
-    )
-  );
+  USING (public.app_can_see_incident(organization_id, reporter_id));
 CREATE POLICY incidents_insert ON public.incidents FOR INSERT
   WITH CHECK (organization_id = public.app_org_id() AND reporter_id = public.app_user_id());
 CREATE POLICY incidents_update ON public.incidents FOR UPDATE
@@ -119,7 +160,9 @@ CREATE POLICY incidents_update ON public.incidents FOR UPDATE
 -- front lets the planner discard other tenants' rows by index before the subquery runs; the composite foreign
 -- key (incident_id, organization_id) guarantees the denormalised value matches the parent.
 
--- incident_status_history: append-only (no UPDATE grant); the actor is always the current user.
+-- incident_status_history: append-only (no UPDATE grant); the actor is always the current user. Only staff
+-- record transitions; the reporter records the creation entry (NULL -> NEW) of their own incident, nothing else,
+-- so the timeline (BF06) cannot be forged from the client side.
 CREATE POLICY incident_status_history_select ON public.incident_status_history FOR SELECT
   USING (
     (public.app_is_staff() OR organization_id = public.app_org_id())
@@ -128,7 +171,18 @@ CREATE POLICY incident_status_history_select ON public.incident_status_history F
 CREATE POLICY incident_status_history_insert ON public.incident_status_history FOR INSERT
   WITH CHECK (
     changed_by = public.app_user_id()
-    AND EXISTS (SELECT 1 FROM public.incidents i WHERE i.id = incident_status_history.incident_id)
+    AND EXISTS (
+      SELECT 1 FROM public.incidents i
+       WHERE i.id = incident_status_history.incident_id
+         AND (
+           public.app_is_staff()
+           OR (
+             incident_status_history.from_status IS NULL
+             AND incident_status_history.to_status = 'NEW'
+             AND i.reporter_id = public.app_user_id()
+           )
+         )
+    )
   );
 
 -- incident_messages: internal notes are visible to, and written by, staff only.
@@ -157,13 +211,19 @@ CREATE POLICY attachments_insert ON public.attachments FOR INSERT
     AND EXISTS (SELECT 1 FROM public.incidents i WHERE i.id = attachments.incident_id)
   );
 
--- incident_reference_counters: global per year (L2 §7.3), used inside any authenticated creation transaction.
-CREATE POLICY incident_reference_counters_all ON public.incident_reference_counters FOR ALL
-  USING (public.app_user_id() IS NOT NULL)
-  WITH CHECK (public.app_user_id() IS NOT NULL);
+-- incident_reference_counters: global per year (L2 §7.3), shared by every tenant, so no runtime role touches it
+-- directly (one tenant could otherwise exhaust or rewind the sequence for all). next_incident_reference() is the
+-- only way in; it runs as s360_owner, which this policy admits.
+CREATE POLICY incident_reference_counters_owner ON public.incident_reference_counters FOR ALL TO s360_owner
+  USING (true)
+  WITH CHECK (true);
 
 -- notifications: read and marked read by their recipient only. They are written in the transaction of the
--- change that causes them (L2 §5, risk R02), so by the actor, for another user: the actor must see the incident.
+-- change that causes them (L2 §5, risk R02), so by the actor, for another user: app_can_notify() requires that
+-- the actor sees the incident and that the recipient is related to it. The composite foreign key
+-- (user_id, organization_id) makes organization_id the recipient's organisation. incident_id keeps a plain foreign
+-- key: a staff recipient belongs to the PROVIDER organisation, not the incident's, so (incident_id,
+-- organization_id) cannot reference incidents.
 CREATE POLICY notifications_select ON public.notifications FOR SELECT
   USING (user_id = public.app_user_id());
 CREATE POLICY notifications_update ON public.notifications FOR UPDATE
@@ -173,7 +233,7 @@ CREATE POLICY notifications_insert ON public.notifications FOR INSERT
   WITH CHECK (
     public.app_user_id() IS NOT NULL
     AND incident_id IS NOT NULL
-    AND EXISTS (SELECT 1 FROM public.incidents i WHERE i.id = notifications.incident_id)
+    AND public.app_can_notify(user_id, incident_id)
   );
 
 -- Per-user tables: only the owning user, for every command.
@@ -193,7 +253,9 @@ CREATE POLICY idempotency_keys_own ON public.idempotency_keys FOR ALL
   USING (user_id = public.app_user_id())
   WITH CHECK (user_id = public.app_user_id());
 
--- report_jobs: the requester and staff. Non-staff reports are limited to the requester's organisation.
+-- report_jobs: the requester and staff. Non-staff reports are limited to the requester's organisation, in every
+-- WITH CHECK. The API only creates jobs; the worker records their outcome under the requester's context (column
+-- grant below: never organization_id, so a job can never be widened to another tenant).
 CREATE POLICY report_jobs_select ON public.report_jobs FOR SELECT
   USING (requested_by = public.app_user_id() OR public.app_is_staff());
 CREATE POLICY report_jobs_insert ON public.report_jobs FOR INSERT
@@ -201,9 +263,12 @@ CREATE POLICY report_jobs_insert ON public.report_jobs FOR INSERT
     requested_by = public.app_user_id()
     AND (public.app_is_staff() OR organization_id = public.app_org_id())
   );
-CREATE POLICY report_jobs_update ON public.report_jobs FOR UPDATE
+CREATE POLICY report_jobs_worker_update ON public.report_jobs FOR UPDATE TO s360_worker
   USING (requested_by = public.app_user_id() OR public.app_is_staff())
-  WITH CHECK (requested_by = public.app_user_id() OR public.app_is_staff());
+  WITH CHECK (
+    (requested_by = public.app_user_id() OR public.app_is_staff())
+    AND (public.app_is_staff() OR organization_id = public.app_org_id())
+  );
 
 -- outbox_events (L2 §6.2): the API appends events for what it may act on; the relay reads every tenant's
 -- pending events and marks them published, so its policies are scoped to s360_worker only.
@@ -225,8 +290,9 @@ CREATE POLICY audit_logs_worker_insert ON public.audit_logs FOR INSERT TO s360_w
 -- ---------------------------------------------------------------------------------------------------------------
 -- 3. users: columns RLS cannot protect
 -- ---------------------------------------------------------------------------------------------------------------
--- RLS decides which rows a role may update, not which columns or values. Without this trigger a user updating
--- their own row (password change) could also raise their role or move to another organisation.
+-- RLS decides which rows a role may update, not which columns or values. Column grants (section 5) keep the
+-- credential columns out of s360_app's reach; this trigger guards the values of the rest, and also applies to
+-- the SECURITY DEFINER auth functions that will change credentials (tasks 12–15).
 -- SECURITY INVOKER: it reads the caller's context and needs no extra privilege.
 
 CREATE FUNCTION public.users_guard_update() RETURNS trigger
@@ -257,6 +323,19 @@ BEGIN
     RAISE EXCEPTION 'session_version may only be raised by the user or an ADMIN'
       USING ERRCODE = 'insufficient_privilege';
   END IF;
+  -- Replay protection (L2 §8.2): TOTP steps are absolute time counters, so the last accepted one never goes back,
+  -- not even when 2FA is re-enrolled.
+  IF OLD.totp_last_step IS NOT NULL
+     AND (NEW.totp_last_step IS NULL OR NEW.totp_last_step < OLD.totp_last_step) THEN
+    RAISE EXCEPTION 'totp_last_step cannot decrease' USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  -- These changes must invalidate every outstanding access token at once (L2 §8.2), whatever code made them.
+  IF NEW.role IS DISTINCT FROM OLD.role
+     OR NEW.is_active IS DISTINCT FROM OLD.is_active
+     OR NEW.organization_id IS DISTINCT FROM OLD.organization_id
+     OR NEW.password_hash IS DISTINCT FROM OLD.password_hash THEN
+    NEW.session_version := GREATEST(NEW.session_version, OLD.session_version + 1);
+  END IF;
   RETURN NEW;
 END
 $$;
@@ -264,6 +343,103 @@ $$;
 CREATE TRIGGER users_guard_update
   BEFORE UPDATE ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.users_guard_update();
+
+-- Staff see every tenant (app_is_staff() is role-based, L2 Table 12), so a staff role outside the PROVIDER
+-- organisation would open all tenants to a client employee. SECURITY DEFINER: the organisation row may be
+-- invisible to the caller. Trigger functions cannot be called directly, so this exposes nothing callable.
+CREATE FUNCTION public.users_guard_staff_org() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+BEGIN
+  IF NEW.role IN ('TECHNICIAN', 'ADMIN') AND NOT EXISTS (
+    SELECT 1 FROM public.organizations o WHERE o.id = NEW.organization_id AND o.type = 'PROVIDER'
+  ) THEN
+    RAISE EXCEPTION 'TECHNICIAN and ADMIN users must belong to the PROVIDER organization'
+      USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER users_guard_staff_org
+  BEFORE INSERT OR UPDATE OF role, organization_id ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.users_guard_staff_org();
+
+-- The same rule seen from the organisation: the PROVIDER cannot change type while it has staff.
+CREATE FUNCTION public.organizations_guard_type() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+BEGIN
+  IF OLD.type = 'PROVIDER' AND NEW.type IS DISTINCT FROM OLD.type AND EXISTS (
+    SELECT 1 FROM public.users u WHERE u.organization_id = OLD.id AND u.role IN ('TECHNICIAN', 'ADMIN')
+  ) THEN
+    RAISE EXCEPTION 'TECHNICIAN and ADMIN users must belong to the PROVIDER organization'
+      USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER organizations_guard_type
+  BEFORE UPDATE OF type ON public.organizations
+  FOR EACH ROW EXECUTE FUNCTION public.organizations_guard_type();
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- 3b. incidents: columns RLS cannot protect
+-- ---------------------------------------------------------------------------------------------------------------
+-- Staff may update any incident (RLS), but identity, provenance and the confidentiality flag are fixed at
+-- creation: flipping is_anonymous would expose a confidential reporter to their manager (AGENTS rule 5). A
+-- reporter creates an incident in its initial state only; triage fields are the analysts' (L2 §7.5, §8.3).
+-- An incident is only ever assigned to an active staff user (a deactivated analyst would leave it unattended).
+-- SECURITY DEFINER: the assignee's row is generally invisible to the caller.
+
+CREATE FUNCTION public.incidents_guard() RETURNS trigger
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+BEGIN
+  IF TG_OP = 'INSERT' AND NOT public.app_is_staff() THEN
+    NEW.status := 'NEW';
+    NEW.assigned_to := NULL;
+    NEW.acknowledged_at := NULL;
+    NEW.resolved_at := NULL;
+    NEW.closed_at := NULL;
+    NEW.version := 1;
+  END IF;
+  IF TG_OP = 'UPDATE' AND (
+    NEW.id IS DISTINCT FROM OLD.id
+    OR NEW.reference IS DISTINCT FROM OLD.reference
+    OR NEW.organization_id IS DISTINCT FROM OLD.organization_id
+    OR NEW.reporter_id IS DISTINCT FROM OLD.reporter_id
+    OR NEW.is_anonymous IS DISTINCT FROM OLD.is_anonymous
+    OR NEW.severity_initial IS DISTINCT FROM OLD.severity_initial
+    OR NEW.severity_answers IS DISTINCT FROM OLD.severity_answers
+    OR NEW.client_request_id IS DISTINCT FROM OLD.client_request_id
+    OR NEW.created_at IS DISTINCT FROM OLD.created_at
+  ) THEN
+    RAISE EXCEPTION 'incidents identity, provenance and confidentiality columns cannot change'
+      USING ERRCODE = 'insufficient_privilege',
+            DETAIL = 'id, reference, organization_id, reporter_id, is_anonymous, severity_initial, '
+                     || 'severity_answers, client_request_id, created_at';
+  END IF;
+  IF NEW.assigned_to IS NOT NULL
+     AND (TG_OP = 'INSERT' OR NEW.assigned_to IS DISTINCT FROM OLD.assigned_to)
+     AND NOT EXISTS (
+       SELECT 1 FROM public.users u
+        WHERE u.id = NEW.assigned_to AND u.role IN ('TECHNICIAN', 'ADMIN') AND u.is_active
+     ) THEN
+    RAISE EXCEPTION 'incidents.assigned_to must be an active staff user'
+      USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER incidents_guard
+  BEFORE INSERT OR UPDATE ON public.incidents
+  FOR EACH ROW EXECUTE FUNCTION public.incidents_guard();
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- 4. Pre-authentication e-mail lookup (L2 Table 14)
@@ -299,65 +475,111 @@ CREATE FUNCTION public.auth_find_user_by_email(p_email text)
      WHERE u.email = p_email::public.citext
   $$;
 
--- FORCE ROW LEVEL SECURITY applies to the owner as well, so the function needs these two read policies.
--- They grant nothing new: s360_owner owns the tables and is never used at runtime (L2 Table 13).
+-- FORCE ROW LEVEL SECURITY applies to the owner as well, so the SECURITY DEFINER functions and guard triggers
+-- need these read policies (the e-mail lookup, app_can_notify, users_guard_staff_org, organizations_guard_type,
+-- incidents_guard). They grant nothing new: s360_owner owns the tables and is never used at runtime (L2 Table 13).
 CREATE POLICY users_auth_lookup ON public.users FOR SELECT TO s360_owner USING (true);
 CREATE POLICY organizations_auth_lookup ON public.organizations FOR SELECT TO s360_owner USING (true);
+CREATE POLICY incidents_owner_lookup ON public.incidents FOR SELECT TO s360_owner USING (true);
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- 4b. Incident references SFC-YYYY-NNNNNN (L2 §7.3)
+-- ---------------------------------------------------------------------------------------------------------------
+-- Called inside the incident creation transaction: the counter row stays locked until COMMIT, so references are
+-- gap-free and unique under concurrency, and a rolled-back creation gives its number back. The counter itself is
+-- out of reach of every runtime role (policy incident_reference_counters_owner).
+
+CREATE FUNCTION public.next_incident_reference(p_year integer) RETURNS text
+  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+DECLARE
+  next_value integer;
+BEGIN
+  IF public.app_user_id() IS NULL THEN
+    RAISE EXCEPTION 'next_incident_reference requires a tenant context' USING ERRCODE = 'insufficient_privilege';
+  END IF;
+  -- Out-of-range years and the six-digit limit are rejected by the CHECK constraints on the counter.
+  INSERT INTO public.incident_reference_counters AS c (year, last_value) VALUES (p_year, 1)
+    ON CONFLICT (year) DO UPDATE SET last_value = c.last_value + 1
+    RETURNING c.last_value INTO next_value;
+  RETURN 'SFC-' || to_char(p_year, 'FM0000') || '-' || to_char(next_value, 'FM000000');
+END
+$$;
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- 5. Privileges (L2 Table 13)
 -- ---------------------------------------------------------------------------------------------------------------
 
--- Objects s360_owner creates later grant nothing to anyone until a migration says so. Functions are the case
--- that matters: PostgreSQL grants EXECUTE to PUBLIC by default. (Functions of extensions created later by
--- s360_owner are affected too; grant them explicitly if needed.)
-ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE ALL ON TABLES FROM PUBLIC;
-ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE ALL ON SEQUENCES FROM PUBLIC;
-ALTER DEFAULT PRIVILEGES FOR ROLE s360_owner REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
+-- Default privileges are set at the top of this file (section 0), so no function above has a PUBLIC EXECUTE;
+-- the explicit REVOKE keeps that true even if this file is reordered. Extension functions (citext) keep theirs:
+-- the citext operators that s360_app uses for e-mail comparisons need them.
 
 -- Clean slate, then explicit grants only.
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC, s360_app, s360_worker, s360_metrics;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, s360_app, s360_worker, s360_metrics;
 REVOKE EXECUTE ON FUNCTION
   public.app_org_id(), public.app_user_id(), public.app_role(), public.app_is_staff(),
-  public.users_guard_update(), public.auth_find_user_by_email(text)
+  public.app_can_see_incident(uuid, uuid), public.app_can_notify(uuid, uuid),
+  public.users_guard_update(), public.users_guard_staff_org(), public.organizations_guard_type(),
+  public.incidents_guard(), public.auth_find_user_by_email(text), public.next_incident_reference(integer)
   FROM PUBLIC;
 
--- Policies run with the caller's privileges, so both runtime roles need the helpers.
-GRANT EXECUTE ON FUNCTION public.app_org_id(), public.app_user_id(), public.app_role(), public.app_is_staff()
+-- Policies run with the caller's privileges, so both runtime roles need the helpers. app_can_notify() is also
+-- the worker's: it writes notifications for the jobs of L2 Table 11 (SLA breach) under the same policy.
+GRANT EXECUTE ON FUNCTION
+  public.app_org_id(), public.app_user_id(), public.app_role(), public.app_is_staff(),
+  public.app_can_see_incident(uuid, uuid), public.app_can_notify(uuid, uuid)
   TO s360_app, s360_worker;
-GRANT EXECUTE ON FUNCTION public.auth_find_user_by_email(text) TO s360_app;
+GRANT EXECUTE ON FUNCTION public.auth_find_user_by_email(text), public.next_incident_reference(integer)
+  TO s360_app;
+
+-- users: column grants. password_hash and totp_secret_enc are never readable by a runtime role (the login path
+-- reads them through auth_find_user_by_email); the Prisma client omits them globally. Credentials, 2FA state,
+-- lockout and session_version are not updatable: they change only through the SECURITY DEFINER auth functions of
+-- tasks 12–15. updated_at is in the UPDATE list because Prisma sets @updatedAt on every update.
+GRANT SELECT (
+    id, organization_id, first_name, last_name, email, phone, role, preferred_language, totp_last_step,
+    is_2fa_enabled, must_change_password, session_version, locked_until, last_login_at, is_active, created_at,
+    updated_at
+  ) ON public.users TO s360_app, s360_worker;
+GRANT INSERT ON public.users TO s360_app;
+GRANT UPDATE (
+    first_name, last_name, phone, preferred_language, role, is_active, organization_id, email, updated_at
+  ) ON public.users TO s360_app;
 
 -- s360_app (API): DML on business tables, always under RLS. DELETE only where the domain removes rows.
 GRANT SELECT, INSERT, UPDATE ON public.organizations TO s360_app;
-GRANT SELECT, INSERT, UPDATE ON public.users TO s360_app;
 GRANT SELECT, UPDATE ON public.incident_categories TO s360_app;
 GRANT SELECT, INSERT, UPDATE ON public.incidents TO s360_app;
 GRANT SELECT, INSERT ON public.incident_status_history TO s360_app;
 GRANT SELECT, INSERT ON public.incident_messages TO s360_app;
 GRANT SELECT, INSERT ON public.attachments TO s360_app;
-GRANT SELECT, INSERT, UPDATE ON public.incident_reference_counters TO s360_app;
+-- incident_reference_counters: nothing; next_incident_reference() only.
 GRANT SELECT, INSERT ON public.notifications TO s360_app;
 GRANT UPDATE (is_read) ON public.notifications TO s360_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.device_tokens TO s360_app;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.refresh_tokens TO s360_app;
-GRANT SELECT, INSERT, UPDATE ON public.password_reset_tokens TO s360_app;
+-- Token tables: issue, look up, delete (logout). Rotation and revocation are SECURITY DEFINER functions
+-- (tasks 13–14), so a request can never un-revoke a token or extend its expiry.
+GRANT SELECT, INSERT, DELETE ON public.refresh_tokens TO s360_app;
+GRANT SELECT, INSERT ON public.password_reset_tokens TO s360_app;
 GRANT SELECT, INSERT, DELETE ON public.idempotency_keys TO s360_app;
-GRANT SELECT, INSERT, UPDATE ON public.report_jobs TO s360_app;
+GRANT SELECT, INSERT ON public.report_jobs TO s360_app;
 -- Append-only: no SELECT, so INSERT ... RETURNING is not possible either (use createMany or $executeRaw).
 GRANT INSERT ON public.outbox_events TO s360_app;
 GRANT USAGE ON SEQUENCE public.outbox_events_id_seq TO s360_app;
 -- audit_logs: nothing for s360_app.
 
 -- s360_worker: outbox relay, audit writer and the jobs of L2 Table 11, under RLS with a job-supplied context.
-GRANT SELECT, UPDATE ON public.outbox_events TO s360_worker;
+GRANT SELECT ON public.outbox_events TO s360_worker;
+GRANT UPDATE (published_at) ON public.outbox_events TO s360_worker;
 GRANT INSERT ON public.audit_logs TO s360_worker;
 GRANT USAGE ON SEQUENCE public.audit_logs_id_seq TO s360_worker;
-GRANT SELECT ON public.users TO s360_worker;
 GRANT SELECT ON public.incidents TO s360_worker;
 GRANT SELECT ON public.incident_categories TO s360_worker;
 GRANT SELECT, DELETE ON public.device_tokens TO s360_worker;
 GRANT INSERT ON public.notifications TO s360_worker;
-GRANT SELECT, UPDATE ON public.report_jobs TO s360_worker;
+GRANT SELECT ON public.report_jobs TO s360_worker;
+GRANT UPDATE (status, storage_key, error_code, completed_at) ON public.report_jobs TO s360_worker;
 
 -- s360_metrics: no table privileges at all (pg_monitor only, granted at role creation).

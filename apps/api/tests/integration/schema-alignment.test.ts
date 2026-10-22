@@ -10,11 +10,11 @@ import {
   SUBSCRIPTION_PLANS,
   USER_ROLES,
 } from '@secure360/shared';
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import { connectAs, inRolledBackTenant } from './helpers/db';
 import { readConnectionUrl } from './setup/env';
 
-let superuser: PrismaClient;
+let superuser: DbClient;
 
 beforeAll(() => {
   superuser = connectAs('superuser');

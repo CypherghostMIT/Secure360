@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import {
   connectAs,
   dbError,
@@ -8,10 +8,10 @@ import {
 } from './helpers/db';
 import { CONTEXT, ORG, USER } from './setup/fixtures';
 
-let superuser: PrismaClient;
-let app: PrismaClient;
-let worker: PrismaClient;
-let metrics: PrismaClient;
+let superuser: DbClient;
+let app: DbClient;
+let worker: DbClient;
+let metrics: DbClient;
 
 beforeAll(() => {
   superuser = connectAs('superuser');
@@ -30,7 +30,8 @@ interface GrantRow {
   privileges: string;
 }
 
-// The complete, intended privilege set (L2 Table 13). Any grant added or removed must update this table.
+// The complete, intended table-level privilege set (L2 Table 13). Any grant added or removed must update this
+// table. Column-level grants do not appear in role_table_grants: EXPECTED_COLUMN_GRANTS pins them.
 const EXPECTED_GRANTS: Record<string, Record<string, string>> = {
   s360_app: {
     attachments: 'INSERT,SELECT',
@@ -38,16 +39,15 @@ const EXPECTED_GRANTS: Record<string, Record<string, string>> = {
     idempotency_keys: 'DELETE,INSERT,SELECT',
     incident_categories: 'SELECT,UPDATE',
     incident_messages: 'INSERT,SELECT',
-    incident_reference_counters: 'INSERT,SELECT,UPDATE',
     incident_status_history: 'INSERT,SELECT',
     incidents: 'INSERT,SELECT,UPDATE',
     notifications: 'INSERT,SELECT',
     organizations: 'INSERT,SELECT,UPDATE',
     outbox_events: 'INSERT',
-    password_reset_tokens: 'INSERT,SELECT,UPDATE',
-    refresh_tokens: 'DELETE,INSERT,SELECT,UPDATE',
-    report_jobs: 'INSERT,SELECT,UPDATE',
-    users: 'INSERT,SELECT,UPDATE',
+    password_reset_tokens: 'INSERT,SELECT',
+    refresh_tokens: 'DELETE,INSERT,SELECT',
+    report_jobs: 'INSERT,SELECT',
+    users: 'INSERT',
   },
   s360_worker: {
     audit_logs: 'INSERT',
@@ -55,21 +55,99 @@ const EXPECTED_GRANTS: Record<string, Record<string, string>> = {
     incident_categories: 'SELECT',
     incidents: 'SELECT',
     notifications: 'INSERT',
-    outbox_events: 'SELECT,UPDATE',
-    report_jobs: 'SELECT,UPDATE',
-    users: 'SELECT',
+    outbox_events: 'SELECT',
+    report_jobs: 'SELECT',
   },
 };
+
+// Readable users columns: all but password_hash and totp_secret_enc (GLOBAL_OMIT in the Prisma client).
+const USERS_READABLE =
+  'created_at,email,first_name,id,is_2fa_enabled,is_active,last_login_at,last_name,locked_until,' +
+  'must_change_password,organization_id,phone,preferred_language,role,session_version,totp_last_step,updated_at';
+
+// grantee -> table -> privilege -> sorted columns. Only grants made on columns (pg_attribute.attacl).
+const EXPECTED_COLUMN_GRANTS: Record<string, Record<string, Record<string, string>>> = {
+  s360_app: {
+    notifications: { UPDATE: 'is_read' },
+    users: {
+      SELECT: USERS_READABLE,
+      UPDATE:
+        'email,first_name,is_active,last_name,organization_id,phone,preferred_language,role,updated_at',
+    },
+  },
+  s360_worker: {
+    outbox_events: { UPDATE: 'published_at' },
+    report_jobs: { UPDATE: 'completed_at,error_code,status,storage_key' },
+    users: { SELECT: USERS_READABLE },
+  },
+};
+
+// grantee -> functions of public it may EXECUTE (extension functions excluded); s360_owner owns them all.
+const POLICY_HELPERS = [
+  'app_can_notify(p_recipient uuid, p_incident uuid)',
+  'app_can_see_incident(p_organization_id uuid, p_reporter_id uuid)',
+  'app_is_staff()',
+  'app_org_id()',
+  'app_role()',
+  'app_user_id()',
+];
+const EXPECTED_ROUTINE_GRANTS: Record<string, string[]> = {
+  s360_app: [
+    ...POLICY_HELPERS,
+    'auth_find_user_by_email(p_email text)',
+    'next_incident_reference(p_year integer)',
+  ],
+  s360_worker: POLICY_HELPERS,
+};
+
+const RUNTIME_ROLES = ['s360_app', 's360_worker', 's360_metrics'];
+const MANAGED_ROLES = ['s360_owner', ...RUNTIME_ROLES];
+const GRANTEES = ['PUBLIC', ...RUNTIME_ROLES];
 
 async function tableGrants(): Promise<Record<string, Record<string, string>>> {
   const rows = await superuser.$queryRaw<GrantRow[]>`
     SELECT grantee, table_name, string_agg(privilege_type, ',' ORDER BY privilege_type) AS privileges
       FROM information_schema.role_table_grants
-     WHERE table_schema = 'public' AND grantee IN ('PUBLIC', 's360_app', 's360_worker', 's360_metrics')
+     WHERE table_schema = 'public' AND grantee = ANY(${GRANTEES})
      GROUP BY grantee, table_name`;
   const result: Record<string, Record<string, string>> = {};
   for (const row of rows) (result[row.grantee] ??= {})[row.table_name] = row.privileges;
   return result;
+}
+
+async function columnGrants(): Promise<Record<string, Record<string, Record<string, string>>>> {
+  const rows = await superuser.$queryRaw<(GrantRow & { columns: string })[]>`
+    SELECT COALESCE(r.rolname, 'PUBLIC')::text AS grantee, c.relname::text AS table_name,
+           acl.privilege_type AS privileges, string_agg(a.attname, ',' ORDER BY a.attname) AS columns
+      FROM pg_attribute a
+      JOIN pg_class c ON c.oid = a.attrelid
+      JOIN pg_namespace n ON n.oid = c.relnamespace
+     CROSS JOIN LATERAL aclexplode(a.attacl) acl
+      LEFT JOIN pg_roles r ON r.oid = acl.grantee
+     WHERE n.nspname = 'public' AND a.attacl IS NOT NULL
+       AND COALESCE(r.rolname, 'PUBLIC') = ANY(${GRANTEES})
+     GROUP BY 1, 2, 3`;
+  const result: Record<string, Record<string, Record<string, string>>> = {};
+  for (const row of rows) {
+    ((result[row.grantee] ??= {})[row.table_name] ??= {})[row.privileges] = row.columns;
+  }
+  return result;
+}
+
+async function routineGrants(): Promise<Record<string, string[]>> {
+  const rows = await superuser.$queryRaw<{ grantee: string; routines: string[] }[]>`
+    SELECT COALESCE(r.rolname, 'PUBLIC')::text AS grantee,
+           array_agg(p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' ORDER BY p.proname)
+             AS routines
+      FROM pg_proc p
+      JOIN pg_namespace n ON n.oid = p.pronamespace
+     CROSS JOIN LATERAL aclexplode(COALESCE(p.proacl, acldefault('f', p.proowner))) acl
+      LEFT JOIN pg_roles r ON r.oid = acl.grantee
+     WHERE n.nspname = 'public' AND acl.privilege_type = 'EXECUTE'
+       AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')
+       AND COALESCE(r.rolname, 'PUBLIC') = ANY(${GRANTEES})
+     GROUP BY 1`;
+  return Object.fromEntries(rows.map((row) => [row.grantee, row.routines]));
 }
 
 describe('table privileges (L2 Table 13)', () => {
@@ -77,11 +155,8 @@ describe('table privileges (L2 Table 13)', () => {
     expect(await tableGrants()).toEqual(EXPECTED_GRANTS);
   });
 
-  it('limit the s360_app UPDATE on notifications to is_read', async () => {
-    const rows = await superuser.$queryRaw<{ column_name: string }[]>`
-      SELECT column_name FROM information_schema.column_privileges
-       WHERE grantee = 's360_app' AND table_name = 'notifications' AND privilege_type = 'UPDATE'`;
-    expect(rows).toEqual([{ column_name: 'is_read' }]);
+  it('match the intended column grants exactly', async () => {
+    expect(await columnGrants()).toEqual(EXPECTED_COLUMN_GRANTS);
   });
 
   it('enable and force RLS on every application table', async () => {
@@ -95,6 +170,50 @@ describe('table privileges (L2 Table 13)', () => {
   it('give no runtime role access to the migrations table', async () => {
     const error = await dbError(app.$queryRaw`SELECT count(*) FROM _prisma_migrations`);
     expect(error).toMatch(PERMISSION_DENIED);
+  });
+});
+
+describe('function privileges', () => {
+  it('match the intended EXECUTE grants exactly', async () => {
+    expect(await routineGrants()).toEqual(EXPECTED_ROUTINE_GRANTS);
+  });
+
+  // citext's own functions keep PUBLIC EXECUTE: its operators, used for e-mail comparisons, need them.
+  it('give PUBLIC no EXECUTE on any function of the schema, extension functions aside', async () => {
+    const rows = await superuser.$queryRaw<{ proname: string }[]>`
+      SELECT p.proname::text FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+       WHERE n.nspname = 'public' AND has_function_privilege('public', p.oid, 'EXECUTE')
+         AND NOT EXISTS (SELECT 1 FROM pg_depend d WHERE d.objid = p.oid AND d.deptype = 'e')`;
+    expect(rows).toEqual([]);
+  });
+
+  it('pin search_path on every SECURITY DEFINER function', async () => {
+    const rows = await superuser.$queryRaw<{ proname: string }[]>`
+      SELECT p.proname::text FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+       WHERE n.nspname = 'public' AND p.prosecdef
+         AND NOT ('search_path=pg_catalog, public, pg_temp' = ANY (COALESCE(p.proconfig, '{}')))`;
+    expect(rows).toEqual([]);
+  });
+});
+
+describe('database roles', () => {
+  it('give no runtime role TEMP on the database', async () => {
+    const rows = await superuser.$queryRaw<{ rolname: string }[]>`
+      SELECT rolname::text FROM pg_roles
+       WHERE rolname = ANY(${RUNTIME_ROLES})
+         AND has_database_privilege(rolname, current_database(), 'TEMP')`;
+    expect(rows).toEqual([]);
+  });
+
+  it('make no role a member of another, except s360_metrics in pg_monitor', async () => {
+    const rows = await superuser.$queryRaw<{ member: string; role: string }[]>`
+      SELECT m.rolname::text AS member, r.rolname::text AS role
+        FROM pg_auth_members am
+        JOIN pg_roles m ON m.oid = am.member
+        JOIN pg_roles r ON r.oid = am.roleid
+       WHERE m.rolname = ANY(${MANAGED_ROLES}) OR r.rolname = ANY(${MANAGED_ROLES})
+       ORDER BY 1, 2`;
+    expect(rows).toEqual([{ member: 's360_metrics', role: 'pg_monitor' }]);
   });
 });
 

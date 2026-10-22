@@ -30,6 +30,10 @@ export const MESSAGE = {
   b1Reporter: '40000000-0000-4000-8000-0000000000b1',
 } as const;
 
+export const REPORT_JOB = {
+  aManager: '90000000-0000-4000-8000-0000000000a3',
+} as const;
+
 export const EMAIL = {
   aUser1: 'a.user1@org-a.test',
 } as const;

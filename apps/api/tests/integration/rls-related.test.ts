@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import {
   connectAs,
   dbError,
@@ -11,7 +11,7 @@ import {
 } from './helpers/db';
 import { CONTEXT, INCIDENT, MESSAGE, ORG, type TenantContext, USER } from './setup/fixtures';
 
-let app: PrismaClient;
+let app: DbClient;
 
 beforeAll(() => {
   app = connectAs('app');

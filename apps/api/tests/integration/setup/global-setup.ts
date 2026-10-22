@@ -27,6 +27,7 @@ async function recreateDatabase(adminUrl: URL): Promise<void> {
   try {
     await testDb.$executeRaw`ALTER SCHEMA public OWNER TO s360_owner`;
     await testDb.$executeRaw`REVOKE CREATE ON SCHEMA public FROM PUBLIC`;
+    await testDb.$executeRaw`REVOKE TEMPORARY ON DATABASE secure360_test FROM PUBLIC`;
   } finally {
     await testDb.$disconnect();
   }

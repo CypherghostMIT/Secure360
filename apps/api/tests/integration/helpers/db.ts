@@ -1,14 +1,13 @@
-import { PrismaPg } from '@prisma/adapter-pg';
-import { type Prisma, PrismaClient } from '../../../src/generated/prisma/client';
+import type { Prisma } from '../../../src/generated/prisma/client';
+import { createPrismaClient, type DbClient } from '../../../src/platform/db/prisma-client';
 import { type Connection, readConnectionUrl } from '../setup/env';
 import type { TenantContext } from '../setup/fixtures';
 
 export type Tx = Prisma.TransactionClient;
 
-export function connectAs(connection: Connection): PrismaClient {
-  return new PrismaClient({
-    adapter: new PrismaPg({ connectionString: readConnectionUrl(connection) }),
-  });
+/** The API's own client factory, so every test also proves that its global omit fits the column grants. */
+export function connectAs(connection: Connection): DbClient {
+  return createPrismaClient(readConnectionUrl(connection));
 }
 
 /**
@@ -16,7 +15,7 @@ export function connectAs(connection: Connection): PrismaClient {
  * disappears at COMMIT and never leaks to the next user of the pooled connection (L2 §7.4).
  */
 export async function withTenant<T>(
-  db: PrismaClient,
+  db: DbClient,
   ctx: TenantContext,
   fn: (tx: Tx) => Promise<T>,
 ): Promise<T> {
@@ -32,7 +31,7 @@ class Rollback extends Error {}
 
 /** Runs fn in a tenant transaction and always rolls it back, so a test never changes the shared seed. */
 export async function inRolledBackTenant<T>(
-  db: PrismaClient,
+  db: DbClient,
   ctx: TenantContext | null,
   fn: (tx: Tx) => Promise<T>,
 ): Promise<T> {

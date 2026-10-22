@@ -524,7 +524,12 @@ ALTER TABLE "incidents"
   ADD CONSTRAINT "chk_incidents_resolved_at" CHECK ("resolved_at" >= "created_at"),
   ADD CONSTRAINT "chk_incidents_closed_at" CHECK ("closed_at" >= "created_at"),
   ADD CONSTRAINT "chk_incidents_acknowledged_at" CHECK ("acknowledged_at" >= "created_at"),
-  ADD CONSTRAINT "chk_incidents_sla_due_at" CHECK ("sla_due_at" >= "created_at"),
+  -- sla_due_at is the resolution deadline. Its longest target (L1 Table 16: LOW, 10 business days) spans
+  -- 14 calendar days, more when public holidays fall inside; 21 days covers that, and a later deadline is a bug.
+  -- Revisit with the contractual targets (D5).
+  ADD CONSTRAINT "chk_incidents_sla_due_at" CHECK (
+    "sla_due_at" IS NULL OR ("sla_due_at" > "created_at" AND "sla_due_at" <= "created_at" + interval '21 days')
+  ),
   ADD CONSTRAINT "chk_incidents_updated_at" CHECK ("updated_at" >= "created_at");
 
 -- incident_status_history: a transition always changes the status.
@@ -542,6 +547,11 @@ ALTER TABLE "attachments"
   ADD CONSTRAINT "chk_attachments_storage_key" CHECK (
     "storage_key" ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/[0-9]{4}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]bin$'
   ),
+  -- The key's first segment is the row's own organisation: a row can never point at another tenant's file.
+  -- Compared as text (uuid::text is lower-case, like the pattern above), so a malformed key cannot raise a cast
+  -- error instead of a check violation.
+  ADD CONSTRAINT "chk_attachments_storage_key_org"
+    CHECK (split_part("storage_key", '/', 1) = "organization_id"::text),
   ADD CONSTRAINT "chk_attachments_size_bytes" CHECK ("size_bytes" > 0),
   ADD CONSTRAINT "chk_attachments_sha256" CHECK ("sha256" ~ '^[0-9a-f]{64}$'),
   ADD CONSTRAINT "chk_attachments_dimensions" CHECK ("width" > 0 AND "height" > 0);
@@ -599,5 +609,8 @@ ALTER TABLE "audit_logs"
 ALTER TABLE "report_jobs"
   ADD CONSTRAINT "chk_report_jobs_params" CHECK (jsonb_typeof("params") = 'object'),
   ADD CONSTRAINT "chk_report_jobs_storage_key" CHECK ("status" <> 'SUCCEEDED' OR "storage_key" IS NOT NULL),
-  ADD CONSTRAINT "chk_report_jobs_error_code" CHECK (char_length("error_code") <= 100),
+  -- A machine-readable code only (e.g. REPORT_TIMEOUT), never an error message or a stack trace, which could
+  -- carry personal data or internals to the requester.
+  ADD CONSTRAINT "chk_report_jobs_error_code"
+    CHECK ("error_code" IS NULL OR "error_code" ~ '^[A-Z][A-Z0-9_]{2,63}$'),
   ADD CONSTRAINT "chk_report_jobs_completed_at" CHECK ("completed_at" >= "created_at");

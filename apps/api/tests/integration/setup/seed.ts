@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import type { PrismaClient } from '../../../src/generated/prisma/client';
-import { EMAIL, FAKE_BCRYPT_HASH, INCIDENT, MESSAGE, ORG, USER } from './fixtures';
+import { EMAIL, FAKE_BCRYPT_HASH, INCIDENT, MESSAGE, ORG, REPORT_JOB, USER } from './fixtures';
 
 const sha256 = (value: string) => createHash('sha256').update(value).digest();
 const hex = (value: string) => sha256(value).toString('hex');
@@ -210,6 +210,34 @@ async function seedSystemRows(db: PrismaClient): Promise<void> {
         aggregateId: INCIDENT.a1,
         organizationId: ORG.a,
         payload: { incidentId: INCIDENT.a1 },
+      },
+    ],
+  });
+  await db.passwordResetToken.createMany({
+    data: [{ userId: USER.bUser, organizationId: ORG.b, tokenHash: sha256('reset-b'), expiresAt }],
+  });
+  await db.idempotencyKey.createMany({
+    data: [
+      {
+        userId: USER.bUser,
+        organizationId: ORG.b,
+        key: INCIDENT.b1.replace(/^3/, '7'),
+        method: 'POST',
+        path: '/api/v1/incidents',
+        requestHash: sha256('request-b'),
+        statusCode: 201,
+        response: {},
+        expiresAt,
+      },
+    ],
+  });
+  await db.reportJob.createMany({
+    data: [
+      {
+        id: REPORT_JOB.aManager,
+        requestedBy: USER.aManager,
+        organizationId: ORG.a,
+        params: { period: '2026-Q3' },
       },
     ],
   });

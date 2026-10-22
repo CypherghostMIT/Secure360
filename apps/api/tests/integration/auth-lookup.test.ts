@@ -1,11 +1,11 @@
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import { connectAs, dbError, PERMISSION_DENIED } from './helpers/db';
 import { EMAIL, ORG, USER } from './setup/fixtures';
 
-let superuser: PrismaClient;
-let app: PrismaClient;
-let worker: PrismaClient;
-let metrics: PrismaClient;
+let superuser: DbClient;
+let app: DbClient;
+let worker: DbClient;
+let metrics: DbClient;
 
 beforeAll(() => {
   superuser = connectAs('superuser');
@@ -34,7 +34,7 @@ const LOGIN_FIELDS = [
   'organization_is_active',
 ];
 
-const lookup = (db: PrismaClient, email: string) =>
+const lookup = (db: DbClient, email: string) =>
   db.$queryRaw<Record<string, unknown>[]>`SELECT * FROM auth_find_user_by_email(${email})`;
 
 describe('auth_find_user_by_email (SECURITY DEFINER)', () => {

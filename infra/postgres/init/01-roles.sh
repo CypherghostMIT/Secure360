@@ -43,6 +43,8 @@ ALTER SCHEMA public OWNER TO s360_owner;
 
 -- Only the owner may create objects in public (PUBLIC keeps USAGE).
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+-- No runtime role needs temporary objects; the owner keeps TEMP through its own ownership privileges.
+REVOKE TEMPORARY ON DATABASE secure360 FROM PUBLIC;
 
 -- A request stalled inside its tenant transaction must not hold a pooled connection (L2 §7.4).
 ALTER ROLE s360_app SET statement_timeout = '5s';

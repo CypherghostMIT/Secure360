@@ -150,6 +150,9 @@ npm run dev:up && npm run dev:secrets
 Data migrations run as s360_owner, which is also subject to FORCE RLS and the users guard trigger: every data
 migration must set an app context (set_config) or use a dedicated SECURITY DEFINER function.
 
+Trust boundary: RLS trusts app.org_id/app.user_id/app.role set by withTenant(); no SQL may reach the database
+outside withTenant() (AGENTS rules 2–3).
+
 ## 4. Definition of done (per pull request)
 
 - Acceptance criteria of the issue met; requirement IDs in the PR description.

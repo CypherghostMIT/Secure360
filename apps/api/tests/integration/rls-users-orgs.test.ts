@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import {
   connectAs,
   dbError,
@@ -9,15 +9,19 @@ import {
 } from './helpers/db';
 import { CONTEXT, FAKE_BCRYPT_HASH, ORG, type TenantContext, USER } from './setup/fixtures';
 
-let app: PrismaClient;
+let app: DbClient;
+let superuser: DbClient;
 
 beforeAll(() => {
   app = connectAs('app');
+  superuser = connectAs('superuser');
 });
 
 afterAll(async () => {
-  await app.$disconnect();
+  await Promise.all([app, superuser].map((client) => client.$disconnect()));
 });
+
+const STAFF_ORG_VIOLATION = /must belong to the PROVIDER organization/;
 
 const visibleUserCount = (ctx: TenantContext) => withTenant(app, ctx, (tx) => tx.user.count());
 const visibleOrgIds = (ctx: TenantContext) =>
@@ -73,8 +77,10 @@ describe('users RLS', () => {
 });
 
 describe('users_guard_update trigger', () => {
+  // A non-staff role, so the change reaches users_guard_update (users_guard_staff_org already rejects a staff
+  // role outside the PROVIDER organisation, tested below).
   const privilegedChanges = [
-    ['role', { role: 'ADMIN' as const }],
+    ['role', { role: 'MANAGER' as const }],
     ['organization', { organizationId: ORG.b }],
     ['active flag', { isActive: false }],
     ['e-mail', { email: 'other@org-a.test' }],
@@ -89,10 +95,11 @@ describe('users_guard_update trigger', () => {
     expect(error).toMatch(GUARD_VIOLATION);
   });
 
-  it.each(privilegedChanges)('stops a MANAGER changing their own %s', async (_label, data) => {
+  it.each(privilegedChanges)('stops a MANAGER changing their own %s', async (label, data) => {
+    const change = label === 'role' ? { role: 'USER' as const } : data;
     const error = await dbError(
       inRolledBackTenant(app, CONTEXT.aManager, (tx) =>
-        tx.user.updateMany({ where: { id: USER.aManager }, data }),
+        tx.user.updateMany({ where: { id: USER.aManager }, data: change }),
       ),
     );
     expect(error).toMatch(GUARD_VIOLATION);
@@ -125,32 +132,71 @@ describe('users_guard_update trigger', () => {
     expect(result.count).toBe(1);
   });
 
-  it('lets the user and an ADMIN raise session_version', async () => {
-    const own = await inRolledBackTenant(app, CONTEXT.aUser1, (tx) =>
-      tx.user.updateMany({
-        where: { id: USER.aUser1 },
-        data: { sessionVersion: { increment: 1 } },
-      }),
-    );
-    const byAdmin = await inRolledBackTenant(app, CONTEXT.admin, (tx) =>
-      tx.user.updateMany({
-        where: { id: USER.aUser1 },
-        data: { sessionVersion: { increment: 1 } },
-      }),
-    );
-    expect([own.count, byAdmin.count]).toEqual([1, 1]);
-  });
-
-  it('never lets session_version decrease, even for an ADMIN', async () => {
-    for (const ctx of [CONTEXT.aUser1, CONTEXT.admin]) {
-      const error = await dbError(
-        inRolledBackTenant(app, ctx, async (tx) => {
-          await tx.user.updateMany({ where: { id: USER.aUser1 }, data: { sessionVersion: 5 } });
-          return tx.user.updateMany({ where: { id: USER.aUser1 }, data: { sessionVersion: 4 } });
+  // session_version is not updatable by s360_app (column grant): the auth functions of tasks 12–15 raise it.
+  // The trigger rules are exercised as the superuser, which bypasses grants but not triggers.
+  it('lets only the user or an ADMIN raise session_version', async () => {
+    const raise = (ctx: TenantContext) =>
+      inRolledBackTenant(superuser, ctx, (tx) =>
+        tx.user.updateMany({
+          where: { id: USER.aUser1 },
+          data: { sessionVersion: { increment: 1 } },
         }),
       );
-      expect(error).toMatch(/session_version cannot decrease/);
-    }
+    expect([(await raise(CONTEXT.aUser1)).count, (await raise(CONTEXT.admin)).count]).toEqual([
+      1, 1,
+    ]);
+    expect(await dbError(raise(CONTEXT.aManager))).toMatch(
+      /may only be raised by the user or an ADMIN/,
+    );
+  });
+});
+
+describe('users_guard_staff_org trigger: staff roles only in the PROVIDER organisation', () => {
+  const staffUser = (organizationId: string, role: 'TECHNICIAN' | 'ADMIN') => ({
+    organizationId,
+    firstName: 'New',
+    lastName: 'Staff',
+    email: `new.staff.${role.toLowerCase()}@${organizationId.slice(-2)}.test`,
+    passwordHash: FAKE_BCRYPT_HASH,
+    role,
+  });
+
+  it.each(['TECHNICIAN', 'ADMIN'] as const)(
+    'rejects creating a client-organisation %s',
+    async (role) => {
+      const error = await dbError(
+        inRolledBackTenant(app, CONTEXT.admin, (tx) =>
+          tx.user.createMany({ data: [staffUser(ORG.a, role)] }),
+        ),
+      );
+      expect(error).toMatch(STAFF_ORG_VIOLATION);
+    },
+  );
+
+  it('accepts staff in the PROVIDER organisation', async () => {
+    const created = await inRolledBackTenant(app, CONTEXT.admin, (tx) =>
+      tx.user.createMany({ data: [staffUser(ORG.sfc, 'TECHNICIAN')] }),
+    );
+    expect(created.count).toBe(1);
+  });
+
+  it.each([
+    ['promoting a client user to TECHNICIAN', USER.aUser1, { role: 'TECHNICIAN' as const }],
+    ['moving a TECHNICIAN to a client organisation', USER.technician, { organizationId: ORG.a }],
+  ])('rejects %s', async (_label, id, data) => {
+    const error = await dbError(
+      inRolledBackTenant(app, CONTEXT.admin, (tx) => tx.user.updateMany({ where: { id }, data })),
+    );
+    expect(error).toMatch(STAFF_ORG_VIOLATION);
+  });
+
+  it('stops the PROVIDER organisation changing type while it has staff', async () => {
+    const error = await dbError(
+      inRolledBackTenant(app, CONTEXT.admin, (tx) =>
+        tx.organization.updateMany({ where: { id: ORG.sfc }, data: { type: 'COMPANY' } }),
+      ),
+    );
+    expect(error).toMatch(STAFF_ORG_VIOLATION);
   });
 });
 

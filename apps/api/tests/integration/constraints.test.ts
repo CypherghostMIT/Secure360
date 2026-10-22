@@ -1,4 +1,4 @@
-import type { PrismaClient } from '../../src/generated/prisma/client';
+import type { DbClient } from '../../src/platform/db/prisma-client';
 import {
   CHECK_VIOLATION,
   dbError,
@@ -7,11 +7,11 @@ import {
   type Tx,
   connectAs,
 } from './helpers/db';
-import { FAKE_BCRYPT_HASH, INCIDENT, ORG, USER } from './setup/fixtures';
+import { CONTEXT, FAKE_BCRYPT_HASH, INCIDENT, ORG, USER } from './setup/fixtures';
 
 // CHECK constraints and foreign keys apply to every role, so they are exercised as the superuser (no RLS),
 // each in a transaction that is rolled back.
-let superuser: PrismaClient;
+let superuser: DbClient;
 
 beforeAll(() => {
   superuser = connectAs('superuser');
@@ -94,7 +94,12 @@ describe('incidents', () => {
     ['malformed reference', { reference: 'SFC-26-1' }],
     ['answers that are not an object', { severityAnswers: ['yes'] }],
   ])('rejects %s', async (_label, overrides) => {
-    const error = await rejected((tx) => tx.incident.createMany({ data: [incident(overrides)] }));
+    // Staff context: for anyone else incidents_guard resets the lifecycle fields before the CHECKs run.
+    const error = await dbError(
+      inRolledBackTenant(superuser, CONTEXT.admin, (tx) =>
+        tx.incident.createMany({ data: [incident(overrides)] }),
+      ),
+    );
     expect(error).toMatch(CHECK_VIOLATION);
   });
 
@@ -209,6 +214,25 @@ describe('other CHECK constraints', () => {
         }),
     ],
     [
+      "an attachment key in another organisation's folder",
+      (tx: Tx) =>
+        tx.attachment.createMany({
+          data: [
+            {
+              incidentId: INCIDENT.a1,
+              organizationId: ORG.a,
+              uploadedBy: USER.aUser1,
+              storageKey: `${ORG.b}/2026/${INCIDENT.b1}.bin`,
+              mime: 'image/jpeg',
+              sizeBytes: 1,
+              sha256: 'a'.repeat(64),
+              width: 1,
+              height: 1,
+            },
+          ],
+        }),
+    ],
+    [
       'an attachment that is not an image',
       (tx: Tx) =>
         tx.attachment.createMany({
@@ -273,5 +297,52 @@ describe('foreign keys: ON DELETE RESTRICT', () => {
       return tx.user.updateMany({ where: { id: USER.aUser1 }, data: { organizationId: ORG.b } });
     });
     expect(error).toMatch(FK_VIOLATION);
+  });
+});
+
+describe('incidents.sla_due_at: after creation, at most 21 days later', () => {
+  const createdAt = new Date('2026-05-01T08:00:00Z');
+  const after = (hours: number) => new Date(createdAt.getTime() + hours * 3_600_000);
+  const create = (slaDueAt: Date | null) => (tx: Tx) =>
+    tx.incident.createMany({ data: [incident({ createdAt, slaDueAt })] });
+
+  it.each([
+    ['no deadline', null],
+    ['a 4-hour deadline', after(4)],
+    // LOW: 10 business days with public holidays inside, beyond the former 14-day bound.
+    ['a 16-day deadline', after(16 * 24)],
+    ['a deadline exactly 21 days later', after(21 * 24)],
+  ])('accepts %s', async (_label, slaDueAt) => {
+    expect((await inRolledBackTenant(superuser, null, create(slaDueAt))).count).toBe(1);
+  });
+
+  it.each([
+    ['a deadline at creation', after(0)],
+    ['a deadline before creation', after(-1)],
+    ['a deadline 21 days and 1 hour later', after(21 * 24 + 1)],
+  ])('rejects %s', async (_label, slaDueAt) => {
+    expect(await rejected(create(slaDueAt))).toMatch(CHECK_VIOLATION);
+  });
+});
+
+describe('report_jobs.error_code: a code, never a message', () => {
+  const create = (errorCode: string | null) => (tx: Tx) =>
+    tx.reportJob.createMany({
+      data: [{ requestedBy: USER.aManager, organizationId: ORG.a, params: {}, errorCode }],
+    });
+
+  it.each([null, 'REPORT_TIMEOUT', 'PDF_RENDER_FAILED', 'E42'])('accepts %s', async (errorCode) => {
+    expect((await inRolledBackTenant(superuser, null, create(errorCode))).count).toBe(1);
+  });
+
+  it.each([
+    ['a message', 'Timeout while rendering report for user a.user1@org-a.test'],
+    ['a stack trace', 'Error: boom\n    at render (report.ts:12:5)'],
+    ['lower case', 'report_timeout'],
+    ['a leading digit', '1_FAILED'],
+    ['fewer than three characters', 'E1'],
+    ['more than 64 characters', `E${'X'.repeat(64)}`],
+  ])('rejects %s', async (_label, errorCode) => {
+    expect(await rejected(create(errorCode))).toMatch(CHECK_VIOLATION);
   });
 });
