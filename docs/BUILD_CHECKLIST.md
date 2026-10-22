@@ -36,6 +36,11 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **Production secrets:** ensure secret files are readable by the container users (postgres uid 70, redis uid 999)
       on Linux — mode 600 with host ownership will not work; use a root init step or matching ownership.
 - [ ] API behind Nginx: `TRUST_PROXY=1`.
+- [ ] Prisma schema-engine binary: install scripts are not approved, so the binary downloads on first CLI use; the production migrate step needs it available (no internet on the server, or pre-fetched in the image).
+
+## Task 4 — Database schema and RLS
+
+- [x] Prisma 7.10.1 installed before min-release-age (security fix for GHSA-ggr8-5vv4-36mx, GHSA-3f6p-5ww8-9rcr, GHSA-rgwj-5xj2-c3m3); provenance: @prisma/client and @prisma/adapter-pg attested (prisma/orm publish workflow); prisma CLI registry signature only, no attestation (dev-only tool, never shipped).
 
 ## Repository and publication
 

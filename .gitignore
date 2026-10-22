@@ -6,6 +6,9 @@ coverage/
 .turbo/
 *.tsbuildinfo
 
+# Generated Prisma client (npm run db:generate)
+apps/api/src/generated/
+
 # Expo / React Native
 .expo/
 apps/mobile/android/

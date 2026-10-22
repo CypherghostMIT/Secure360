@@ -126,7 +126,7 @@ PostgreSQL 16 and Redis 8 run in Docker (`infra/compose.dev.yml`), bound to `127
 
 | Command               | What it does                                                                                                                                                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm run dev:secrets` | Once. Creates the password files in `infra/secrets/` (git-ignored, mode 600; existing files are kept) and prints `DATABASE_URL`, `MIGRATION_DATABASE_URL` and `REDIS_URL` for your `.env`.                                                                         |
+| `npm run dev:secrets` | Once. Creates the password files in `infra/secrets/` (git-ignored, mode 600; existing files are kept) and prints `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `DATA_ENCRYPTION_KEY` and `TEST_DATABASE_ADMIN_URL` for your `.env`.         |
 | `npm run dev:up`      | Starts both services and waits until they are healthy. On the first start, `infra/postgres/init/01-roles.sh` creates the roles `s360_owner` (migrations), `s360_app` (API), `s360_worker` (worker) and `s360_metrics` (monitoring). The app never uses `postgres`. |
 | `npm run dev:down`    | Stops the services; data is kept in the named volumes.                                                                                                                                                                                                             |
 | `npm run dev:reset`   | Asks for confirmation, then stops the services and **deletes all local data** (volumes).                                                                                                                                                                           |
@@ -144,6 +144,14 @@ reads them from the shell environment, not from the root `.env`, so export them 
 export REDIS_HOST_PORT=16379
 npm run dev:up && npm run dev:secrets
 ```
+
+### 3.4 Database migrations
+
+Data migrations run as s360_owner, which is also subject to FORCE RLS and the users guard trigger: every data
+migration must set an app context (set_config) or use a dedicated SECURITY DEFINER function.
+
+Trust boundary: RLS trusts app.org_id/app.user_id/app.role set by withTenant(); no SQL may reach the database
+outside withTenant() (AGENTS rules 2–3).
 
 ## 4. Definition of done (per pull request)
 
