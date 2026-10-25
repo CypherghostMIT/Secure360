@@ -1,0 +1,463 @@
+// Secure360 data model (L2 §7.2, Figure F09, Table 12). Source of truth for tables, columns and indexes.
+// Things Prisma cannot express live in hand-written SQL migrations: the citext extension, CHECK constraints,
+// Row-Level Security policies, helper and SECURITY DEFINER functions, triggers and grants.
+// Connection URLs are not here: the CLI reads prisma.config.ts, the runtime client gets a driver adapter.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+  previewFeatures     = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---- Enumerations: values must equal the constants in packages/shared (pinned by an integration test) ----
+
+enum OrganizationType {
+  COMPANY
+  ADMINISTRATION
+  NGO
+  PROVIDER
+
+  @@map("organization_type")
+}
+
+enum SubscriptionPlan {
+  BASIC
+  STANDARD
+  PREMIUM
+
+  @@map("subscription_plan")
+}
+
+enum UserRole {
+  USER
+  MANAGER
+  TECHNICIAN
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum Language {
+  fr
+  en
+
+  @@map("language")
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@map("severity")
+}
+
+enum IncidentStatus {
+  NEW
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+
+  @@map("incident_status")
+}
+
+// Spec §6.2 types plus the staff types of L2 Table 12.
+enum NotificationType {
+  STATUS_UPDATE
+  NEW_MESSAGE
+  ASSIGNMENT
+  NEW_INCIDENT
+  SLA_BREACH
+
+  @@map("notification_type")
+}
+
+enum DevicePlatform {
+  ANDROID
+  IOS
+
+  @@map("device_platform")
+}
+
+enum ReportJobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+
+  @@map("report_job_status")
+}
+
+// ---- Tenants and identities ----
+
+model Organization {
+  id               String           @id @default(uuid()) @db.Uuid
+  name             String
+  type             OrganizationType
+  sector           String
+  city             String
+  contactEmail     String           @map("contact_email") @db.Citext
+  subscriptionPlan SubscriptionPlan @map("subscription_plan")
+  isActive         Boolean          @default(true) @map("is_active")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  users        User[]
+  incidents    Incident[]
+  reportJobs   ReportJob[]
+  auditLogs    AuditLog[]
+  outboxEvents OutboxEvent[]
+
+  // SFC is the only PROVIDER organisation (L2 Table 12).
+  @@unique([type], map: "organizations_single_provider_key", where: raw("type = 'PROVIDER'"))
+  @@map("organizations")
+}
+
+model User {
+  id                 String    @id @default(uuid()) @db.Uuid
+  organizationId     String    @map("organization_id") @db.Uuid
+  firstName          String    @map("first_name")
+  lastName           String    @map("last_name")
+  email              String    @unique @db.Citext
+  phone              String?
+  passwordHash       String    @map("password_hash")
+  role               UserRole
+  preferredLanguage  Language  @default(fr) @map("preferred_language")
+  // AES-256-GCM ciphertext, encrypted by the application (L2 §7.6).
+  totpSecretEnc      Bytes?    @map("totp_secret_enc")
+  // Last accepted TOTP time step: a code is accepted only for a greater step (replay protection, L2 §8.2).
+  totpLastStep       BigInt?   @map("totp_last_step")
+  is2faEnabled       Boolean   @default(false) @map("is_2fa_enabled")
+  mustChangePassword Boolean   @default(true) @map("must_change_password")
+  // JWT "sv" claim: incremented to invalidate every outstanding access token at once (L2 §8.2).
+  sessionVersion     Int       @default(1) @map("session_version")
+  lockedUntil        DateTime? @map("locked_until") @db.Timestamptz(3)
+  lastLoginAt        DateTime? @map("last_login_at") @db.Timestamptz(3)
+  isActive           Boolean   @default(true) @map("is_active")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  reportedIncidents   Incident[]              @relation("IncidentReporter")
+  assignedIncidents   Incident[]              @relation("IncidentAssignee")
+  statusChanges       IncidentStatusHistory[]
+  messages            IncidentMessage[]
+  attachments         Attachment[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  deviceTokens        DeviceToken[]
+  idempotencyKeys     IdempotencyKey[]
+  reportJobs          ReportJob[]
+
+  // Target of the composite foreign keys that keep a child row's organization_id equal to its user's.
+  @@unique([id, organizationId], map: "users_id_organization_id_key")
+  @@index([organizationId])
+  @@map("users")
+}
+
+// ---- Incidents ----
+
+model IncidentCategory {
+  code            String   @id
+  groupCode       String   @map("group_code")
+  labelFr         String   @map("label_fr")
+  labelEn         String   @map("label_en")
+  defaultSeverity Severity @map("default_severity")
+  isActive        Boolean  @default(true) @map("is_active")
+  sortOrder       Int      @map("sort_order")
+
+  incidents Incident[]
+
+  @@map("incident_categories")
+}
+
+model Incident {
+  id              String         @id @default(uuid()) @db.Uuid
+  // Drawn by the incidents_guard trigger on every insert; a supplied value is ignored.
+  reference       String         @unique @default(dbgenerated())
+  organizationId  String         @map("organization_id") @db.Uuid
+  // NOT NULL: confidential reporting stores the reporter and masks it in responses (L1 D1).
+  reporterId      String         @map("reporter_id") @db.Uuid
+  categoryCode    String         @map("category_code")
+  title           String
+  description     String
+  severity        Severity
+  severityInitial Severity       @map("severity_initial")
+  severityAnswers Json           @map("severity_answers")
+  status          IncidentStatus @default(NEW)
+  isAnonymous     Boolean        @default(false) @map("is_anonymous")
+  location        String?
+  deviceAffected  String?        @map("device_affected")
+  assignedTo      String?        @map("assigned_to") @db.Uuid
+  slaDueAt        DateTime?      @map("sla_due_at") @db.Timestamptz(3)
+  acknowledgedAt  DateTime?      @map("acknowledged_at") @db.Timestamptz(3)
+  resolvedAt      DateTime?      @map("resolved_at") @db.Timestamptz(3)
+  resolutionNotes String?        @map("resolution_notes")
+  closedAt        DateTime?      @map("closed_at") @db.Timestamptz(3)
+  clientRequestId String         @map("client_request_id") @db.Uuid
+  // Optimistic concurrency: UPDATE ... WHERE version = $expected SET version = version + 1 (L2 §4.4).
+  version         Int            @default(1)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  // Composite: the reporter must belong to the incident's organisation.
+  reporter     User             @relation("IncidentReporter", fields: [reporterId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "incidents_reporter_fkey")
+  assignee     User?            @relation("IncidentAssignee", fields: [assignedTo], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  category     IncidentCategory @relation(fields: [categoryCode], references: [code], onDelete: Restrict, onUpdate: Restrict)
+
+  statusHistory IncidentStatusHistory[]
+  messages      IncidentMessage[]
+  attachments   Attachment[]
+  notifications Notification[]
+
+  // Target of the composite foreign keys of child tables (messages, attachments, history, notifications).
+  @@unique([id, organizationId], map: "incidents_id_organization_id_key")
+  // Second idempotency barrier behind the Idempotency-Key header (L2 §7.3).
+  @@unique([reporterId, clientRequestId], map: "incidents_reporter_id_client_request_id_key")
+  @@index([organizationId, status, createdAt(sort: Desc)], map: "incidents_org_status_created_idx")
+  @@index([reporterId, createdAt(sort: Desc)], map: "incidents_reporter_created_idx")
+  @@index([assignedTo, status], map: "incidents_assigned_status_idx")
+  @@index([categoryCode])
+  @@map("incidents")
+}
+
+model IncidentStatusHistory {
+  id             String          @id @default(uuid()) @db.Uuid
+  incidentId     String          @map("incident_id") @db.Uuid
+  organizationId String          @map("organization_id") @db.Uuid
+  // Null for the creation entry.
+  fromStatus     IncidentStatus? @map("from_status")
+  toStatus       IncidentStatus  @map("to_status")
+  changedBy      String          @map("changed_by") @db.Uuid
+  note           String?
+  changedAt      DateTime        @default(now()) @map("changed_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "incident_status_history_incident_fkey")
+  actor    User     @relation(fields: [changedBy], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([incidentId], map: "incident_status_history_one_creation_key", where: raw("from_status IS NULL"))
+  @@index([incidentId, changedAt])
+  @@index([changedBy])
+  @@map("incident_status_history")
+}
+
+model IncidentMessage {
+  id              String   @id @default(uuid()) @db.Uuid
+  incidentId      String   @map("incident_id") @db.Uuid
+  organizationId  String   @map("organization_id") @db.Uuid
+  senderId        String   @map("sender_id") @db.Uuid
+  body            String
+  // Staff-only notes, never visible to reporters or managers (L2 Table 14).
+  isInternal      Boolean  @default(false) @map("is_internal")
+  // Generated on the device so offline retries map to one message.
+  clientMessageId String?  @map("client_message_id") @db.Uuid
+  sentAt          DateTime @default(now()) @map("sent_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "incident_messages_incident_fkey")
+  sender   User     @relation(fields: [senderId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@unique([senderId, clientMessageId], map: "incident_messages_sender_id_client_message_id_key")
+  @@index([incidentId, sentAt], map: "incident_messages_incident_sent_idx")
+  @@map("incident_messages")
+}
+
+model Attachment {
+  id             String   @id @default(uuid()) @db.Uuid
+  incidentId     String   @map("incident_id") @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  uploadedBy     String   @map("uploaded_by") @db.Uuid
+  // Server-generated {organization_id}/{yyyy}/{uuid}.bin, never the client file name (L2 §7.6).
+  storageKey     String   @unique @map("storage_key")
+  mime           String
+  sizeBytes      Int      @map("size_bytes")
+  sha256         String
+  width          Int
+  height         Int
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "attachments_incident_fkey")
+  uploader User     @relation(fields: [uploadedBy], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([incidentId, createdAt])
+  @@index([uploadedBy])
+  @@map("attachments")
+}
+
+model IncidentReferenceCounter {
+  // One row per year: SFC-YYYY-NNNNNN is gap-free per year across all organisations (L2 §7.3).
+  year      Int @id
+  lastValue Int @default(0) @map("last_value")
+
+  @@map("incident_reference_counters")
+}
+
+// ---- Notifications and devices ----
+
+model Notification {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  organizationId String           @map("organization_id") @db.Uuid
+  incidentId     String?          @map("incident_id") @db.Uuid
+  type           NotificationType
+  // Translation keys and parameters: the text is rendered in the reader's language (L2 Table 12).
+  titleKey       String           @map("title_key")
+  bodyKey        String           @map("body_key")
+  params         Json             @default("{}")
+  isRead         Boolean          @default(false) @map("is_read")
+  createdAt      DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user     User      @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "notifications_user_fkey")
+  incident Incident? @relation(fields: [incidentId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([incidentId])
+  @@map("notifications")
+}
+
+model DeviceToken {
+  id             String         @id @default(uuid()) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  organizationId String         @map("organization_id") @db.Uuid
+  fcmToken       String         @unique @map("fcm_token")
+  platform       DevicePlatform
+  locale         Language       @default(fr)
+  lastSeenAt     DateTime       @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "device_tokens_user_fkey")
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+// ---- Authentication tokens: stored only as SHA-256 hashes (L2 §7.6) ----
+
+model RefreshToken {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  // Rotation chain: reuse of a rotated token revokes the whole family (L2 §8.2).
+  familyId       String    @map("family_id") @db.Uuid
+  tokenHash      Bytes     @unique @map("token_hash")
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3)
+  revokedAt      DateTime? @map("revoked_at") @db.Timestamptz(3)
+  replacedBy     String?   @unique @map("replaced_by") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user        User          @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "refresh_tokens_user_fkey")
+  replacement RefreshToken? @relation("RefreshTokenRotation", fields: [replacedBy], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  replaces    RefreshToken? @relation("RefreshTokenRotation")
+
+  @@index([userId])
+  @@index([familyId])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  tokenHash      Bytes     @unique @map("token_hash")
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt         DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "password_reset_tokens_user_fkey")
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+// ---- Reliability ----
+
+model IdempotencyKey {
+  userId         String   @map("user_id") @db.Uuid
+  key            String   @db.Uuid
+  organizationId String   @map("organization_id") @db.Uuid
+  method         String
+  path           String
+  // SHA-256 of the request body: the same key with another body returns 422 (L2 §4.4).
+  requestHash    Bytes    @map("request_hash")
+  statusCode     Int      @map("status_code")
+  response       Json
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "idempotency_keys_user_fkey")
+
+  @@id([userId, key])
+  @@index([expiresAt])
+  @@map("idempotency_keys")
+}
+
+model OutboxEvent {
+  id             BigInt    @id @default(autoincrement())
+  eventType      String    @map("event_type")
+  aggregateId    String?   @map("aggregate_id") @db.Uuid
+  organizationId String?   @map("organization_id") @db.Uuid
+  payload        Json
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  publishedAt    DateTime? @map("published_at") @db.Timestamptz(3)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  // The relay polls only unpublished rows (L2 §6.2, §7.3).
+  @@index([id], map: "outbox_events_unpublished_idx", where: raw("published_at IS NULL"))
+  @@index([organizationId])
+  @@map("outbox_events")
+}
+
+model AuditLog {
+  id             BigInt   @id @default(autoincrement())
+  userId         String?  @map("user_id") @db.Uuid
+  organizationId String?  @map("organization_id") @db.Uuid
+  // noun.verb.outcome (instruction set §10).
+  action         String
+  entity         String?
+  entityId       String?  @map("entity_id") @db.Uuid
+  details        Json?
+  ip             String?  @db.Inet
+  requestId      String?  @map("request_id")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([organizationId, createdAt], map: "audit_logs_org_created_idx")
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+model ReportJob {
+  id             String          @id @default(uuid()) @db.Uuid
+  requestedBy    String          @map("requested_by") @db.Uuid
+  // Null for a cross-organisation report requested by SFC staff.
+  organizationId String?         @map("organization_id") @db.Uuid
+  params         Json
+  status         ReportJobStatus @default(QUEUED)
+  storageKey     String?         @map("storage_key")
+  errorCode      String?         @map("error_code")
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  completedAt    DateTime?       @map("completed_at") @db.Timestamptz(3)
+
+  requester    User          @relation(fields: [requestedBy], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([requestedBy, createdAt(sort: Desc)])
+  @@index([organizationId])
+  @@map("report_jobs")
+}

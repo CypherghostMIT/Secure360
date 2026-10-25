@@ -43,10 +43,18 @@ ALTER SCHEMA public OWNER TO s360_owner;
 
 -- Only the owner may create objects in public (PUBLIC keeps USAGE).
 REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+-- No runtime role needs temporary objects; the owner keeps TEMP through its own ownership privileges.
+REVOKE TEMPORARY ON DATABASE secure360 FROM PUBLIC;
 
 -- A request stalled inside its tenant transaction must not hold a pooled connection (L2 §7.4).
 ALTER ROLE s360_app SET statement_timeout = '5s';
 ALTER ROLE s360_app SET idle_in_transaction_session_timeout = '10s';
 ALTER ROLE s360_worker SET statement_timeout = '5s';
 ALTER ROLE s360_worker SET idle_in_transaction_session_timeout = '10s';
+
+-- The Prisma driver adapter sends Date values without a zone, so a session TimeZone other than UTC would shift
+-- every timestamp written; day-based interval arithmetic would also follow that zone's DST rules.
+ALTER ROLE s360_app SET TimeZone = 'UTC';
+ALTER ROLE s360_worker SET TimeZone = 'UTC';
+ALTER ROLE s360_owner SET TimeZone = 'UTC';
 SQL

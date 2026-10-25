@@ -21,8 +21,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: github/codeql-action/init@cf12ceefebab2c867b9c35d7f907e059681d37ab # v3
+      - uses: github/codeql-action/init@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1
         with:
           languages: javascript-typescript
           queries: security-extended
-      - uses: github/codeql-action/analyze@cf12ceefebab2c867b9c35d7f907e059681d37ab # v3
+      - uses: github/codeql-action/analyze@4bfa242aa49c5f7c6770b98670d354a7dfac05f8 # v3.39.1

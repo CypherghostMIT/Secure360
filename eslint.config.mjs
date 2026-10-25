@@ -18,6 +18,7 @@ export default tseslint.config(
       'apps/mobile/android/**',
       'apps/mobile/ios/**',
       '**/prisma/migrations/**',
+      'apps/api/src/generated/**',
       'design/**',
       'docs/reference/**',
       '.taskmaster/**',
@@ -121,6 +122,8 @@ export default tseslint.config(
 
   // Plain JS config files are not part of a TS project: no type-aware rules there.
   { files: ['**/*.{js,mjs,cjs}'], ...tseslint.configs.disableTypeChecked },
+  // Prisma CLI config: outside apps/api/tsconfig.json (rootDir src); type-checked by apps/api/tests/tsconfig.json.
+  { files: ['apps/api/prisma.config.ts'], ...tseslint.configs.disableTypeChecked },
 
   // Repository tooling scripts read local files and spawn npm by design
   {

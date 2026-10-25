@@ -45,6 +45,7 @@ generate data_encryption_key base64_random "$key_bytes"
 
 app="$(<"$dir/db_app_password")"
 owner="$(<"$dir/db_owner_password")"
+superuser="$(<"$dir/pg_superuser_password")"
 redis="$(<"$dir/redis_password")"
 jwt="$(<"$dir/jwt_secret")"
 key="$(<"$dir/data_encryption_key")"
@@ -65,6 +66,8 @@ redis_port="${REDIS_HOST_PORT:-6379}"
 printf '\nPaste these lines into .env (git-ignored). Do not paste them anywhere else.\n\n'
 echo "DATABASE_URL=postgresql://s360_app:${app}@127.0.0.1:${pg_port}/secure360"
 echo "MIGRATION_DATABASE_URL=postgresql://s360_owner:${owner}@127.0.0.1:${pg_port}/secure360"
+# Integration tests only: bootstrap superuser on the throw-away secure360_test database (dropped on every run).
+echo "TEST_DATABASE_ADMIN_URL=postgresql://postgres:${superuser}@127.0.0.1:${pg_port}/secure360_test"
 echo "REDIS_URL=redis://:${redis}@127.0.0.1:${redis_port}"
 echo "JWT_SECRET=${jwt}"
 echo "DATA_ENCRYPTION_KEY=${key}"
