@@ -47,7 +47,6 @@ const EXPECTED_GRANTS: Record<string, Record<string, string>> = {
     password_reset_tokens: 'INSERT,SELECT',
     refresh_tokens: 'DELETE,INSERT,SELECT',
     report_jobs: 'INSERT,SELECT',
-    users: 'INSERT',
   },
   s360_worker: {
     audit_logs: 'INSERT',
@@ -70,6 +69,10 @@ const EXPECTED_COLUMN_GRANTS: Record<string, Record<string, Record<string, strin
   s360_app: {
     notifications: { UPDATE: 'is_read' },
     users: {
+      // Not the TOTP secret and step, lockout or last login (users_guard_insert fixes the other credential state).
+      INSERT:
+        'created_at,email,first_name,id,is_2fa_enabled,is_active,last_name,must_change_password,organization_id,' +
+        'password_hash,phone,preferred_language,role,session_version,updated_at',
       SELECT: USERS_READABLE,
       UPDATE:
         'email,first_name,is_active,last_name,organization_id,phone,preferred_language,role,updated_at',
@@ -92,11 +95,7 @@ const POLICY_HELPERS = [
   'app_user_id()',
 ];
 const EXPECTED_ROUTINE_GRANTS: Record<string, string[]> = {
-  s360_app: [
-    ...POLICY_HELPERS,
-    'auth_find_user_by_email(p_email text)',
-    'next_incident_reference(p_year integer)',
-  ],
+  s360_app: [...POLICY_HELPERS, 'auth_find_user_by_email(p_email text)'],
   s360_worker: POLICY_HELPERS,
 };
 
@@ -204,6 +203,31 @@ describe('database roles', () => {
          AND has_database_privilege(rolname, current_database(), 'TEMP')`;
     expect(rows).toEqual([]);
   });
+
+  // Prisma's driver adapter sends Date values without a zone: any other session TimeZone would shift them.
+  // The role setting is checked too: the server default may already be UTC, which would hide a missing pin.
+  it.each([
+    ['app', 's360_app'],
+    ['worker', 's360_worker'],
+    ['owner', 's360_owner'],
+  ] as const)(
+    'give the %s connection a UTC session TimeZone, pinned on %s',
+    async (connection, role) => {
+      const db = connectAs(connection);
+      try {
+        const rows = await db.$queryRaw<{ tz: string }[]>`SELECT current_setting('TimeZone') AS tz`;
+        expect(rows).toEqual([{ tz: 'UTC' }]);
+      } finally {
+        await db.$disconnect();
+      }
+      const pinned = await superuser.$queryRaw<{ pinned: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1 FROM pg_db_role_setting s JOIN pg_roles r ON r.oid = s.setrole
+         WHERE r.rolname = ${role} AND s.setdatabase = 0 AND 'TimeZone=UTC' = ANY (s.setconfig)
+      ) AS pinned`;
+      expect(pinned).toEqual([{ pinned: true }]);
+    },
+  );
 
   it('make no role a member of another, except s360_metrics in pg_monitor', async () => {
     const rows = await superuser.$queryRaw<{ member: string; role: string }[]>`

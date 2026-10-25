@@ -134,11 +134,11 @@ const EXPECTED_POLICIES: PolicyRow[] = [
   ['incidents', 'incidents_update', 'UPDATE', 'public', `app_is_staff()`, `app_is_staff()`],
   [
     'notifications',
-    'notifications_insert',
+    'notifications_app_insert',
     'INSERT',
-    'public',
+    's360_app',
     null,
-    `((app_user_id() IS NOT NULL) AND (incident_id IS NOT NULL) AND app_can_notify(user_id, incident_id))`,
+    `((app_user_id() IS NOT NULL) AND (incident_id IS NOT NULL) AND app_can_notify(user_id, incident_id) AND (app_is_staff() OR (type = ANY (ARRAY['NEW_INCIDENT'::notification_type, 'NEW_MESSAGE'::notification_type]))))`,
   ],
   ['notifications', 'notifications_select', 'SELECT', 'public', `(user_id = app_user_id())`, null],
   [
@@ -148,6 +148,14 @@ const EXPECTED_POLICIES: PolicyRow[] = [
     'public',
     `(user_id = app_user_id())`,
     `(user_id = app_user_id())`,
+  ],
+  [
+    'notifications',
+    'notifications_worker_insert',
+    'INSERT',
+    's360_worker',
+    null,
+    `((app_user_id() IS NOT NULL) AND (incident_id IS NOT NULL) AND app_can_notify(user_id, incident_id))`,
   ],
   ['organizations', 'organizations_auth_lookup', 'SELECT', 's360_owner', `true`, null],
   [

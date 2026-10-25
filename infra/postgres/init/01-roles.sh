@@ -51,4 +51,10 @@ ALTER ROLE s360_app SET statement_timeout = '5s';
 ALTER ROLE s360_app SET idle_in_transaction_session_timeout = '10s';
 ALTER ROLE s360_worker SET statement_timeout = '5s';
 ALTER ROLE s360_worker SET idle_in_transaction_session_timeout = '10s';
+
+-- The Prisma driver adapter sends Date values without a zone, so a session TimeZone other than UTC would shift
+-- every timestamp written; day-based interval arithmetic would also follow that zone's DST rules.
+ALTER ROLE s360_app SET TimeZone = 'UTC';
+ALTER ROLE s360_worker SET TimeZone = 'UTC';
+ALTER ROLE s360_owner SET TimeZone = 'UTC';
 SQL

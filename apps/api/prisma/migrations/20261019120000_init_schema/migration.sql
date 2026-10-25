@@ -330,6 +330,9 @@ CREATE INDEX "incident_status_history_incident_id_changed_at_idx" ON "incident_s
 CREATE INDEX "incident_status_history_changed_by_idx" ON "incident_status_history"("changed_by");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "incident_status_history_one_creation_key" ON "incident_status_history"("incident_id") WHERE (from_status IS NULL);
+
+-- CreateIndex
 CREATE INDEX "incident_messages_incident_sent_idx" ON "incident_messages"("incident_id", "sent_at");
 
 -- CreateIndex
@@ -526,9 +529,10 @@ ALTER TABLE "incidents"
   ADD CONSTRAINT "chk_incidents_acknowledged_at" CHECK ("acknowledged_at" >= "created_at"),
   -- sla_due_at is the resolution deadline. Its longest target (L1 Table 16: LOW, 10 business days) spans
   -- 14 calendar days, more when public holidays fall inside; 21 days covers that, and a later deadline is a bug.
-  -- Revisit with the contractual targets (D5).
+  -- Revisit with the contractual targets (D5). Written in hours: a day interval depends on the session TimeZone
+  -- (DST), an hour interval does not, so the check gives the same answer on every connection and on restore.
   ADD CONSTRAINT "chk_incidents_sla_due_at" CHECK (
-    "sla_due_at" IS NULL OR ("sla_due_at" > "created_at" AND "sla_due_at" <= "created_at" + interval '21 days')
+    "sla_due_at" IS NULL OR ("sla_due_at" > "created_at" AND "sla_due_at" <= "created_at" + interval '504 hours')
   ),
   ADD CONSTRAINT "chk_incidents_updated_at" CHECK ("updated_at" >= "created_at");
 
@@ -572,15 +576,18 @@ ALTER TABLE "device_tokens"
   ADD CONSTRAINT "chk_device_tokens_fcm_token"
     CHECK (btrim("fcm_token") <> '' AND char_length("fcm_token") <= 4096);
 
--- Token tables: SHA-256 digests only (32 bytes), never the token itself (L2 §7.6).
+-- Token tables: SHA-256 digests only (32 bytes), never the token itself (L2 §7.6). Lifetimes are capped at the
+-- AGENTS rule 8 / L2 §8.2 values (refresh 7 d, password reset 1 h), in hours for the reason given at sla_due_at.
 ALTER TABLE "refresh_tokens"
   ADD CONSTRAINT "chk_refresh_tokens_token_hash" CHECK (octet_length("token_hash") = 32),
-  ADD CONSTRAINT "chk_refresh_tokens_expires_at" CHECK ("expires_at" > "created_at"),
+  ADD CONSTRAINT "chk_refresh_tokens_expires_at"
+    CHECK ("expires_at" > "created_at" AND "expires_at" <= "created_at" + interval '168 hours'),
   ADD CONSTRAINT "chk_refresh_tokens_replaced_by" CHECK ("replaced_by" <> "id");
 
 ALTER TABLE "password_reset_tokens"
   ADD CONSTRAINT "chk_password_reset_tokens_token_hash" CHECK (octet_length("token_hash") = 32),
-  ADD CONSTRAINT "chk_password_reset_tokens_expires_at" CHECK ("expires_at" > "created_at");
+  ADD CONSTRAINT "chk_password_reset_tokens_expires_at"
+    CHECK ("expires_at" > "created_at" AND "expires_at" <= "created_at" + interval '1 hour');
 
 -- idempotency_keys (L2 §4.4)
 ALTER TABLE "idempotency_keys"
@@ -608,9 +615,20 @@ ALTER TABLE "audit_logs"
 -- report_jobs
 ALTER TABLE "report_jobs"
   ADD CONSTRAINT "chk_report_jobs_params" CHECK (jsonb_typeof("params") = 'object'),
-  ADD CONSTRAINT "chk_report_jobs_storage_key" CHECK ("status" <> 'SUCCEEDED' OR "storage_key" IS NOT NULL),
+  -- Same layout as attachments, {organization_id}/{yyyy}/{uuid}.bin, so a job can never point at another tenant's
+  -- file. A staff report across organisations (NULL organization_id) lives under the fixed prefix global/.
+  ADD CONSTRAINT "chk_report_jobs_storage_key" CHECK (
+    "storage_key" ~ '^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|global)/[0-9]{4}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}[.]bin$'
+    AND split_part("storage_key", '/', 1) = COALESCE("organization_id"::text, 'global')
+  ),
   -- A machine-readable code only (e.g. REPORT_TIMEOUT), never an error message or a stack trace, which could
   -- carry personal data or internals to the requester.
   ADD CONSTRAINT "chk_report_jobs_error_code"
     CHECK ("error_code" IS NULL OR "error_code" ~ '^[A-Z][A-Z0-9_]{2,63}$'),
+  -- Outcome consistency: a failure says why, a success has a file and no error, and a finished job says when.
+  ADD CONSTRAINT "chk_report_jobs_failed" CHECK ("status" <> 'FAILED' OR "error_code" IS NOT NULL),
+  ADD CONSTRAINT "chk_report_jobs_succeeded"
+    CHECK ("status" <> 'SUCCEEDED' OR ("error_code" IS NULL AND "storage_key" IS NOT NULL)),
+  ADD CONSTRAINT "chk_report_jobs_finished"
+    CHECK ("status" NOT IN ('SUCCEEDED', 'FAILED') OR "completed_at" IS NOT NULL),
   ADD CONSTRAINT "chk_report_jobs_completed_at" CHECK ("completed_at" >= "created_at");

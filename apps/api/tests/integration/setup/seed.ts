@@ -184,7 +184,9 @@ async function seedChildren(db: PrismaClient): Promise<void> {
 }
 
 async function seedSystemRows(db: PrismaClient): Promise<void> {
+  // Inside the lifetime caps of the token CHECKs (refresh 7 d, password reset 1 h).
   const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000);
+  const resetExpiresAt = new Date(Date.now() + 30 * 60 * 1000);
   await db.refreshToken.createMany({
     data: [
       {
@@ -214,7 +216,14 @@ async function seedSystemRows(db: PrismaClient): Promise<void> {
     ],
   });
   await db.passwordResetToken.createMany({
-    data: [{ userId: USER.bUser, organizationId: ORG.b, tokenHash: sha256('reset-b'), expiresAt }],
+    data: [
+      {
+        userId: USER.bUser,
+        organizationId: ORG.b,
+        tokenHash: sha256('reset-b'),
+        expiresAt: resetExpiresAt,
+      },
+    ],
   });
   await db.idempotencyKey.createMany({
     data: [

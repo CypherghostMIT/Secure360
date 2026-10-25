@@ -184,7 +184,8 @@ model IncidentCategory {
 
 model Incident {
   id              String         @id @default(uuid()) @db.Uuid
-  reference       String         @unique
+  // Drawn by the incidents_guard trigger on every insert; a supplied value is ignored.
+  reference       String         @unique @default(dbgenerated())
   organizationId  String         @map("organization_id") @db.Uuid
   // NOT NULL: confidential reporting stores the reporter and masks it in responses (L1 D1).
   reporterId      String         @map("reporter_id") @db.Uuid
@@ -246,6 +247,7 @@ model IncidentStatusHistory {
   incident Incident @relation(fields: [incidentId, organizationId], references: [id, organizationId], onDelete: Restrict, onUpdate: Restrict, map: "incident_status_history_incident_fkey")
   actor    User     @relation(fields: [changedBy], references: [id], onDelete: Restrict, onUpdate: Restrict)
 
+  @@unique([incidentId], map: "incident_status_history_one_creation_key", where: raw("from_status IS NULL"))
   @@index([incidentId, changedAt])
   @@index([changedBy])
   @@map("incident_status_history")

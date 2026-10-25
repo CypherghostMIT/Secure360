@@ -53,16 +53,21 @@ async function createRole(admin: PrismaClient, role: DbRole, password: string): 
   });
 }
 
+/** Idempotent, so it also brings a local cluster created by an older 01-roles.sh up to date. */
 async function applyRoleSettings(admin: PrismaClient, role: DbRole): Promise<void> {
   if (role === 's360_metrics') await admin.$executeRaw`GRANT pg_monitor TO s360_metrics`;
   if (role === 's360_app') {
     await admin.$executeRaw`ALTER ROLE s360_app SET statement_timeout = '5s'`;
     await admin.$executeRaw`ALTER ROLE s360_app SET idle_in_transaction_session_timeout = '10s'`;
+    await admin.$executeRaw`ALTER ROLE s360_app SET TimeZone = 'UTC'`;
   }
   if (role === 's360_worker') {
     await admin.$executeRaw`ALTER ROLE s360_worker SET statement_timeout = '5s'`;
     await admin.$executeRaw`ALTER ROLE s360_worker SET idle_in_transaction_session_timeout = '10s'`;
+    await admin.$executeRaw`ALTER ROLE s360_worker SET TimeZone = 'UTC'`;
   }
+  // Prisma's driver adapter sends Date values without a zone: see infra/postgres/init/01-roles.sh.
+  if (role === 's360_owner') await admin.$executeRaw`ALTER ROLE s360_owner SET TimeZone = 'UTC'`;
 }
 
 /** Creates missing roles with random passwords (CI) and returns every role's password. */
@@ -83,10 +88,10 @@ export async function ensureRoles(admin: PrismaClient): Promise<Record<DbRole, s
   for (const role of names as DbRole[]) {
     if (existingNames.has(role)) {
       passwords[role] = readExistingPassword(role);
-      continue;
+    } else {
+      passwords[role] = randomBytes(32).toString('base64url');
+      await createRole(admin, role, passwords[role]);
     }
-    passwords[role] = randomBytes(32).toString('base64url');
-    await createRole(admin, role, passwords[role]);
     await applyRoleSettings(admin, role);
   }
   return passwords;

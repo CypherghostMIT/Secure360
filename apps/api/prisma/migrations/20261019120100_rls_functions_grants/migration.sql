@@ -55,10 +55,10 @@ CREATE FUNCTION public.app_can_see_incident(p_organization_id uuid, p_reporter_i
       false)
   $$;
 
--- Notification recipient check (used by notifications_insert). SECURITY DEFINER because the recipient is usually
--- invisible to the actor under RLS (a reporter cannot see the analyst's row); it returns a boolean only, and only
--- about an incident the caller can already see. A recipient qualifies when they are the reporter, a user of the
--- incident's organisation, or SFC staff (staff role in the PROVIDER organisation).
+-- Notification recipient check (used by both notifications insert policies). SECURITY DEFINER because the
+-- recipient is usually invisible to the actor under RLS (a reporter cannot see the analyst's row); it returns a
+-- boolean only, and only about an incident the caller can already see. A recipient qualifies when they can see the incident too: its
+-- reporter, a MANAGER of its organisation, or SFC staff (staff role in the PROVIDER organisation).
 CREATE FUNCTION public.app_can_notify(p_recipient uuid, p_incident uuid) RETURNS boolean
   LANGUAGE sql STABLE SECURITY DEFINER
   SET search_path = pg_catalog, public, pg_temp
@@ -72,7 +72,7 @@ CREATE FUNCTION public.app_can_notify(p_recipient uuid, p_incident uuid) RETURNS
          AND public.app_can_see_incident(i.organization_id, i.reporter_id)
          AND (
            r.id = i.reporter_id
-           OR r.organization_id = i.organization_id
+           OR (r.organization_id = i.organization_id AND r.role = 'MANAGER')
            OR (r.role IN ('TECHNICIAN', 'ADMIN') AND ro.type = 'PROVIDER')
          )
     )
@@ -229,7 +229,16 @@ CREATE POLICY notifications_select ON public.notifications FOR SELECT
 CREATE POLICY notifications_update ON public.notifications FOR UPDATE
   USING (user_id = public.app_user_id())
   WITH CHECK (user_id = public.app_user_id());
-CREATE POLICY notifications_insert ON public.notifications FOR INSERT
+-- A reporter or a manager only ever causes NEW_INCIDENT and NEW_MESSAGE; ASSIGNMENT, STATUS_UPDATE and SLA_BREACH
+-- come from staff actions or from the worker's jobs (L2 Table 11), so the worker has its own policy.
+CREATE POLICY notifications_app_insert ON public.notifications FOR INSERT TO s360_app
+  WITH CHECK (
+    public.app_user_id() IS NOT NULL
+    AND incident_id IS NOT NULL
+    AND public.app_can_notify(user_id, incident_id)
+    AND (public.app_is_staff() OR type IN ('NEW_INCIDENT', 'NEW_MESSAGE'))
+  );
+CREATE POLICY notifications_worker_insert ON public.notifications FOR INSERT TO s360_worker
   WITH CHECK (
     public.app_user_id() IS NOT NULL
     AND incident_id IS NOT NULL
@@ -344,6 +353,26 @@ CREATE TRIGGER users_guard_update
   BEFORE UPDATE ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.users_guard_update();
 
+-- A new user starts without 2FA, on the first session version, and must change the password the ADMIN set.
+-- Prisma always sends these three columns with their @default values, so s360_app holds INSERT on them (column
+-- grants, section 5) and this trigger, not the grant, fixes their values. The other credential columns
+-- (totp_secret_enc, totp_last_step, locked_until, last_login_at) are outside the INSERT grant altogether.
+CREATE FUNCTION public.users_guard_insert() RETURNS trigger
+  LANGUAGE plpgsql SECURITY INVOKER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+BEGIN
+  NEW.is_2fa_enabled := false;
+  NEW.must_change_password := true;
+  NEW.session_version := 1;
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER users_guard_insert
+  BEFORE INSERT ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.users_guard_insert();
+
 -- Staff see every tenant (app_is_staff() is role-based, L2 Table 12), so a staff role outside the PROVIDER
 -- organisation would open all tenants to a client employee. SECURITY DEFINER: the organisation row may be
 -- invisible to the caller. Trigger functions cannot be called directly, so this exposes nothing callable.
@@ -391,9 +420,12 @@ CREATE TRIGGER organizations_guard_type
 -- ---------------------------------------------------------------------------------------------------------------
 -- Staff may update any incident (RLS), but identity, provenance and the confidentiality flag are fixed at
 -- creation: flipping is_anonymous would expose a confidential reporter to their manager (AGENTS rule 5). A
--- reporter creates an incident in its initial state only; triage fields are the analysts' (L2 §7.5, §8.3).
--- An incident is only ever assigned to an active staff user (a deactivated analyst would leave it unattended).
--- SECURITY DEFINER: the assignee's row is generally invisible to the caller.
+-- reporter creates an incident in its initial state only, stamped by the database clock; triage fields are the
+-- analysts' (L2 §7.5, §8.3). The reference is always drawn here, whatever the caller supplied: a reference chosen
+-- by a caller could take a number the counter hands out later, and every later creation would then fail.
+-- The assignee must be an active staff user at assignment (insert, or a change of assigned_to). Deactivating an
+-- analyst who still has open incidents is refused by the admin service (task 30), not here.
+-- SECURITY DEFINER: the assignee's row is generally invisible to the caller, and the counter is the owner's.
 
 CREATE FUNCTION public.incidents_guard() RETURNS trigger
   LANGUAGE plpgsql SECURITY DEFINER
@@ -406,7 +438,11 @@ BEGIN
     NEW.acknowledged_at := NULL;
     NEW.resolved_at := NULL;
     NEW.closed_at := NULL;
+    NEW.resolution_notes := NULL;
     NEW.version := 1;
+    -- updated_at follows: a client clock behind the database would otherwise trip chk_incidents_updated_at.
+    NEW.created_at := now();
+    NEW.updated_at := NEW.created_at;
   END IF;
   IF TG_OP = 'UPDATE' AND (
     NEW.id IS DISTINCT FROM OLD.id
@@ -433,6 +469,9 @@ BEGIN
     RAISE EXCEPTION 'incidents.assigned_to must be an active staff user'
       USING ERRCODE = 'insufficient_privilege';
   END IF;
+  IF TG_OP = 'INSERT' THEN
+    NEW.reference := public.next_incident_reference();
+  END IF;
   RETURN NEW;
 END
 $$;
@@ -440,6 +479,26 @@ $$;
 CREATE TRIGGER incidents_guard
   BEFORE INSERT OR UPDATE ON public.incidents
   FOR EACH ROW EXECUTE FUNCTION public.incidents_guard();
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- 3c. incident_status_history: the timeline (BF06) is stamped by the database clock
+-- ---------------------------------------------------------------------------------------------------------------
+-- The policy fixes who may record what; this fixes when, so no transition can be back-dated. One creation entry
+-- per incident: unique index incident_status_history_one_creation_key (init migration).
+
+CREATE FUNCTION public.incident_status_history_stamp() RETURNS trigger
+  LANGUAGE plpgsql SECURITY INVOKER
+  SET search_path = pg_catalog, public, pg_temp
+  AS $$
+BEGIN
+  NEW.changed_at := now();
+  RETURN NEW;
+END
+$$;
+
+CREATE TRIGGER incident_status_history_stamp
+  BEFORE INSERT ON public.incident_status_history
+  FOR EACH ROW EXECUTE FUNCTION public.incident_status_history_stamp();
 
 -- ---------------------------------------------------------------------------------------------------------------
 -- 4. Pre-authentication e-mail lookup (L2 Table 14)
@@ -485,25 +544,25 @@ CREATE POLICY incidents_owner_lookup ON public.incidents FOR SELECT TO s360_owne
 -- ---------------------------------------------------------------------------------------------------------------
 -- 4b. Incident references SFC-YYYY-NNNNNN (L2 §7.3)
 -- ---------------------------------------------------------------------------------------------------------------
--- Called inside the incident creation transaction: the counter row stays locked until COMMIT, so references are
--- gap-free and unique under concurrency, and a rolled-back creation gives its number back. The counter itself is
--- out of reach of every runtime role (policy incident_reference_counters_owner).
+-- Called only by incidents_guard, inside the incident creation transaction: the counter row stays locked until
+-- COMMIT, so references are gap-free and unique under concurrency, and a rolled-back creation gives its number
+-- back. No runtime role may execute it or touch the counter (policy incident_reference_counters_owner), so no
+-- caller can draw numbers without creating an incident, or choose the year. SECURITY INVOKER: it runs as
+-- s360_owner inside the SECURITY DEFINER guard. The year is the calendar year in Cameroon, where SFC operates.
 
-CREATE FUNCTION public.next_incident_reference(p_year integer) RETURNS text
-  LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+CREATE FUNCTION public.next_incident_reference() RETURNS text
+  LANGUAGE plpgsql VOLATILE SECURITY INVOKER
   SET search_path = pg_catalog, public, pg_temp
   AS $$
 DECLARE
+  current_year integer := EXTRACT(YEAR FROM now() AT TIME ZONE 'Africa/Douala')::integer;
   next_value integer;
 BEGIN
-  IF public.app_user_id() IS NULL THEN
-    RAISE EXCEPTION 'next_incident_reference requires a tenant context' USING ERRCODE = 'insufficient_privilege';
-  END IF;
-  -- Out-of-range years and the six-digit limit are rejected by the CHECK constraints on the counter.
-  INSERT INTO public.incident_reference_counters AS c (year, last_value) VALUES (p_year, 1)
+  -- The six-digit limit is enforced by the CHECK constraints on the counter.
+  INSERT INTO public.incident_reference_counters AS c (year, last_value) VALUES (current_year, 1)
     ON CONFLICT (year) DO UPDATE SET last_value = c.last_value + 1
     RETURNING c.last_value INTO next_value;
-  RETURN 'SFC-' || to_char(p_year, 'FM0000') || '-' || to_char(next_value, 'FM000000');
+  RETURN 'SFC-' || to_char(current_year, 'FM0000') || '-' || to_char(next_value, 'FM000000');
 END
 $$;
 
@@ -521,8 +580,10 @@ REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, s360_app, s360_worker,
 REVOKE EXECUTE ON FUNCTION
   public.app_org_id(), public.app_user_id(), public.app_role(), public.app_is_staff(),
   public.app_can_see_incident(uuid, uuid), public.app_can_notify(uuid, uuid),
-  public.users_guard_update(), public.users_guard_staff_org(), public.organizations_guard_type(),
-  public.incidents_guard(), public.auth_find_user_by_email(text), public.next_incident_reference(integer)
+  public.users_guard_update(), public.users_guard_insert(), public.users_guard_staff_org(),
+  public.organizations_guard_type(),
+  public.incidents_guard(), public.incident_status_history_stamp(), public.auth_find_user_by_email(text),
+  public.next_incident_reference()
   FROM PUBLIC;
 
 -- Policies run with the caller's privileges, so both runtime roles need the helpers. app_can_notify() is also
@@ -531,19 +592,24 @@ GRANT EXECUTE ON FUNCTION
   public.app_org_id(), public.app_user_id(), public.app_role(), public.app_is_staff(),
   public.app_can_see_incident(uuid, uuid), public.app_can_notify(uuid, uuid)
   TO s360_app, s360_worker;
-GRANT EXECUTE ON FUNCTION public.auth_find_user_by_email(text), public.next_incident_reference(integer)
-  TO s360_app;
+GRANT EXECUTE ON FUNCTION public.auth_find_user_by_email(text) TO s360_app;
 
 -- users: column grants. password_hash and totp_secret_enc are never readable by a runtime role (the login path
 -- reads them through auth_find_user_by_email); the Prisma client omits them globally. Credentials, 2FA state,
 -- lockout and session_version are not updatable: they change only through the SECURITY DEFINER auth functions of
--- tasks 12–15. updated_at is in the UPDATE list because Prisma sets @updatedAt on every update.
+-- tasks 12–15. updated_at is in the UPDATE list because Prisma sets @updatedAt on every update. An ADMIN creates a
+-- user with a password and a profile only: TOTP secret and step, lockout and last login are not insertable;
+-- is_2fa_enabled, must_change_password and session_version are (Prisma sends them) but users_guard_insert fixes
+-- their values.
 GRANT SELECT (
     id, organization_id, first_name, last_name, email, phone, role, preferred_language, totp_last_step,
     is_2fa_enabled, must_change_password, session_version, locked_until, last_login_at, is_active, created_at,
     updated_at
   ) ON public.users TO s360_app, s360_worker;
-GRANT INSERT ON public.users TO s360_app;
+GRANT INSERT (
+    id, organization_id, first_name, last_name, email, phone, password_hash, role, preferred_language, is_active,
+    is_2fa_enabled, must_change_password, session_version, created_at, updated_at
+  ) ON public.users TO s360_app;
 GRANT UPDATE (
     first_name, last_name, phone, preferred_language, role, is_active, organization_id, email, updated_at
   ) ON public.users TO s360_app;
@@ -555,7 +621,7 @@ GRANT SELECT, INSERT, UPDATE ON public.incidents TO s360_app;
 GRANT SELECT, INSERT ON public.incident_status_history TO s360_app;
 GRANT SELECT, INSERT ON public.incident_messages TO s360_app;
 GRANT SELECT, INSERT ON public.attachments TO s360_app;
--- incident_reference_counters: nothing; next_incident_reference() only.
+-- incident_reference_counters: nothing; incidents_guard draws the references.
 GRANT SELECT, INSERT ON public.notifications TO s360_app;
 GRANT UPDATE (is_read) ON public.notifications TO s360_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.device_tokens TO s360_app;

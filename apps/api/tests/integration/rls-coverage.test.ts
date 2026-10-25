@@ -54,7 +54,7 @@ describe('s360_worker under RLS (job-supplied context)', () => {
       inRolledBackTenant(
         worker,
         CONTEXT.aUser1,
-        (tx) => tx.$queryRaw`SELECT public.next_incident_reference(2031)`,
+        (tx) => tx.$queryRaw`SELECT public.next_incident_reference()`,
       ),
     );
     expect(error).toMatch(PERMISSION_DENIED);

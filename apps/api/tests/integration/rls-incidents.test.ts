@@ -22,7 +22,6 @@ const visibleIncidentIds = (ctx: TenantContext) =>
 const newIncident = (organizationId: string, reporterId: string, n: number) => ({
   organizationId,
   reporterId,
-  reference: `SFC-2026-${String(900 + n).padStart(6, '0')}`,
   categoryCode: 'MSG-01',
   title: 'New incident',
   description: 'Details',
