@@ -41,6 +41,7 @@ Items decided during design that must not be forgotten during the build. Tick th
 ## Task 4 — Database schema and RLS
 
 - [x] Prisma 7.10.1 installed before min-release-age (security fix for GHSA-ggr8-5vv4-36mx, GHSA-3f6p-5ww8-9rcr, GHSA-rgwj-5xj2-c3m3); provenance: @prisma/client and @prisma/adapter-pg attested (prisma/orm publish workflow); prisma CLI registry signature only, no attestation (dev-only tool, never shipped).
+- [x] body-parser <version> and fast-uri <version> installed before min-release-age (security fixes GHSA-27r3-jxmh-p828 high, GHSA-w74x-v6f9-j3xg and related moderate); registry signatures verified. Zod 4.6.7 (GHSA-mrhx-c7xc-m3w5) installed normally.
 
 ## Repository and publication
 

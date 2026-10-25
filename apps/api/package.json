@@ -26,7 +26,7 @@
     "@prisma/client": "7.10.1",
     "@secure360/shared": "*",
     "express": "5.3.0",
-    "zod": "4.6.5"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/express": "5.0.6",
