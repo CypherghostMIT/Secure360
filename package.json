@@ -40,7 +40,7 @@
     "@commitlint/cli": "^19.0.0",
     "@commitlint/config-conventional": "^19.0.0",
     "@eslint/js": "^9.0.0",
-    "eslint": "^9.0.0",
+    "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-security": "^3.0.0",
     "globals": "^16.0.0",
