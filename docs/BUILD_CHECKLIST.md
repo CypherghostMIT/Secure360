@@ -77,3 +77,4 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] Supervisor sign-off on Decision Record D1–D9; issue specification v1.2 with the adopted stack.
 - [ ] Week 2 interviews (Appendix A) — integrate findings.
 - [ ] Verify operator hotline numbers before showing them in Help (M20), or remove them.
+- [ ] S12 load test: confirm synchronous stdout logging (pino.destination sync:true, PR #44) has no measurable p99 latency impact at L2 peak load (~50 req/s); if it does, switch to async + awaited flush before exit.

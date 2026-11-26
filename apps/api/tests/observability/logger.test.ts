@@ -1,3 +1,5 @@
+import pino from 'pino';
+import { createLogger } from '../../src/platform/observability/logger';
 import { serializeError } from '../../src/platform/observability/serialize-error';
 import { captureLogger } from '../helpers/log-capture';
 
@@ -81,6 +83,19 @@ describe('createLogger', () => {
       error: { code: 'VALIDATION_ERROR' },
       code: 'P2002',
     });
+  });
+});
+
+describe('createLogger stdout stream', () => {
+  // An asynchronous stdout loses or reorders the last lines on process.exit (CI: redis.connection.closed after
+  // server.shutdown.success).
+  it.each(['production', 'test'] as const)('writes synchronously in %s', (nodeEnv) => {
+    const logger = createLogger({ logLevel: 'info', nodeEnv });
+    const stream = (logger as unknown as Record<symbol, { sync?: boolean }>)[
+      pino.symbols.streamSym
+    ];
+
+    expect(stream?.sync).toBe(true);
   });
 });
 

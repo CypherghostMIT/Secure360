@@ -31,7 +31,7 @@ export interface RedisConnection {
   readonly client: Redis;
   /** Starts connecting. Never throws: while Redis is down, the limiter uses its fallback. */
   connect(): Promise<void>;
-  /** QUIT on shutdown (lets pending replies arrive), or a hard disconnect if the connection is not up. */
+  /** QUIT on shutdown (lets pending replies arrive), or a hard disconnect; resolves once the client has ended. */
   close(): Promise<void>;
 }
 
@@ -40,16 +40,60 @@ function errorCode(error: unknown): string | undefined {
   return typeof code === 'string' ? code : undefined;
 }
 
-// Bounded: shutdown must never hang on Redis.
-function waitForEnd(client: Redis, timeoutMs = CLOSE_TIMEOUT_MS): Promise<void> {
+/** What closing needs from an ioredis client: a seam so the unit tests can drive the event order. */
+export type ClosableRedis = Pick<
+  Redis,
+  'status' | 'quit' | 'disconnect' | 'once' | 'removeListener'
+>;
+
+// Resolves true on 'end', false after the timeout: shutdown must never hang on Redis.
+function waitForEnd(client: ClosableRedis, timeoutMs: number): Promise<boolean> {
+  if (client.status === 'end') return Promise.resolve(true);
   return new Promise((resolve) => {
-    const timer = setTimeout(resolve, timeoutMs);
-    timer.unref();
-    client.once('end', () => {
+    const onEnd = () => {
       clearTimeout(timer);
-      resolve();
-    });
+      resolve(true);
+    };
+    const timer = setTimeout(() => {
+      client.removeListener('end', onEnd);
+      resolve(false);
+    }, timeoutMs);
+    timer.unref();
+    client.once('end', onEnd);
   });
+}
+
+// QUIT resolves on the server's OK, before the socket is gone: only 'end' counts as closed. A failed QUIT ends the
+// wait early.
+function quitAndWait(client: ClosableRedis, timeoutMs: number): Promise<boolean> {
+  const ended = waitForEnd(client, timeoutMs);
+  const quit = client.quit().then(
+    () => ended,
+    () => false,
+  );
+  return Promise.race([ended, quit]);
+}
+
+/**
+ * Closes the client and resolves only once it has ended (or the bounded waits ran out), after logging
+ * redis.connection.closed exactly once: QUIT when the connection is up, else, or if QUIT does not end it in time,
+ * a hard disconnect.
+ */
+export async function closeRedisClient(
+  client: ClosableRedis,
+  log: Logger,
+  timeoutMs = CLOSE_TIMEOUT_MS,
+): Promise<void> {
+  if (client.status === 'end') return;
+  if (client.status === 'ready' && (await quitAndWait(client, timeoutMs))) {
+    log.info({ mode: 'quit' }, 'redis.connection.closed');
+    return;
+  }
+  // While reconnecting there is no socket: disconnect() cancels the retry timer and ioredis 6 emits no 'end'.
+  const ended = waitForEnd(client, timeoutMs);
+  client.disconnect();
+  await ended;
+  log.info({ mode: 'disconnect' }, 'redis.connection.closed');
 }
 
 export function createRedisConnection(url: string, logger: Logger): RedisConnection {
@@ -58,6 +102,7 @@ export function createRedisConnection(url: string, logger: Logger): RedisConnect
   // ioredis emits 'error' on every reconnect attempt: log the transition once, never the URL (it holds the password).
   let isUp: boolean | undefined;
   let isClosing = false;
+  let closing: Promise<void> | undefined;
   const markDown = (code?: string) => {
     if (isClosing || isUp === false) return;
     isUp = false;
@@ -80,26 +125,11 @@ export function createRedisConnection(url: string, logger: Logger): RedisConnect
         // Already logged by the 'error' handler; reconnection continues in the background.
       }
     },
-    close: async () => {
+    // Memoized: a second call waits for the same close instead of logging it again.
+    close: () => {
       isClosing = true;
-      if (client.status === 'end') return;
-      if (client.status === 'ready') {
-        try {
-          // QUIT resolves on the server's OK, before the socket is gone: wait for 'end' too.
-          const ended = waitForEnd(client);
-          await client.quit();
-          await ended;
-          log.info({ mode: 'quit' }, 'redis.connection.closed');
-          return;
-        } catch {
-          // Fall through to a hard disconnect.
-        }
-      }
-      // While reconnecting there is no socket: disconnect() cancels the retry timer and ioredis 6 emits no 'end'.
-      const ended = waitForEnd(client);
-      client.disconnect();
-      await ended;
-      log.info({ mode: 'disconnect' }, 'redis.connection.closed');
+      closing ??= closeRedisClient(client, log);
+      return closing;
     },
   };
 }

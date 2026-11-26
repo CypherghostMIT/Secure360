@@ -44,9 +44,14 @@ export type LoggerOptions = Pick<AppConfig, 'logLevel' | 'nodeEnv'>;
  * Root logger: JSON on stdout, one line per event (L2 §11.1). Modules use logger.child({ module }).
  * `destination` is for tests; without it, development output goes through pino-pretty, a devDependency that is
  * only resolved in development and so never required by the production image.
+ *
+ * stdout is written synchronously. Pino's default stdout stream is asynchronous: on process.exit its flush writes
+ * the buffered lines while an earlier write may still be in flight, so the last lines (shutdown, fatal errors)
+ * could land out of order or be lost.
  */
 export function createLogger(options: LoggerOptions, destination?: DestinationStream): Logger {
   const usePretty = options.nodeEnv === 'development' && destination === undefined;
+  const stream = destination ?? (usePretty ? undefined : pino.destination({ dest: 1, sync: true }));
   return pino(
     {
       level: options.logLevel,
@@ -55,6 +60,6 @@ export function createLogger(options: LoggerOptions, destination?: DestinationSt
       formatters: { level: (label) => ({ level: label }) },
       ...(usePretty ? { transport: { target: 'pino-pretty' } } : {}),
     },
-    destination,
+    stream,
   );
 }
