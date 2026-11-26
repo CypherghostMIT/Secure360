@@ -44,6 +44,10 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [x] body-parser <version> and fast-uri <version> installed before min-release-age (security fixes GHSA-27r3-jxmh-p828 high, GHSA-w74x-v6f9-j3xg and related moderate); registry signatures verified. Zod 4.6.7 (GHSA-mrhx-c7xc-m3w5) installed normally.
 - [x] npm override: effect 3.22.4, unscoped (its only consumer is @prisma/config) — GHSA-7589-6fvf-x4pw (ReDoS, high). No stable Prisma 7.x ships a fixed effect (7.10.1 pins 3.20.0; 7.11 only dev, 8.x only RC). Same major (3.x); validated by prisma generate, migrate deploy, drift check and 240 integration tests. A scoped override under @prisma/config was not applied by npm with an existing lock file. Remove the override when a stable Prisma 7.x ships effect > 3.22.0.
 
+## Task 12 — Authentication
+
+- [ ] Password hashing uses bcryptjs (pure JS, bcrypt $2b$ hashes, async API) to avoid native install scripts; measure hash time at cost 12 on the target server during task 12 and switch to native bcrypt if login latency exceeds the BNF01 budget.
+
 ## Repository and publication
 
 - [ ] Ask the supervisor whether the specification and the deliverables (L1–L3) may be published in this public

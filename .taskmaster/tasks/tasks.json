@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Initialize shared package with Zod schemas and TypeScript configuration",
         "description": "Create packages/shared workspace with Zod 4 schemas as single source of truth, TypeScript types, error codes (L2 Table 7), category codes (34 categories from L1 Table 12), i18n keys for shared resources only (fr/en), design tokens, computeSeverity pure function, and build with tsup to ESM/CJS. Requirements: BF02-BF05, BNF07.",
         "status": "done",
@@ -202,7 +202,7 @@
         "updatedAt": "2026-10-18T15:06:06.921Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Set up API workspace with Express 5, TypeScript, and project structure",
         "description": "Initialize apps/api workspace with Node.js 24, Express 5, TypeScript, and the Router → Controller → Service → Repository layer architecture. Requirements: Technical Architecture.",
         "details": "1. Create apps/api/package.json with dependencies: express@5, typescript, @types/node, @types/express, tsx for dev.\n2. Create apps/api/tsconfig.json extending tsconfig.base.json with paths alias '@/*' → 'src/*', references to packages/shared.\n3. Create directory structure:\n   src/\n   ├── config/         # Environment, secrets\n   ├── middleware/     # Auth, validation, error handler, tenant\n   ├── modules/        # Feature modules (auth, incidents, users, etc.)\n   │   └── auth/\n   │       ├── auth.router.ts\n   │       ├── auth.controller.ts\n   │       ├── auth.service.ts\n   │       └── auth.repository.ts\n   ├── lib/            # Shared utilities (crypto, redis, logger)\n   ├── types/          # Express extensions, request context\n   └── index.ts        # Entry point\n4. Create src/types/express.d.ts extending Express Request with tenant context (orgId, userId, role).\n5. Create src/index.ts with basic Express app setup, JSON parsing, CORS.\n6. Add scripts: 'dev': 'tsx watch src/index.ts', 'build': 'tsc', 'start': 'node dist/index.js'.\n7. Configure ESLint import boundaries to enforce layer rules (controllers cannot import repositories directly).",
@@ -219,7 +219,7 @@
         "updatedAt": "2026-10-19T09:30:33.902Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Configure Docker Compose for PostgreSQL 16 and Redis 8 development environment",
         "description": "Create Docker Compose configuration for local development with PostgreSQL 16 and Redis 8, including volume persistence and health checks. Requirements: Technical Architecture, Phase S5.",
         "details": "1. Create infra/docker-compose.dev.yml:\n   ```yaml\n   services:\n     postgres:\n       image: postgres:16-alpine\n       environment:\n         POSTGRES_DB: secure360\n         POSTGRES_USER: secure360\n         POSTGRES_PASSWORD_FILE: /run/secrets/db_password\n       volumes:\n         - pgdata:/var/lib/postgresql/data\n         - ./init-db:/docker-entrypoint-initdb.d\n       ports: ['5432:5432']\n       healthcheck:\n         test: pg_isready -U secure360\n         interval: 5s\n     redis:\n       image: redis:8-alpine\n       command: redis-server --appendonly yes\n       volumes:\n         - redisdata:/data\n       ports: ['6379:6379']\n       healthcheck:\n         test: redis-cli ping\n   volumes:\n     pgdata:\n     redisdata:\n   secrets:\n     db_password:\n       file: ./secrets/db_password.txt\n   ```\n2. Create infra/secrets/db_password.txt with placeholder (git-ignored).\n3. Create infra/init-db/01-roles.sql for creating database roles (s360_owner, s360_app, s360_worker, s360_metrics).\n4. Add npm script 'docker:dev': 'docker compose -f infra/docker-compose.dev.yml up -d'.\n5. Create .env.example with DATABASE_URL and REDIS_URL templates.",
@@ -234,10 +234,10 @@
         "updatedAt": "2026-10-19T05:46:51.092Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Implement Prisma schema with complete L2 data model and RLS policies",
         "description": "Create Prisma schema for all entities (organizations, users, incidents, etc.) with PostgreSQL Row-Level Security policies, forced RLS, database role grants, and CHECK constraints for enum-like fields. Requirements: Technical Architecture, Phase S5, BNF19.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           "2",
           "3"
@@ -249,26 +249,111 @@
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement prisma schema with complete l2 data model and rls policies.",
-        "updatedAt": "2026-10-19T09:31:56.358Z"
+        "updatedAt": "2026-10-25T21:43:22.364Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Create category seed data and fictitious test data",
-        "description": "Implement Prisma seed script with 34 incident categories (fr/en labels, default severities) and fictitious data for 5 organisations with personas. Requirements: Phase S5, BF02.",
-        "details": "1. Create apps/api/prisma/seed.ts using categories from @secure360/shared.\n2. Seed every category exported by @secure360/shared, including SIM swap (MOB-02), using the shared codes, fr/en labels, and default severities.\n3. Seed 5 organizations: Alpha Corp, Beta Industries, Gamma Services, Delta Tech, Epsilon Ltd.\n4. Seed personas per org:\n   - Aimé (EMPLOYEE), Christelle (MANAGER), at least one per org\n   - Jean-Paul (TECHNICIAN) and Paul (ADMIN) at SFC organization\n5. Passwords: bcrypt hash with cost 12, must_change_password: true.\n6. Seed 10-20 sample incidents per org with realistic data.\n7. Add script to package.json: 'db:seed': 'tsx prisma/seed.ts'.",
-        "testStrategy": "Run db:seed and verify 34 categories exist with correct codes and labels in both languages; verify 5 organizations created; verify at least 2 users per org; verify sample incidents created with valid category_code references.",
-        "priority": "high",
+        "description": "Implement Prisma seed scripts with 34 incident categories (fr/en labels, default severities) and fictitious data for 5 organisations with L1/L3 personas. Requirements: Phase S5, BF02.",
+        "status": "done",
         "dependencies": [
           "4"
         ],
-        "status": "pending",
-        "subtasks": [],
+        "priority": "high",
+        "details": "1. Create apps/api/prisma/seed/ directory with modular seed scripts:\n   - cli.ts: CLI helpers (loadLocalEnv, runCli, writeStderr)\n   - context.ts: SeedContext type and withSeedContext() for RLS-safe seeding with set_config(..., true)\n   - categories.ts: db:seed entry point (runCategorySeed)\n   - dev-fixtures.ts: Typed fixture data (DevOrganization, DevUser, DevIncident)\n   - dev-data.ts: db:seed:dev entry point (runDevSeed)\n\n2. db:seed (categories.ts):\n   - Seed all 34 categories from CATEGORIES in @secure360/shared\n   - Use shared fr/en labels from sharedMessages\n   - Idempotent: insert new codes, update changed labels/groups/sortOrder, deactivate removed codes\n   - Never overwrite default_severity (SFC may tune it per L1 §7)\n   - Requires MIGRATION_DATABASE_URL (runs as s360_owner)\n\n3. Migration 20261126120000_seed_category_policies:\n   - incident_categories_owner_lookup: SELECT for s360_owner (read all codes to upsert)\n   - incident_categories_owner_insert: INSERT WITH CHECK app_role() = 'ADMIN'\n\n4. db:seed:dev (dev-data.ts):\n   - Local databases only: refuses if NODE_ENV=production or database not secure360/*_test\n   - Requires DEV_SEED_PASSWORD (validated with PasswordSchema)\n   - Uses bcryptjs with cost 12, sets mustChangePassword: true\n\n5. Organisations (dev-fixtures.ts):\n   - SFC (PROVIDER, Douala)\n   - Kamdem Distribution SARL (COMPANY, Douala)\n   - Direction Fictive des Services Numériques (ADMINISTRATION, Yaoundé)\n   - ONG Santé Pour Tous (NGO, Bafoussam)\n   - Douala Logistics SARL (COMPANY, Douala)\n\n6. Personas (roles: USER, MANAGER, TECHNICIAN, ADMIN — no EMPLOYEE):\n   - Aimé Kamga (USER) and Paul Ndoumou (MANAGER, SME CEO) at Kamdem\n   - Christelle Biya (MANAGER) at the administration\n   - Jean-Paul Nguemo (TECHNICIAN) and Rodrigue Essomba (ADMIN) at SFC\n   - Mireille Fotso (USER) at ONG Santé Pour Tous\n   - Hervé Tchinda (USER) at Douala Logistics\n   - All use @example.com emails and +237000000xxx phones (fictitious contacts)\n\n7. Incidents (6 total covering every status):\n   - Aimé's confidential Mobile Money fraud (FRD-03, isAnonymous: true, ASSIGNED)\n   - Aimé's phishing email (MSG-01, RESOLVED)\n   - Paul's SIM swap (MOB-02, IN_PROGRESS)\n   - Christelle's ransomware (WKS-03, NEW)\n   - Mireille's suspicious login (ACC-01, CLOSED)\n   - Hervé's service availability (AVL-02, NEW)\n   - Each incident has timeline (IncidentStatusHistory) and messages where applicable\n\n8. Package.json scripts:\n   - 'db:seed': 'tsx prisma/seed/categories.ts'\n   - 'db:seed:dev': 'tsx prisma/seed/dev-data.ts'\n   - Both have pre-scripts that build @secure360/shared and run db:generate\n\n9. RLS compliance:\n   - Seed never disables RLS or triggers (AGENTS rule)\n   - Uses withSeedContext() which calls set_config('app.org_id'/'app.user_id'/'app.role', ..., true)\n   - Incidents created under reporter context, then transitioned under technician context",
+        "testStrategy": "Integration tests in apps/api/tests/integration/seed.test.ts:\n\n1. db:seed (categories):\n   - Verify RLS refuses insert without ADMIN context\n   - Verify 34 categories created with correct codes, fr/en labels, default severities\n   - Verify typographic apostrophes preserved and MOB-02 is CRITICAL\n   - Verify idempotent: second run changes nothing\n   - Verify label restoration but default_severity preserved when tuned\n   - Verify deactivation of codes removed from @secure360/shared\n\n2. db:seed:dev (refusals):\n   - Verify refusal when NODE_ENV=production\n   - Verify refusal for non-local databases\n   - Verify refusal when DEV_SEED_PASSWORD missing or invalid\n\n3. db:seed:dev (fictitious data):\n   - Verify 5 orgs created (1 PROVIDER, 4 clients)\n   - Verify 7 personas with correct roles and org assignments\n   - Verify bcrypt cost-12 hashes and mustChangePassword=true\n   - Verify 6 incidents across categories and all statuses\n   - Verify Aimé's Mobile Money fraud is confidential (isAnonymous=true)\n   - Verify password never printed to output\n   - Verify idempotent: second run changes nothing",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create seed CLI helpers and RLS context utilities",
+            "description": "Create apps/api/prisma/seed/cli.ts with loadLocalEnv, runCli, writeStderr helpers and apps/api/prisma/seed/context.ts with SeedContext type, SEED_ADMIN constant, and withSeedContext function for RLS-safe seeding.",
+            "dependencies": [],
+            "details": "cli.ts provides CLI utilities: loadLocalEnv() loads .env for local development, runCli() wraps async main functions with exit code handling, writeStderr() outputs messages to stderr without sensitive data. context.ts provides SeedContext type with orgId/userId/role fields, SEED_ADMIN constant (null org/user, ADMIN role), setSeedContext() that calls set_config with true for transaction-local settings, and withSeedContext() that wraps a transaction with the given context. All seed operations run through RLS policies.",
+            "status": "done",
+            "testStrategy": "Unit test that withSeedContext sets the correct PostgreSQL session variables and cleans up after transaction.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 2,
+            "title": "Implement db:seed for 34 incident categories",
+            "description": "Create apps/api/prisma/seed/categories.ts that seeds all 34 categories from @secure360/shared with idempotent upsert logic: insert new codes, update labels/groups/sortOrder, deactivate removed codes, never overwrite default_severity.",
+            "dependencies": [
+              1
+            ],
+            "details": "categoriesFromShared() maps CATEGORIES array to seed rows with fr/en labels from sharedMessages. seedCategories() uses withSeedContext(SEED_ADMIN) to run as ADMIN, compares stored vs wanted categories, inserts missing codes, updates changed fields (excluding default_severity), and deactivates codes no longer in shared. formatCategoryResult() returns human-readable counts. runCategorySeed() is the CLI entry point requiring MIGRATION_DATABASE_URL.",
+            "status": "done",
+            "testStrategy": "Integration test: verify 34 categories created, verify idempotent behavior, verify default_severity preserved when tuned, verify deactivation of removed codes.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 3,
+            "title": "Create migration for s360_owner category INSERT policy",
+            "description": "Create migration 20261126120000_seed_category_policies with RLS policies allowing s360_owner to SELECT all categories and INSERT when app_role()='ADMIN', enabling the seed to run through RLS without bypass.",
+            "dependencies": [],
+            "details": "Migration adds two policies: incident_categories_owner_lookup (SELECT USING true) for reading all codes during upsert comparison, and incident_categories_owner_insert (INSERT WITH CHECK app_role()='ADMIN') for inserting new categories. These policies only apply to s360_owner role used during migrations/seeding, not runtime roles s360_app/s360_worker.",
+            "status": "done",
+            "testStrategy": "Integration test: verify RLS refuses insert without ADMIN context, verify seed succeeds with ADMIN context.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 4,
+            "title": "Define L1/L3 compliant dev fixtures",
+            "description": "Create apps/api/prisma/seed/dev-fixtures.ts with typed fixture data: 5 organizations (SFC PROVIDER + 4 clients), 7 personas with correct roles (USER/MANAGER/TECHNICIAN/ADMIN, no EMPLOYEE), and 6 incidents covering all statuses including Aimé's confidential Mobile Money fraud.",
+            "dependencies": [],
+            "details": "DEV_ORGANIZATIONS: SFC (PROVIDER), Kamdem (COMPANY Douala), Direction Fictive (ADMINISTRATION Yaoundé), ONG Santé Pour Tous (NGO Bafoussam), Douala Logistics (COMPANY Douala). DEV_USERS: Aimé/Paul at Kamdem, Christelle at administration, Jean-Paul/Rodrigue at SFC, Mireille at ONG, Hervé at Logistics. DEV_INCIDENTS: 6 incidents with FRD-03 (confidential, ASSIGNED), MSG-01 (RESOLVED), MOB-02 (IN_PROGRESS), WKS-03 (NEW), ACC-01 (CLOSED), AVL-02 (NEW). All emails @example.com, phones +237000000xxx.",
+            "status": "done",
+            "testStrategy": "Integration test: verify 5 orgs with correct types/cities, 7 users with correct roles/orgs, 6 incidents with correct statuses and confidentiality flags.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 5,
+            "title": "Implement db:seed:dev for local development data",
+            "description": "Create apps/api/prisma/seed/dev-data.ts that seeds organizations, users, and incidents for local development only, with environment checks, DEV_SEED_PASSWORD validation, bcryptjs cost-12 hashing, and RLS-compliant seeding.",
+            "dependencies": [
+              1,
+              2,
+              4
+            ],
+            "details": "checkDevTarget() refuses production or non-local databases. readSeedPassword() validates against PasswordSchema. seedOrganizations() upserts orgs (SFC found by PROVIDER type, others by id). seedUsers() upserts by email, hashes password only on create. seedIncident() creates under reporter context, then triageAsStaff() transitions status under technician context. All operations use withSeedContext() for RLS compliance. runDevSeed() orchestrates: seed categories, then orgs/users in one transaction, then each incident in separate transactions.",
+            "status": "done",
+            "testStrategy": "Integration test: verify refusals for production/invalid password, verify data creation with correct relationships, verify bcrypt cost-12, verify idempotent second run.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 6,
+            "title": "Add package.json scripts and tsconfig for seed directory",
+            "description": "Add db:seed and db:seed:dev scripts to apps/api/package.json with pre-scripts for building shared package and generating Prisma client, and create apps/api/prisma/tsconfig.json for the seed directory.",
+            "dependencies": [
+              2,
+              5
+            ],
+            "details": "package.json scripts: 'predb:seed': 'npm run build -w @secure360/shared && npm run db:generate', 'db:seed': 'tsx prisma/seed/categories.ts', 'predb:seed:dev': same pre-script, 'db:seed:dev': 'tsx prisma/seed/dev-data.ts'. prisma/tsconfig.json extends ../../tsconfig.base.json with settings appropriate for seed scripts including path aliases for @secure360/shared.",
+            "status": "done",
+            "testStrategy": "Run npm run db:seed and npm run db:seed:dev from apps/api directory and verify they execute correctly.",
+            "parentId": "undefined"
+          },
+          {
+            "id": 7,
+            "title": "Create comprehensive integration tests for seed scripts",
+            "description": "Create apps/api/tests/integration/seed.test.ts with full test coverage for db:seed (categories) and db:seed:dev (refusals and fictitious data), verifying RLS compliance, idempotency, and correct data relationships.",
+            "dependencies": [
+              2,
+              3,
+              5
+            ],
+            "details": "Tests run against secure360_seed_test database. Category tests: RLS refusal without ADMIN, 34 categories with correct data, typographic apostrophes, MOB-02 CRITICAL, idempotency, label restoration with severity preservation, deactivation. Dev seed refusal tests: production NODE_ENV, non-local database, missing/invalid password. Dev seed data tests: 5 orgs (1 PROVIDER), 7 personas with bcrypt cost-12, 6 incidents with timelines, confidential fraud incident, no password in output, idempotency.",
+            "status": "done",
+            "testStrategy": "Run test:integration and verify all seed.test.ts tests pass with expected assertions.",
+            "parentId": "undefined"
+          }
+        ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on create category seed data and fictitious test data."
+        "expansionPrompt": "Break down this task with a focus on create category seed data and fictitious test data.",
+        "updatedAt": "2026-11-26T14:51:58.368Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Implement platform kernel: configuration, logger, and request context",
         "description": "Build core platform infrastructure: configuration loader with Docker secrets support, Pino structured logger with request ID, and request context propagation. Requirements: Phase S5, BNF19.",
         "details": "1. Create src/config/index.ts:\n   - Load secrets from /run/secrets/* in production, .env in development\n   - Export typed config object: { database: { url }, redis: { url }, jwt: { secret, accessTtl, refreshTtl }, smtp: { host, port, user, pass }, firebase: { projectId, privateKey, clientEmail } }\n   - Validate required vars exist at startup, throw clear error if missing\n2. Create src/lib/logger.ts:\n   - Configure Pino with level from NODE_ENV (debug in dev, info in prod)\n   - Create child logger factory: createLogger(context: { requestId?, module? })\n   - Redact sensitive fields: password, token, authorization, cookie\n   - Format: JSON in prod, pretty in dev\n3. Create src/middleware/request-id.middleware.ts:\n   - Generate UUID for each request using crypto.randomUUID()\n   - Set X-Request-Id response header\n   - Attach to req.id\n4. Create src/middleware/request-logger.middleware.ts:\n   - Log request start: method, url, user-agent\n   - Log request end: status, duration\n   - Attach logger child to req.log\n5. Create src/types/express.d.ts extending Request with id: string and log: Logger.",
@@ -284,7 +369,7 @@
         "expansionPrompt": "Break down this task with a focus on implement platform kernel: configuration, logger, and request context."
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement error handler and API response envelope",
         "description": "Create centralized error handling middleware and response envelope utilities ensuring consistent API responses. Requirements: Technical Architecture, L2 Table 7.",
         "details": "1. Create src/lib/errors.ts with custom error classes:\n   - AppError: base class with code, message, statusCode, details?\n   - ValidationError: extends AppError, 400\n   - AuthenticationError: extends AppError, 401\n   - AuthorizationError: extends AppError, 403\n   - NotFoundError: extends AppError, 404\n   - ConflictError: extends AppError, 409\n   - RateLimitError: extends AppError, 429\n   - InternalError: extends AppError, 500\n2. Create src/lib/response.ts with envelope utilities:\n   - success<T>(data: T, message?: string): { success: true, data, message? }\n   - error(code: string, message: string, details?: unknown): { success: false, error: { code, message, details? } }\n   - paginated<T>(data: T[], cursor?: string, hasMore: boolean): { success: true, data, pagination: { cursor, hasMore } }\n3. Create src/middleware/error-handler.middleware.ts:\n   - Catch all errors, convert to envelope format\n   - Log errors with request ID\n   - In production: hide internal error details\n   - Handle Prisma errors (P2002 unique, P2025 not found)\n   - Handle Zod validation errors: map to ValidationError with field details\n4. Use error codes from @secure360/shared/constants/error-codes.",
@@ -300,7 +385,7 @@
         "expansionPrompt": "Break down this task with a focus on implement error handler and api response envelope."
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Implement Zod validation middleware and tenant context middleware",
         "description": "Create request validation middleware using Zod schemas and tenant isolation middleware using Prisma interactive transactions with set_config. Requirements: Phase S5, Technical Architecture.",
         "details": "1. Create src/middleware/validate.middleware.ts:\n   ```typescript\n   import { ZodSchema } from 'zod';\n   export const validate = (schema: { body?: ZodSchema; query?: ZodSchema; params?: ZodSchema }) => {\n     return (req, res, next) => {\n       const result = {};\n       if (schema.body) result.body = schema.body.parse(req.body);\n       if (schema.query) result.query = schema.query.parse(req.query);\n       if (schema.params) result.params = schema.params.parse(req.params);\n       Object.assign(req, result);\n       next();\n     };\n   };\n   ```\n2. Create src/lib/prisma.ts:\n   - Export singleton PrismaClient\n   - Configure logging to Pino in development\n3. Create src/middleware/tenant.middleware.ts:\n   ```typescript\n   export const withTenant = async (req, res, next) => {\n     const { orgId, userId, role } = req.auth; // from JWT middleware\n     req.tx = await prisma.$transaction(async (tx) => {\n       await tx.$executeRaw`SELECT set_config('app.org_id', ${orgId}, true)`;\n       await tx.$executeRaw`SELECT set_config('app.user_id', ${userId}, true)`;\n       await tx.$executeRaw`SELECT set_config('app.role', ${role}, true)`;\n       return tx;\n     });\n     // Wrap in res.on('finish') to ensure transaction completes\n   };\n   ```\n4. Note: Need careful handling since Prisma interactive transactions have timeout limits.",
@@ -317,7 +402,7 @@
         "expansionPrompt": "Break down this task with a focus on implement zod validation middleware and tenant context middleware."
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Implement Redis client and rate limiting middleware",
         "description": "Set up Redis client with reconnection handling and implement token bucket rate limiting per L2 Table 5 limits. Requirements: Phase S5, L2 Table 5.",
         "details": "1. Install ioredis in apps/api.\n2. Create src/lib/redis.ts:\n   - Create Redis client with config from environment\n   - Handle reconnection with exponential backoff\n   - Export client singleton and typed commands\n   - Create pub/sub client for real-time events\n3. Create src/middleware/rate-limiter.middleware.ts:\n   - Implement sliding window rate limiter using Redis\n   - Key pattern: rate:{endpoint}:{identifier} (IP or userId)\n   - Limits from L2 Table 5:\n     * POST /auth/login: 5/minute per IP\n     * POST /auth/verify-2fa: 5/minute per IP\n     * POST /auth/forgot-password: 3/minute per IP\n     * POST /incidents: 10/minute per user\n     * General API: 100/minute per user\n   - Return 429 with Retry-After header when exceeded\n   - Factory function: rateLimiter({ points: number, duration: number, keyPrefix: string })\n4. Create rate limit presets for each endpoint category.\n5. Add bypass for health check endpoints.",
@@ -333,7 +418,7 @@
         "expansionPrompt": "Break down this task with a focus on implement redis client and rate limiting middleware."
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Implement crypto utilities for password hashing, token generation, and encryption",
         "description": "Create cryptographic helper functions for bcrypt password hashing (cost 12), secure token generation, AES-256-GCM encryption, and SHA-256 hashing. Requirements: Technical Architecture, BF01.",
         "details": "1. Install bcrypt in apps/api.\n2. Create src/lib/crypto.ts:\n   ```typescript\n   import { randomBytes, createCipheriv, createDecipheriv, createHash } from 'crypto';\n   import bcrypt from 'bcrypt';\n   \n   const BCRYPT_COST = 12;\n   const AES_ALGORITHM = 'aes-256-gcm';\n   \n   export const hashPassword = (password: string): Promise<string> => bcrypt.hash(password, BCRYPT_COST);\n   export const verifyPassword = (password: string, hash: string): Promise<boolean> => bcrypt.compare(password, hash);\n   \n   export const generateToken = (bytes = 32): string => randomBytes(bytes).toString('base64url');\n   export const generateUUID = (): string => crypto.randomUUID();\n   \n   export const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex');\n   \n   export const encrypt = (plaintext: string, key: Buffer): { ciphertext: string; iv: string; tag: string } => {\n     const iv = randomBytes(16);\n     const cipher = createCipheriv(AES_ALGORITHM, key, iv);\n     let ciphertext = cipher.update(plaintext, 'utf8', 'base64');\n     ciphertext += cipher.final('base64');\n     return { ciphertext, iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64') };\n   };\n   \n   export const decrypt = (ciphertext: string, iv: string, tag: string, key: Buffer): string => {\n     const decipher = createDecipheriv(AES_ALGORITHM, key, Buffer.from(iv, 'base64'));\n     decipher.setAuthTag(Buffer.from(tag, 'base64'));\n     let plaintext = decipher.update(ciphertext, 'base64', 'utf8');\n     plaintext += decipher.final('utf8');\n     return plaintext;\n   };\n   ```\n3. Never use Math.random() for any security-related operations.\n4. Encryption key loaded from config (32 bytes for AES-256).",
@@ -349,7 +434,7 @@
         "expansionPrompt": "Break down this task with a focus on implement crypto utilities for password hashing, token generation, and encryption."
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Implement JWT authentication utilities with access/refresh token handling",
         "description": "Create JWT token generation and verification with pinned HS256 algorithm, 1h access tokens, and 7d refresh tokens. Requirements: BF01, Technical Architecture.",
         "details": "1. Install jsonwebtoken, @types/jsonwebtoken in apps/api.\n2. Create src/lib/jwt.ts:\n   ```typescript\n   import jwt from 'jsonwebtoken';\n   import { config } from '../config';\n   \n   interface AccessTokenPayload {\n     sub: string;      // userId\n     org: string;      // organizationId\n     role: UserRole;\n     sv: number;       // session version\n     type: 'access';\n   }\n   \n   interface RefreshTokenPayload {\n     sub: string;\n     fam: string;      // family ID for reuse detection\n     type: 'refresh';\n   }\n   \n   export const signAccessToken = (payload: Omit<AccessTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'access' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '1h',\n     });\n   };\n   \n   export const signRefreshToken = (payload: Omit<RefreshTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'refresh' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '7d',\n     });\n   };\n   \n   export const verifyToken = <T>(token: string): T => {\n     return jwt.verify(token, config.jwt.secret, {\n       algorithms: ['HS256'],  // CRITICAL: pin algorithm\n     }) as T;\n   };\n   ```\n3. CRITICAL: Always specify algorithms array in jwt.verify to prevent algorithm confusion attacks.\n4. Create middleware/auth.middleware.ts that extracts and verifies Bearer token.",
@@ -365,7 +450,7 @@
         "expansionPrompt": "Break down this task with a focus on implement jwt authentication utilities with access/refresh token handling."
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Implement auth module: login and 2FA verification endpoints",
         "description": "Create authentication endpoints for email/password login and TOTP 2FA verification with replay protection. Requirements: BF01, Phase S5.",
         "details": "1. Install otplib in apps/api for TOTP.\n2. Create src/modules/auth/auth.repository.ts:\n   - findUserByEmail(email: string)\n   - updateLastLogin(userId: string)\n   - storeUsedTotpCode(userId: string, code: string, timestamp: number)\n   - isTotpCodeUsed(userId: string, code: string): boolean\n3. Create src/modules/auth/auth.service.ts:\n   - login(email, password): { requiresTwoFactor: boolean, tempToken?: string } | { accessToken, refreshToken }\n   - verifyTwoFactor(tempToken, totpCode): { accessToken, refreshToken }\n   - Check user is_active, verify password with bcrypt\n   - If totp_enabled, return tempToken (short-lived JWT with userId only)\n   - TOTP verification: use otplib.authenticator.verify with window: 1 (±1 step)\n   - Replay protection: store used codes in Redis with 90s TTL\n4. Create src/modules/auth/auth.controller.ts:\n   - POST /auth/login: validate input, call service, return envelope\n   - POST /auth/verify-2fa: validate tempToken + code, return tokens\n5. Create src/modules/auth/auth.router.ts with rate limiters attached.\n6. Audit log: auth.login.success, auth.login.failed, auth.2fa.success, auth.2fa.failed.",
@@ -382,7 +467,7 @@
         "expansionPrompt": "Break down this task with a focus on implement auth module: login and 2fa verification endpoints."
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Implement refresh token rotation with family reuse detection",
         "description": "Create refresh token endpoint with rotation on every use and family-based reuse detection that revokes entire token family. Implement dual delivery: JSON body for mobile clients and HttpOnly cookie for web dashboard (same-origin /api/v1). Requirements: BF01, Phase S5, L2 §8.2, L2 §4.4.",
         "status": "pending",
@@ -400,7 +485,8 @@
             "dependencies": [],
             "details": "Create new migration in apps/api/prisma/migrations. CRITICAL: auth_create_refresh_token MUST compute expires_at as `now() + interval '168 hours'` internally to avoid clock-skew failures against CHECK constraint chk_refresh_tokens_expires_at (init_schema line 583-584: `expires_at > created_at AND expires_at <= created_at + interval '168 hours'`). Since created_at is set by DB's now(), app-computed expires_at could violate the CHECK if clocks differ. The function returns the DB-computed expires_at so the app can include it in responses. All functions follow the auth_find_user_by_email pattern (rls_functions_grants lines 511-535): SQL language, STABLE/VOLATILE as appropriate, SECURITY DEFINER, fixed search_path (pg_catalog, public, pg_temp). Add owner policies (refresh_tokens_auth_lookup, refresh_tokens_auth_modify) for s360_owner since FORCE ROW LEVEL SECURITY is enabled. Grant EXECUTE only to s360_app.",
             "status": "pending",
-            "testStrategy": "Unit test: verify auth_find_refresh_token returns correct row for valid hash and empty for invalid. Verify auth_create_refresh_token returns valid expires_at that satisfies CHECK constraint. Test with simulated clock skew (app time different from DB time). Integration test: call functions from s360_app role without setting RLS context variables. Security test: verify s360_worker, PUBLIC, and s360_metrics cannot execute the functions. Verify prosecdef=true and proconfig includes fixed search_path."
+            "testStrategy": "Unit test: verify auth_find_refresh_token returns correct row for valid hash and empty for invalid. Verify auth_create_refresh_token returns valid expires_at that satisfies CHECK constraint. Test with simulated clock skew (app time different from DB time). Integration test: call functions from s360_app role without setting RLS context variables. Security test: verify s360_worker, PUBLIC, and s360_metrics cannot execute the functions. Verify prosecdef=true and proconfig includes fixed search_path.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -411,7 +497,8 @@
             ],
             "details": "All methods use $queryRaw to call the SECURITY DEFINER functions without RLS context. findRefreshTokenByHash calls auth_find_refresh_token(bytea). createRefreshToken calls auth_create_refresh_token(uuid, uuid, uuid, uuid, bytea) and returns the expires_at value from the database - the app MUST NOT compute expires_at itself due to CHECK constraint clock-skew issues. revokeToken calls auth_revoke_refresh_token(uuid). revokeFamily calls auth_revoke_token_family(uuid) and returns count of revoked tokens. markAsReplaced calls auth_mark_token_replaced(uuid, uuid). Token hash is SHA-256 (32 bytes) stored as bytea per schema constraint chk_refresh_tokens_token_hash.",
             "status": "pending",
-            "testStrategy": "Unit test each repository method with mock Prisma client; test findRefreshTokenByHash works without RLS context; test revokeFamily updates all family tokens; test markAsReplaced sets replaced_by correctly; test createRefreshToken returns valid Date object for expires_at."
+            "testStrategy": "Unit test each repository method with mock Prisma client; test findRefreshTokenByHash works without RLS context; test revokeFamily updates all family tokens; test markAsReplaced sets replaced_by correctly; test createRefreshToken returns valid Date object for expires_at.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -420,7 +507,8 @@
             "dependencies": [],
             "details": "Run npm install cookie-parser @types/cookie-parser in apps/api. Add cookieParser() middleware before auth routes in apps/api/src/app.ts. Ensure secure cookie settings match production requirements.",
             "status": "pending",
-            "testStrategy": "Verify cookies are correctly parsed in request handlers; test with integration tests that send cookies."
+            "testStrategy": "Verify cookies are correctly parsed in request handlers; test with integration tests that send cookies.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -431,7 +519,8 @@
             ],
             "details": "Implement isWebClient() checking Origin/Referer against config.webOrigin (from apps/api/src/config). setRefreshTokenCookie() sets HttpOnly, Secure, SameSite=Strict, Path=/api/v1/auth/refresh, maxAge=7d. clearRefreshTokenCookie() clears with same path. getRefreshToken() reads from cookie first, then body fallback.",
             "status": "pending",
-            "testStrategy": "Unit test isWebClient with various Origin/Referer combinations; test cookie options are correctly set; test token extraction priority (cookie over body)."
+            "testStrategy": "Unit test isWebClient with various Origin/Referer combinations; test cookie options are correctly set; test token extraction priority (cookie over body).",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -442,7 +531,8 @@
             ],
             "details": "Call findRefreshTokenByHash (SECURITY DEFINER, no RLS context) to look up token. Verify expires_at and revoked_at. Detect reuse via replaced_by field: if non-null, the token was already rotated and this is a replay attack. On reuse, revoke entire family via revokeFamily. On valid refresh: generate new token with crypto.randomBytes(32).toString('base64url'), hash with SHA-256 to Buffer, call markAsReplaced on old token, createRefreshToken for new token in same family_id - the expires_at is computed by the database function and returned to include in response if needed. Fire audit events auth.refresh.success and auth.refresh.reuse_detected.",
             "status": "pending",
-            "testStrategy": "Unit test with mocked repository; test reuse detection (replaced_by set) triggers family revocation; test audit events fire correctly; test new token inherits family_id; test expires_at from DB is propagated correctly."
+            "testStrategy": "Unit test with mocked repository; test reuse detection (replaced_by set) triggers family revocation; test audit events fire correctly; test new token inherits family_id; test expires_at from DB is propagated correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -453,7 +543,8 @@
             ],
             "details": "Create csrfProtection middleware in auth module. Use isWebClient() to determine if validation is needed. Reject with AuthenticationError('CSRF_VALIDATION_FAILED') if header is missing or incorrect for web clients. Mobile clients bypass this check.",
             "status": "pending",
-            "testStrategy": "Test web requests without header are rejected; test web requests with correct header pass; test mobile requests pass without header."
+            "testStrategy": "Test web requests without header are rejected; test web requests with correct header pass; test mobile requests pass without header.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -465,7 +556,8 @@
             ],
             "details": "After successful authentication (non-2FA case), check isWebClient(). For web: call setRefreshTokenCookie(), return { accessToken } only. For mobile: return { accessToken, refreshToken }. Ensure existing login logic and audit events remain intact.",
             "status": "pending",
-            "testStrategy": "Test web login sets cookie and omits refreshToken from body; test mobile login includes refreshToken in body; test cookie attributes are correct."
+            "testStrategy": "Test web login sets cookie and omits refreshToken from body; test mobile login includes refreshToken in body; test cookie attributes are correct.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -477,7 +569,8 @@
             ],
             "details": "After successful 2FA verification, check isWebClient(). For web: call setRefreshTokenCookie(), return { accessToken } only. For mobile: return { accessToken, refreshToken }. Maintain existing 2FA validation and audit logic.",
             "status": "pending",
-            "testStrategy": "Test web 2FA verification sets cookie and omits refreshToken from body; test mobile 2FA returns refreshToken in body."
+            "testStrategy": "Test web 2FA verification sets cookie and omits refreshToken from body; test mobile 2FA returns refreshToken in body.",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -491,7 +584,8 @@
             ],
             "details": "Apply csrfProtection middleware. Use getRefreshToken() to extract token. Call authService.refresh() which uses findRefreshTokenByHash (SECURITY DEFINER, no RLS context needed). For web clients: setRefreshTokenCookie(newToken), return { accessToken }. For mobile: return { accessToken, refreshToken }. Apply rate limiting per L2 Table 5.",
             "status": "pending",
-            "testStrategy": "Test web refresh reads from cookie and sets new cookie; test mobile refresh reads from body and returns in body; test CSRF protection enforced for web; test rate limiting applied; test works without prior RLS context (pre-auth)."
+            "testStrategy": "Test web refresh reads from cookie and sets new cookie; test mobile refresh reads from body and returns in body; test CSRF protection enforced for web; test rate limiting applied; test works without prior RLS context (pre-auth).",
+            "parentId": "undefined"
           },
           {
             "id": 10,
@@ -502,7 +596,8 @@
             ],
             "details": "After revoking the refresh token, check isWebClient(). If web client, call clearRefreshTokenCookie(res). Ensure token revocation still happens for all client types.",
             "status": "pending",
-            "testStrategy": "Test web logout clears cookie; test mobile logout doesn't send Set-Cookie header; test token is revoked in both cases."
+            "testStrategy": "Test web logout clears cookie; test mobile logout doesn't send Set-Cookie header; test token is revoked in both cases.",
+            "parentId": "undefined"
           },
           {
             "id": 11,
@@ -514,9 +609,13 @@
             ],
             "details": "Test SECURITY DEFINER functions: verify auth_find_refresh_token works without RLS context, returns correct fields, handles missing tokens. Test auth_create_refresh_token: verify expires_at is computed by database (now() + 168 hours), verify CHECK constraint is satisfied regardless of app clock offset, verify returned expires_at matches database computation. Test login, verify-2fa, refresh, and logout for both client types. Verify cookie attributes (HttpOnly, Secure, SameSite, Path, Max-Age). Test CSRF protection. Test reuse detection (replaced_by check) works across client types. Test rotation maintains family_id. Use Supertest with cookie jar support. Place tests in apps/api/tests/integration/auth/.",
             "status": "pending",
-            "testStrategy": "Run full integration test suite covering all paths; verify coverage reaches 80% for auth module; specifically test pre-auth scenarios where no RLS context exists; verify clock-skew resilience by checking expires_at is always database-computed."
+            "testStrategy": "Run full integration test suite covering all paths; verify coverage reaches 80% for auth module; specifically test pre-auth scenarios where no RLS context exists; verify clock-skew resilience by checking expires_at is always database-computed.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement refresh token rotation with family reuse detection."
       },
       {
         "id": "14",
@@ -537,7 +636,8 @@
             "dependencies": [],
             "details": "1. Create apps/api/data/common-passwords.txt with 10,000+ common passwords (source from SecLists/HIBP top passwords)\n2. Create apps/api/src/lib/password-blocklist.ts:\n   - Load list at startup into a Set<string> (lowercase for case-insensitive matching)\n   - Export isCommonPassword(normalizedPassword: string): boolean that lowercases and checks the Set\n   - Passwords are already NFC-normalised by PasswordSchema\n3. Add COMMON_PASSWORD to error-codes.ts (HTTP 400) with i18n keys\n4. Ensure no external API calls (data residency requirement)",
             "status": "pending",
-            "testStrategy": "Unit tests: verify blocklist loads from file at startup; test isCommonPassword returns true for '123456', 'password', 'qwerty', 'azerty'; test case-insensitive ('PASSWORD' matches 'password'); test non-common password returns false; test no network calls during check."
+            "testStrategy": "Unit tests: verify blocklist loads from file at startup; test isCommonPassword returns true for '123456', 'password', 'qwerty', 'azerty'; test case-insensitive ('PASSWORD' matches 'password'); test non-common password returns false; test no network calls during check.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -548,7 +648,8 @@
             ],
             "details": "Create a new Prisma migration (apps/api/prisma/migrations) with:\n\n1. auth_create_password_reset_token(p_user_id uuid, p_organization_id uuid, p_token_hash bytea) function:\n   - SECURITY DEFINER, VOLATILE, fixed search_path (pg_catalog, public, pg_temp)\n   - INSERT INTO password_reset_tokens (id, user_id, organization_id, token_hash, expires_at, created_at) VALUES (gen_random_uuid(), p_user_id, p_organization_id, p_token_hash, now() + interval '1 hour', now())\n   - CRITICAL: expires_at is ALWAYS now() + interval '1 hour', computed by database, NEVER passed from app\n   - Returns TABLE (id uuid) with the created row's id\n   - This prevents app clock manipulation attacks (review finding N3)\n\n2. auth_find_password_reset_token(p_token_hash bytea) function:\n   - SECURITY DEFINER, STABLE, fixed search_path\n   - Returns TABLE (id uuid, user_id uuid, organization_id uuid, expires_at timestamptz, used_at timestamptz)\n   - SELECT from password_reset_tokens WHERE token_hash = p_token_hash\n   - Never returns user details to prevent enumeration\n\n3. auth_mark_reset_token_used(p_token_id uuid) function:\n   - SECURITY DEFINER, VOLATILE, fixed search_path\n   - UPDATE password_reset_tokens SET used_at = now() WHERE id = p_token_id AND used_at IS NULL\n   - Returns boolean indicating if a row was updated\n\n4. auth_insert_forgot_password_outbox(p_event_type text, p_aggregate_id uuid, p_payload jsonb) function:\n   - SECURITY DEFINER, VOLATILE, fixed search_path\n   - Inserts into outbox_events with organization_id NULL (system event)\n   - Returns void (fire-and-forget)\n\n5. Add RLS owner policy on password_reset_tokens (like users_auth_lookup):\n   - CREATE POLICY password_reset_tokens_auth_lookup ON password_reset_tokens FOR ALL TO s360_owner USING (true) WITH CHECK (true)\n\n6. Revoke EXECUTE from PUBLIC on all functions\n7. GRANT EXECUTE on all four functions to s360_app only (not s360_worker or s360_metrics)\n8. Add to REVOKE statement list in existing migration pattern",
             "status": "pending",
-            "testStrategy": "Integration tests (following apps/api/tests/integration/auth-lookup.test.ts patterns): test auth_create_password_reset_token creates token with DB-computed expires_at approximately now() + 1 hour (within seconds tolerance); test created token's expires_at cannot be influenced by caller (function has no expires_at parameter); test auth_find_password_reset_token finds token by hash without RLS context; test returns only required fields (id, user_id, organization_id, expires_at, used_at); test auth_mark_reset_token_used sets used_at to approximately now(); test auth_mark_reset_token_used returns false for already-used token; test auth_insert_forgot_password_outbox inserts event without context; test all four functions cannot be executed by s360_worker or s360_metrics (PERMISSION_DENIED); test all functions have SECURITY DEFINER with fixed search_path and no PUBLIC execute (query pg_proc like auth-lookup.test.ts); test password_reset_tokens table is not directly readable/writable without RLS context."
+            "testStrategy": "Integration tests (following apps/api/tests/integration/auth-lookup.test.ts patterns): test auth_create_password_reset_token creates token with DB-computed expires_at approximately now() + 1 hour (within seconds tolerance); test created token's expires_at cannot be influenced by caller (function has no expires_at parameter); test auth_find_password_reset_token finds token by hash without RLS context; test returns only required fields (id, user_id, organization_id, expires_at, used_at); test auth_mark_reset_token_used sets used_at to approximately now(); test auth_mark_reset_token_used returns false for already-used token; test auth_insert_forgot_password_outbox inserts event without context; test all four functions cannot be executed by s360_worker or s360_metrics (PERMISSION_DENIED); test all functions have SECURITY DEFINER with fixed search_path and no PUBLIC execute (query pg_proc like auth-lookup.test.ts); test password_reset_tokens table is not directly readable/writable without RLS context.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -559,7 +660,8 @@
             ],
             "details": "1. Add to auth.repository.ts: revokeRefreshToken(tokenHash), revokeTokenFamily(familyId)\n2. Add to auth.service.ts: logout(refreshToken) - revoke token, optionally family\n3. Create POST /auth/logout controller (authenticated)\n4. Audit event: auth.logout\n5. Return 204 No Content on success",
             "status": "pending",
-            "testStrategy": "Test logout invalidates refresh token; test revoked token cannot be used for refresh; test audit event created; test requires authentication."
+            "testStrategy": "Test logout invalidates refresh token; test revoked token cannot be used for refresh; test audit event created; test requires authentication.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -572,7 +674,8 @@
             ],
             "details": "1. Add to auth.repository.ts:\n   - createPasswordResetToken(userId, organizationId, tokenHash): calls auth_create_password_reset_token SECURITY DEFINER function via $queryRaw; does NOT pass expiresAt (computed by DB as now() + interval '1 hour')\n   - findPasswordResetTokenByHash(tokenHash): calls auth_find_password_reset_token SECURITY DEFINER function via $queryRaw (no RLS context available when resetting)\n   - markResetTokenUsed(id): calls auth_mark_reset_token_used SECURITY DEFINER function via $queryRaw\n   - updateUserPassword(userId, passwordHash)\n   - insertForgotPasswordOutbox(aggregateId, payload): calls auth_insert_forgot_password_outbox SECURITY DEFINER function via $queryRaw (no RLS context when email unknown)\n\n2. Add to auth.service.ts:\n   - forgotPassword(email): use auth_find_user_by_email to check user exists (via existing SECURITY DEFINER function), generate 32-byte random token, compute SHA-256 hash, call createPasswordResetToken (expiry set by DB, NOT by app), call insertForgotPasswordOutbox for email queue, always return void regardless of whether email exists (prevent enumeration)\n   - resetPassword(token, newPassword): hash provided token, call findPasswordResetTokenByHash (via SECURITY DEFINER), verify token validity: used_at IS NULL AND expires_at > now() (compare with current time at verification), call isCommonPassword(newPassword) rejecting with COMMON_PASSWORD if true, hash password, update user, increment session_version, mark token used via markResetTokenUsed\n\n3. Create endpoints using schemas from packages/shared/src/schemas/auth.schema.ts:\n   - POST /auth/forgot-password (public, rate limited 3/min) - ForgotPasswordInputSchema\n   - POST /auth/reset-password (public) - ResetPasswordInputSchema\n\n4. Audit: auth.password.reset_requested (fire-and-forget via outbox), auth.password.reset\n\n5. Add PASSWORD_RESET_TOKEN_EXPIRED and PASSWORD_RESET_TOKEN_USED error codes to error-codes.ts",
             "status": "pending",
-            "testStrategy": "Test forgot-password always returns 200 regardless of email existence (no enumeration - critical security test); test token created via API has expires_at set by DB (not app); test reset token works within 1 hour; test expired reset token rejected with PASSWORD_RESET_TOKEN_EXPIRED; test used reset token rejected with PASSWORD_RESET_TOKEN_USED; test common passwords ('password123', '123456789') rejected with COMMON_PASSWORD error; test session_version increment invalidates old access tokens; verify SECURITY DEFINER functions are used for token creation (with DB-computed expiry), lookup and outbox insertion (no direct table access without context)."
+            "testStrategy": "Test forgot-password always returns 200 regardless of email existence (no enumeration - critical security test); test token created via API has expires_at set by DB (not app); test reset token works within 1 hour; test expired reset token rejected with PASSWORD_RESET_TOKEN_EXPIRED; test used reset token rejected with PASSWORD_RESET_TOKEN_USED; test common passwords ('password123', '123456789') rejected with COMMON_PASSWORD error; test session_version increment invalidates old access tokens; verify SECURITY DEFINER functions are used for token creation (with DB-computed expiry), lookup and outbox insertion (no direct table access without context).",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -584,12 +687,16 @@
             ],
             "details": "1. Add to auth.repository.ts: clearMustChangePassword(userId)\n2. Add to auth.service.ts:\n   - changePassword(userId, currentPassword, newPassword): verify current password matches, call isCommonPassword(newPassword) rejecting with COMMON_PASSWORD if true, check newPassword differs from current, hash and update password, clear must_change_password flag, increment session_version\n3. Create POST /auth/change-password controller using ChangePasswordInputSchema from packages/shared/src/schemas/auth.schema.ts\n4. Requires authentication\n5. Audit: auth.password.changed",
             "status": "pending",
-            "testStrategy": "Test change-password requires correct current password; test common passwords rejected with COMMON_PASSWORD error; test new password must differ from current; test must_change_password flag cleared after change; test session_version increment invalidates old tokens; test audit event created."
+            "testStrategy": "Test change-password requires correct current password; test common passwords rejected with COMMON_PASSWORD error; test new password must differ from current; test must_change_password flag cleared after change; test session_version increment invalidates old tokens; test audit event created.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement logout, password reset, and first-login password change."
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "Implement TOTP 2FA setup, enable, and disable endpoints",
         "description": "Create endpoints for setting up TOTP 2FA (generate secret, show QR), enabling with verification code, and disabling with password confirmation. Requirements: BF01, Phase S5.",
         "details": "1. Install qrcode in apps/api for QR generation.\n2. Add to auth.repository.ts:\n   - storePendingTotpSecret(userId, encryptedSecret)\n   - getPendingTotpSecret(userId)\n   - enableTotp(userId, encryptedSecret)\n   - disableTotp(userId)\n3. Add to auth.service.ts:\n   - setupTotp(userId): generate secret, encrypt with AES-256-GCM, store as pending, return secret and QR data URL\n   - enableTotp(userId, code): verify code against pending secret, move to permanent\n   - disableTotp(userId, password): verify password, clear totp_secret and totp_enabled\n4. Create endpoints (all authenticated):\n   - POST /auth/2fa/setup: returns { secret: string, qrCodeDataUrl: string, backupCodes?: string[] }\n   - POST /auth/2fa/enable: body { code: string }, enables 2FA\n   - POST /auth/2fa/disable: body { password: string }, disables 2FA\n5. TOTP secret encrypted at rest with app encryption key.\n6. QR code: otpauth://totp/Secure360:{email}?secret={secret}&issuer=Secure360\n7. Audit: auth.2fa.setup, auth.2fa.enabled, auth.2fa.disabled.",
@@ -605,7 +712,7 @@
         "expansionPrompt": "Break down this task with a focus on implement totp 2fa setup, enable, and disable endpoints."
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Implement audit logging service with fire-and-forget enqueue",
         "description": "Create audit logging infrastructure with transactional outbox for reliable delivery and structured event format. Requirements: BNF19, Phase S5.",
         "details": "1. Create src/lib/audit.ts:\n   ```typescript\n   interface AuditEvent {\n     event: string;           // noun.verb.outcome (e.g., auth.login.success)\n     entityType?: string;     // incident, user, organization\n     entityId?: string;\n     oldData?: Record<string, unknown>;\n     newData?: Record<string, unknown>;\n     metadata?: Record<string, unknown>;\n   }\n   \n   export const enqueueAudit = async (ctx: RequestContext, event: AuditEvent): Promise<void> => {\n     // Fire and forget - errors logged but not thrown\n     try {\n       await prisma.outboxEvent.create({\n         data: {\n           event_type: 'audit.write',\n           payload: {\n             ...event,\n             organization_id: ctx.orgId,\n             user_id: ctx.userId,\n             ip_address: ctx.ip,\n             user_agent: ctx.userAgent,\n             request_id: ctx.requestId,\n             timestamp: new Date().toISOString(),\n           },\n         },\n       });\n     } catch (err) {\n       ctx.log.error({ err, event: event.event }, 'Failed to enqueue audit event');\n     }\n   };\n   ```\n2. Never log tokens, passwords, TOTP codes, or personal message content.\n3. Use event naming: noun.verb.outcome (incident.created.success, auth.login.failed).\n4. Include request_id for correlation.\n5. Create audit event consumer that writes to audit_logs table (will be implemented with outbox relay).",
@@ -622,7 +729,7 @@
         "expansionPrompt": "Break down this task with a focus on implement audit logging service with fire-and-forget enqueue."
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "Write unit tests for auth module achieving high coverage",
         "description": "Create comprehensive unit tests for all authentication services and utilities using Jest. Requirements: Phase S5.",
         "details": "1. Install jest, @types/jest, ts-jest in apps/api.\n2. Create jest.config.ts with TypeScript support and coverage thresholds.\n3. Create tests/unit/auth/ directory.\n4. Test auth.service.ts:\n   - login: valid credentials, invalid password, inactive user, user with 2FA\n   - verifyTwoFactor: valid code, invalid code, replayed code, expired temp token\n   - refresh: valid token, expired token, revoked token, reuse detection\n   - logout: token revocation\n   - forgotPassword: existing user, non-existing user (no difference in response)\n   - resetPassword: valid token, expired token, used token\n   - changePassword: correct current, wrong current, must_change_password cleared\n   - setupTotp, enableTotp, disableTotp: various scenarios\n5. Test lib/crypto.ts:\n   - hashPassword and verifyPassword\n   - encrypt and decrypt round-trip\n   - hashToken determinism\n6. Test lib/jwt.ts:\n   - signAccessToken/signRefreshToken produce valid JWTs\n   - verifyToken with valid/invalid/expired tokens\n   - algorithm pinning prevents algorithm confusion\n7. Mock Prisma client and Redis for unit tests.\n8. Target: 80%+ coverage on auth module.",
@@ -639,7 +746,7 @@
         "expansionPrompt": "Break down this task with a focus on write unit tests for auth module achieving high coverage."
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "Write integration tests for RLS tenant isolation",
         "description": "Create integration tests verifying Row-Level Security properly isolates tenant data using CI service containers. Requirements: Phase S5.",
         "details": "1. Install supertest, testcontainers in apps/api devDependencies.\n2. Create tests/integration/setup.ts:\n   - Start PostgreSQL container with testcontainers\n   - Run migrations and seed with test data\n   - Create test client with different tenant contexts\n3. Create tests/integration/rls.test.ts:\n   ```typescript\n   describe('Row-Level Security', () => {\n     const orgA = { id: 'org-a', ...testOrgA };\n     const orgB = { id: 'org-b', ...testOrgB };\n     \n     test('user in org A cannot see org B incidents', async () => {\n       const incidents = await queryAsUser(userInOrgA, 'SELECT * FROM incidents');\n       expect(incidents.every(i => i.organization_id === orgA.id)).toBe(true);\n     });\n     \n     test('user cannot insert incident into other org', async () => {\n       await expect(insertAsUser(userInOrgA, { organization_id: orgB.id, ... }))\n         .rejects.toThrow();\n     });\n     \n     test('technician role can see assigned incidents only', async () => { ... });\n     test('admin role can see all org incidents', async () => { ... });\n     test('queries without app.org_id return no rows (fail closed)', async () => { ... });\n   });\n   ```\n4. Test each role: EMPLOYEE, MANAGER, TECHNICIAN, ADMIN, SUPER_ADMIN.\n5. Add to CI workflow: start PostgreSQL service, run integration tests.",
@@ -656,7 +763,7 @@
         "expansionPrompt": "Break down Task 18 into subtasks: 1) Testcontainers setup for PostgreSQL with migration and seed, 2) Test helper factories for creating users/incidents across organizations, 3) Cross-tenant isolation tests (user in org A cannot see org B data), 4) Role-based access tests (EMPLOYEE, MANAGER, TECHNICIAN, ADMIN), 5) Fail-closed tests (queries without app.org_id return no rows). Each test category should verify RLS policies work correctly."
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Implement incidents module: create with idempotency and guided severity",
         "description": "Create incident creation endpoint with idempotency key support, server-side severity calculation from guided questions, and reference number generation. Requirements: BF02-BF05, BF18, Phase S6.",
         "details": "1. Create src/modules/incidents/incidents.repository.ts:\n   - create(data): insert incident with reference\n   - getNextReference(orgId): atomic counter increment, format SFC-YYYY-NNNNNN\n   - checkIdempotencyKey(key, userId): return cached response if exists\n   - storeIdempotencyKey(key, userId, response, expiresAt)\n2. Create src/modules/incidents/incidents.service.ts:\n   - create(userId, input, idempotencyKey?):\n     1. Check idempotency key, return cached response if exists\n     2. Calculate severity from guided questions (L1 D3 algorithm):\n        - Financial impact > threshold? → +1 severity level\n        - Multiple users affected? → +1 severity level\n        - Data compromised? → +1 severity level\n        - Base severity from category default\n     3. Generate reference number atomically\n     4. Insert incident with status NEW\n     5. Create initial status history entry\n     6. Store idempotency key with response (24h TTL)\n     7. Enqueue notifications for technicians\n3. Create POST /v1/incidents endpoint with Idempotency-Key header support.\n4. Zod schema: category_code, description, is_anonymous, guided_questions: { financial_impact, multiple_users, data_compromised }.\n5. Audit: incident.created.success.",
@@ -672,7 +779,7 @@
         "expansionPrompt": "Break down Task 19 into subtasks: 1) Repository layer with incident creation and atomic reference counter (SFC-YYYY-NNNNNN), 2) Severity calculation service using guided questions algorithm from L1 D3, 3) Idempotency key handling with Redis caching and 24h TTL, 4) Controller with Zod validation and response DTOs, 5) Integration tests covering idempotency, severity calculation, and category validation."
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Implement incidents list with cursor pagination and filters",
         "description": "Create incidents list endpoint with cursor-based pagination, status/severity/date filters, and proper DTO mapping for confidential reports. Cursors must be HMAC-signed for tamper detection and validated with VALIDATION_ERROR on garbage/invalid input. Requirements: BF06, Phase S6.",
         "status": "pending",
@@ -759,7 +866,7 @@
         "expansionPrompt": "Break down this task with a focus on implement incidents list with cursor pagination and filters."
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Implement incident detail, PATCH with state machine, and status history",
         "description": "Create incident detail endpoint and update endpoint with status state machine validation, optimistic concurrency, and history tracking. Requirements: BF06, BF09, Phase S6.",
         "details": "1. Add to incidents.repository.ts:\n   - findById(id): incident with relations (reporter, assignee, category, status_history)\n   - update(id, data, expectedVersion): optimistic locking with version check\n   - addStatusHistory(incidentId, fromStatus, toStatus, changedById, comment?)\n2. Create src/modules/incidents/incidents.state-machine.ts:\n   ```typescript\n   const TRANSITIONS: Record<Status, Status[]> = {\n     NEW: ['ASSIGNED'],\n     ASSIGNED: ['IN_PROGRESS', 'NEW'],\n     IN_PROGRESS: ['RESOLVED', 'ASSIGNED'],\n     RESOLVED: ['CLOSED', 'IN_PROGRESS'],  // can reopen\n     CLOSED: ['IN_PROGRESS'],               // can reopen\n   };\n   \n   export const canTransition = (from: Status, to: Status): boolean => \n     TRANSITIONS[from]?.includes(to) ?? false;\n   ```\n3. Add to incidents.service.ts:\n   - getDetail(userId, role, incidentId): apply DTO masking for confidential\n   - update(userId, role, incidentId, input, version):\n     1. Validate status transition if status changed\n     2. Validate role can perform action (only TECHNICIAN/ADMIN can assign)\n     3. Update with version check (throw ConflictError if mismatch)\n     4. Record status history if changed\n     5. Auto-set assigned_to when status → ASSIGNED\n     6. Auto-set resolved_at when status → RESOLVED\n4. Create GET /v1/incidents/:id and PATCH /v1/incidents/:id endpoints.\n5. Version header: If-Match for optimistic concurrency.",
@@ -775,7 +882,7 @@
         "expansionPrompt": "Break down this task with a focus on implement incident detail, patch with state machine, and status history."
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Implement attachment upload with magic byte validation and encryption",
         "description": "Create attachment upload endpoint with memory storage, magic byte verification, EXIF stripping via sharp, and AES-256-GCM encryption at rest. Requirements: BF05, Phase S6.",
         "details": "1. Install multer, sharp, file-type in apps/api.\n2. Create src/modules/attachments/attachments.service.ts:\n   ```typescript\n   const ALLOWED_TYPES = [\n     { mime: 'image/jpeg', magic: [0xFF, 0xD8, 0xFF] },\n     { mime: 'image/png', magic: [0x89, 0x50, 0x4E, 0x47] },\n     { mime: 'image/webp', magic: [0x52, 0x49, 0x46, 0x46] },\n   ];\n   const MAX_SIZE = 2 * 1024 * 1024; // 2 MiB\n   \n   async upload(incidentId: string, file: Express.Multer.File, userId: string) {\n     // 1. Verify magic bytes\n     const detectedType = await fileTypeFromBuffer(file.buffer);\n     if (!ALLOWED_TYPES.some(t => t.mime === detectedType?.mime)) {\n       throw new ValidationError('INVALID_FILE_TYPE');\n     }\n     \n     // 2. Re-encode with sharp (strips EXIF/GPS)\n     const processed = await sharp(file.buffer)\n       .rotate() // auto-rotate based on EXIF before stripping\n       .toFormat(detectedType.ext as 'jpeg' | 'png' | 'webp')\n       .toBuffer();\n     \n     // 3. Encrypt\n     const { ciphertext, iv, tag } = encrypt(processed.toString('base64'), encryptionKey);\n     \n     // 4. Store with UUID filename\n     const fileKey = `${incidentId}/${crypto.randomUUID()}.enc`;\n     await fs.writeFile(path.join(UPLOAD_DIR, fileKey), ciphertext);\n     \n     // 5. Save metadata\n     return repo.create({ incident_id: incidentId, file_key: fileKey, encryption_iv: iv, ... });\n   }\n   ```\n3. Create POST /v1/incidents/:id/attachments with multer.memoryStorage(), limit: 5 files.\n4. Never use original filename in storage path.\n5. Create GET /v1/attachments/:id/download for authorized streaming.",
@@ -791,7 +898,7 @@
         "expansionPrompt": "Break down this task with a focus on implement attachment upload with magic byte validation and encryption."
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Implement messaging with internal notes and notification triggers",
         "description": "Create incident messaging endpoint with internal notes visible only to SFC staff, and notification triggers on new messages. For confidential incidents, ensure reporter PII (name, phone, email) is never exposed to SFC staff or managers. Requirements: BF08, Phase S6.",
         "status": "pending",
@@ -888,7 +995,7 @@
         "expansionPrompt": "Break down this task with a focus on implement messaging with internal notes and notification triggers."
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Implement outbox relay and BullMQ queue infrastructure",
         "description": "Create transactional outbox relay worker that polls outbox table and dispatches to BullMQ queues for push notifications, email, and audit writes. Requirements: Phase S6, Technical Architecture. CRITICAL: Due to RLS grant restrictions, s360_app has INSERT-only on outbox_events (no SELECT), and s360_worker has INSERT-only on audit_logs and notifications - INSERT...RETURNING (Prisma create()) will fail; must use createMany or $executeRaw for these inserts.",
         "status": "pending",
@@ -899,10 +1006,13 @@
         "priority": "high",
         "details": "1. Install bullmq in apps/api.\n\n2. Create src/worker/queues.ts:\n   ```typescript\n   export const pushQueue = new Queue('notify.push', { connection: redis });\n   export const emailQueue = new Queue('notify.email', { connection: redis });\n   export const auditQueue = new Queue('audit.write', { connection: redis });\n   export const reportsQueue = new Queue('reports.pdf', { connection: redis });\n   export const maintenanceQueue = new Queue('maintenance', { connection: redis });\n   ```\n\n3. Create src/worker/outbox-relay.ts:\n   ```typescript\n   const relay = async () => {\n     while (true) {\n       await prisma.$transaction(async (tx) => {\n         // SKIP LOCKED prevents duplicate processing\n         const events = await tx.$queryRaw`\n           SELECT * FROM outbox_events \n           WHERE published_at IS NULL \n           ORDER BY created_at \n           FOR UPDATE SKIP LOCKED \n           LIMIT 100`;\n         \n         for (const event of events) {\n           const queue = getQueueForEventType(event.event_type);\n           await queue.add(event.event_type, event.payload);\n           // Use $executeRaw for UPDATE, not Prisma update() which may have RETURNING\n           await tx.$executeRaw`\n             UPDATE outbox_events \n             SET published_at = NOW() \n             WHERE id = ${event.id}`;\n         }\n       });\n       await sleep(500); // 500ms polling interval\n     }\n   };\n   ```\n\n4. Create audit.write queue processor (src/worker/processors/audit.processor.ts):\n   ```typescript\n   // CRITICAL: s360_worker has INSERT-only on audit_logs (no SELECT grant per L2 Table 13)\n   // INSERT...RETURNING fails without SELECT privilege\n   // Must use createMany (skipDuplicates) or $executeRaw, NOT create()\n   auditQueue.process(async (job) => {\n     const { userId, organizationId, action, entity, entityId, details, ip, requestId } = job.data;\n     // Option 1: createMany (preferred, no RETURNING)\n     await prisma.auditLog.createMany({\n       data: [{ userId, organizationId, action, entity, entityId, details, ip, requestId }],\n     });\n     // Option 2: $executeRaw\n     // await prisma.$executeRaw`\n     //   INSERT INTO audit_logs (user_id, organization_id, action, entity, entity_id, details, ip, request_id)\n     //   VALUES (${userId}::uuid, ${organizationId}::uuid, ${action}, ${entity}, ${entityId}::uuid, ${details}::jsonb, ${ip}::inet, ${requestId})`;\n   });\n   ```\n\n5. Create notification processor (src/worker/processors/notification.processor.ts):\n   ```typescript\n   // CRITICAL: s360_worker has INSERT-only on notifications (no SELECT grant per L2 Table 13)\n   // Must use createMany or $executeRaw, NOT create()\n   pushQueue.process(async (job) => {\n     const { userId, organizationId, incidentId, type, titleKey, bodyKey, params } = job.data;\n     // Use createMany to avoid INSERT...RETURNING\n     await prisma.notification.createMany({\n       data: [{ id: crypto.randomUUID(), userId, organizationId, incidentId, type, titleKey, bodyKey, params }],\n     });\n     // Then send FCM push notification...\n   });\n   ```\n\n6. Document in all API services that insert outbox events:\n   ```typescript\n   // CRITICAL: s360_app has INSERT-only on outbox_events (no SELECT grant, L2 Table 13 line 348)\n   // Prisma create() uses INSERT...RETURNING which requires SELECT privilege\n   // Must use createMany or $executeRaw for outbox inserts\n   await tx.outboxEvent.createMany({\n     data: [{\n       eventType: 'incident.created',\n       aggregateId: incidentId,\n       organizationId,\n       payload: { ... },\n     }],\n   });\n   ```\n\n7. Create src/worker/index.ts entry point for worker process.\n\n8. Add npm script: 'worker': 'tsx src/worker/index.ts'.\n\n9. Reference: apps/api/prisma/migrations/20261019120100_rls_functions_grants/migration.sql lines 347-350 (s360_app grants) and 354-355 (s360_worker grants).",
         "testStrategy": "Integration test: insert outbox event using createMany (not create), verify it's picked up by relay within 1 second; test SKIP LOCKED prevents duplicate processing with concurrent workers; test failed dispatch is retried; test published_at set after successful dispatch. Verify audit log inserts use createMany and succeed without SELECT privilege. Verify notification inserts from worker use createMany. Test that using Prisma create() on outbox_events, audit_logs, or notifications from the appropriate role fails with permission denied (regression test for RLS compliance).",
-        "subtasks": null
+        "subtasks": [],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement outbox relay and bullmq queue infrastructure."
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Implement push notification consumer with FCM integration",
         "description": "Create BullMQ consumer for push notifications using Firebase Admin SDK with thin payloads containing no personal data. Requirements: BF07, BNF14, BNF16, Phase S6.",
         "details": "1. Install firebase-admin in apps/api.\n2. Create src/lib/firebase.ts:\n   - Initialize Firebase Admin with service account from config\n   - Export messaging instance\n3. Create src/worker/consumers/push.consumer.ts:\n   ```typescript\n   const pushWorker = new Worker('notify.push', async (job) => {\n     const { userId, type, incidentId, notificationId } = job.data;\n     \n     // Get user's device tokens\n     const tokens = await deviceTokenRepo.findByUserId(userId);\n     if (!tokens.length) return;\n     \n     // Thin payload - no personal data\n     const message = {\n       tokens: tokens.map(t => t.token),\n       data: {\n         type,\n         incidentId,\n         notificationId,\n       },\n       notification: {\n         title: getLocalizedTitle(type, 'fr'), // generic title\n         body: getLocalizedBody(type, 'fr'),   // generic body\n       },\n       android: {\n         priority: 'high',\n         ttl: 86400000, // 24 hours\n       },\n     };\n     \n     const response = await firebase.messaging().sendEachForMulticast(message);\n     \n     // Remove invalid tokens\n     response.responses.forEach((resp, idx) => {\n       if (!resp.success && resp.error?.code === 'messaging/invalid-registration-token') {\n         deviceTokenRepo.remove(tokens[idx].id);\n       }\n     });\n   }, { connection: redis });\n   ```\n4. Create device token registry endpoints: POST /v1/device-tokens, DELETE /v1/device-tokens/:token.\n5. Localized messages use i18n keys, fetched client-side.",
@@ -918,7 +1028,7 @@
         "expansionPrompt": "Break down this task with a focus on implement push notification consumer with fcm integration."
       },
       {
-        "id": 26,
+        "id": "26",
         "title": "Implement WebSocket gateway with ticket authentication and Redis Pub/Sub",
         "description": "Create WebSocket server at /ws with single-use ticket authentication and Redis Pub/Sub for real-time event fan-out. Requirements: Phase S6, Technical Architecture.",
         "details": "1. Install ws in apps/api.\n2. Create src/modules/realtime/ticket.service.ts:\n   - createTicket(userId): generate single-use ticket, store in Redis with 30s TTL\n   - validateTicket(ticket): check exists, delete immediately (single-use), return userId\n3. Create GET /v1/ws/ticket endpoint (authenticated) returning { ticket }.\n4. Create src/realtime/ws-server.ts:\n   ```typescript\n   const wss = new WebSocketServer({ noServer: true });\n   \n   server.on('upgrade', async (request, socket, head) => {\n     const url = new URL(request.url, 'http://localhost');\n     const ticket = url.searchParams.get('ticket');\n     \n     const userId = await ticketService.validateTicket(ticket);\n     if (!userId) {\n       socket.write('HTTP/1.1 401 Unauthorized\\r\\n\\r\\n');\n       socket.destroy();\n       return;\n     }\n     \n     wss.handleUpgrade(request, socket, head, (ws) => {\n       ws.userId = userId;\n       wss.emit('connection', ws, request);\n     });\n   });\n   ```\n5. Create src/realtime/pubsub.ts:\n   - Subscribe to Redis channels: rt:incident:*, rt:notification:*\n   - On message: broadcast to connected clients in same org\n6. Emit events on incident status change, new message, new notification.",
@@ -935,7 +1045,7 @@
         "expansionPrompt": "Break down this task with a focus on implement websocket gateway with ticket authentication and redis pub/sub."
       },
       {
-        "id": 27,
+        "id": "27",
         "title": "Implement notifications centre API endpoints",
         "description": "Create endpoints for listing notifications, marking as read, and getting unread count for the in-app notification centre. Requirements: BF07, Phase S6.",
         "details": "1. Create src/modules/notifications/notifications.repository.ts:\n   - listByUser(userId, cursor, limit): paginated, newest first\n   - markAsRead(userId, notificationId)\n   - markAllAsRead(userId)\n   - getUnreadCount(userId)\n2. Create src/modules/notifications/notifications.service.ts:\n   - list(userId, cursor, limit): return DTOs\n   - markRead(userId, notificationId)\n   - markAllRead(userId)\n   - getUnreadCount(userId): cached in Redis for 30s\n3. Create src/modules/notifications/notifications.dto.ts:\n   - toNotificationDTO: { id, type, titleKey, bodyKey, incidentId?, read: boolean, createdAt }\n   - Title/body are i18n keys, translated client-side\n4. Create endpoints:\n   - GET /v1/notifications (cursor pagination)\n   - GET /v1/notifications/unread-count\n   - PATCH /v1/notifications/:id/read\n   - POST /v1/notifications/mark-all-read\n5. Create notification when: incident assigned, status changed, new message received.",
@@ -951,7 +1061,7 @@
         "expansionPrompt": "Break down this task with a focus on implement notifications centre api endpoints."
       },
       {
-        "id": 28,
+        "id": "28",
         "title": "Implement statistics endpoints with Redis caching",
         "description": "Create statistics endpoints for user, manager, and executive dashboards with Redis caching and per-organisation cache invalidation. Requirements: BF11, BF12, BF16, Phase S7.",
         "details": "1. Create src/modules/statistics/statistics.repository.ts:\n   - getIncidentCountsByStatus(orgId, dateRange?)\n   - getIncidentCountsBySeverity(orgId, dateRange?)\n   - getIncidentCountsByCategory(orgId, dateRange?)\n   - getIncidentTrend(orgId, period: 'day' | 'week' | 'month', count: number)\n   - getResolutionTimeStats(orgId, dateRange?)\n   - getSlaBreachCount(orgId, dateRange?)\n2. Create src/modules/statistics/statistics.service.ts:\n   - getUserStats(userId): my incidents count, by status\n   - getManagerStats(orgId): org overview with 5+ chart data sets\n   - getExecutiveStats(orgId): summary for Paul persona\n   - Cache strategy:\n     * Key: stats:{orgId}:{endpoint}:{hash(params)}\n     * TTL: 5 minutes\n     * Invalidation: bump org version key on incident change\n3. Create endpoints:\n   - GET /v1/statistics/me (EMPLOYEE)\n   - GET /v1/statistics/organisation (MANAGER, ADMIN)\n   - GET /v1/statistics/executive (ADMIN)\n4. Charts data: incidents by status (pie), by severity (bar), by category (horizontal bar), trend over time (line), resolution time distribution (histogram).",
@@ -967,7 +1077,7 @@
         "expansionPrompt": "Break down this task with a focus on implement statistics endpoints with redis caching."
       },
       {
-        "id": 29,
+        "id": "29",
         "title": "Implement PDF report generation with PDFKit",
         "description": "Create synchronous single-incident PDF reports and asynchronous period reports using PDFKit. Requirements: BF14, Phase S7.",
         "details": "1. Install pdfkit in apps/api.\n2. Create src/modules/reports/pdf-generator.ts:\n   ```typescript\n   export const generateIncidentPDF = async (incident: IncidentWithRelations): Promise<Buffer> => {\n     const doc = new PDFDocument();\n     const chunks: Buffer[] = [];\n     doc.on('data', chunk => chunks.push(chunk));\n     \n     // Header with logo\n     doc.image(LOGO_PATH, 50, 45, { width: 50 });\n     doc.fontSize(20).text('Incident Report', 110, 50);\n     \n     // Incident details\n     doc.fontSize(12).text(`Reference: ${incident.reference}`);\n     doc.text(`Status: ${incident.status}`);\n     doc.text(`Severity: ${incident.severity}`);\n     doc.text(`Category: ${incident.category.label_en}`);\n     doc.text(`Created: ${formatDate(incident.created_at)}`);\n     \n     // Description\n     doc.moveDown().fontSize(14).text('Description');\n     doc.fontSize(12).text(incident.description);\n     \n     // Timeline\n     doc.addPage().fontSize(14).text('Status History');\n     for (const entry of incident.status_history) {\n       doc.fontSize(10).text(`${formatDate(entry.created_at)}: ${entry.from_status} → ${entry.to_status}`);\n     }\n     \n     doc.end();\n     return Buffer.concat(chunks);\n   };\n   ```\n3. Create GET /v1/incidents/:id/report (synchronous, returns PDF).\n4. Create POST /v1/reports/period (async, creates report_job).\n5. Create BullMQ consumer for reports.pdf queue.\n6. Period report includes statistics charts rendered with pdfkit-svg.",
@@ -984,7 +1094,7 @@
         "expansionPrompt": "Break down this task with a focus on implement pdf report generation with pdfkit."
       },
       {
-        "id": 30,
+        "id": "30",
         "title": "Implement organisation and user administration endpoints",
         "description": "Create admin endpoints for managing organisations and users including 2FA reset and account deactivation. Requirements: BF15, Phase S7. Service layer must enforce: PROVIDER organisation cannot be deactivated or have its type changed; only Admins create users; TECHNICIAN and ADMIN roles are restricted to the PROVIDER organisation only; staff users (TECHNICIAN/ADMIN) with open assigned incidents cannot be deactivated or demoted until those incidents are reassigned.",
         "status": "pending",
@@ -1003,7 +1113,8 @@
             "dependencies": [],
             "details": "Repository layer handles Prisma queries only. Methods: list(cursor, limit, filters) returns paginated results; findById(id) returns single org; create(data) inserts new org; update(id, data) patches fields; deactivate(id) sets is_active=false. All queries must run inside withTenant() context for RLS. Never bypass tenant isolation.",
             "status": "pending",
-            "testStrategy": "Unit test each repository method with mock Prisma client. Verify correct SQL generated for pagination, filtering, and RLS compliance."
+            "testStrategy": "Unit test each repository method with mock Prisma client. Verify correct SQL generated for pagination, filtering, and RLS compliance.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1014,7 +1125,8 @@
             ],
             "details": "Service layer enforces business rules. On deactivate: check if org.type === 'PROVIDER', return 403 with appropriate error code. On update: if trying to change type and org.type === 'PROVIDER', reject. All org creation uses ClientOrganizationType only (enforced by schema). Fire audit events: admin.organisation.created, admin.organisation.updated, admin.organisation.deactivated.",
             "status": "pending",
-            "testStrategy": "Test deactivate rejects PROVIDER org with 403. Test update rejects type change for PROVIDER. Test create validates against ClientOrganizationType only. Test audit events fired correctly."
+            "testStrategy": "Test deactivate rejects PROVIDER org with 403. Test update rejects type change for PROVIDER. Test create validates against ClientOrganizationType only. Test audit events fired correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1023,7 +1135,8 @@
             "dependencies": [],
             "details": "Repository methods: listByOrg(orgId, cursor, limit, filters) for paginated user list; findById(id) for single user; create(data) inserts user; update(id, data) patches fields; resetTwoFactor(id) clears totp_secret_enc and sets is_2fa_enabled=false; deactivate(id) sets is_active=false and returns user id for token revocation. Use crypto.randomBytes(32).toString('base64url') for temp password generation in create. Add countOpenAssignedIncidents(userId): SELECT COUNT(*) FROM incidents WHERE assigned_to = userId AND status IN ('ASSIGNED', 'IN_PROGRESS'). This leverages existing index incidents_assigned_status_idx (schema.prisma:231).",
             "status": "pending",
-            "testStrategy": "Unit test repository methods. Verify temp password generation uses crypto module. Verify resetTwoFactor clears both TOTP fields. Verify deactivate returns id for downstream token cleanup. Test countOpenAssignedIncidents returns correct count for user with 0, 1, and multiple open incidents."
+            "testStrategy": "Unit test repository methods. Verify temp password generation uses crypto module. Verify resetTwoFactor clears both TOTP fields. Verify deactivate returns id for downstream token cleanup. Test countOpenAssignedIncidents returns correct count for user with 0, 1, and multiple open incidents.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1035,7 +1148,8 @@
             ],
             "details": "Business rules per packages/shared/src/schemas/user.schema.ts:10-11: when role is TECHNICIAN or ADMIN, verify target organisation type is PROVIDER, else return 400. **Open incident check (re-review m3)**: Before deactivating a user with role TECHNICIAN or ADMIN, call countOpenAssignedIncidents(). If count > 0, return 409 CONFLICT with { code: 'CONFLICT', message: 'errors.user.has_open_incidents', details: { count } }. Same check applies when demoting from TECHNICIAN/ADMIN to USER/MANAGER via update. Create flow: generate temp password, set must_change_password=true, send set-password email. 2FA reset: call resetTwoFactor repo method. Deactivate: check open incidents first, then set is_active=false, revoke all refresh tokens. Fire audit events: admin.user.created, admin.user.updated, admin.user.2fa_reset, admin.user.deactivated.",
             "status": "pending",
-            "testStrategy": "Test TECHNICIAN/ADMIN role assignment fails for non-PROVIDER orgs (400). Test role assignment succeeds for PROVIDER org. Test create sends email and sets must_change_password. Test deactivate with 0 open incidents succeeds. Test deactivate with open incidents returns 409 with count. Test role demotion (TECHNICIAN→USER) with open incidents returns 409. Test role demotion after reassigning incidents succeeds. Test audit events."
+            "testStrategy": "Test TECHNICIAN/ADMIN role assignment fails for non-PROVIDER orgs (400). Test role assignment succeeds for PROVIDER org. Test create sends email and sets must_change_password. Test deactivate with 0 open incidents succeeds. Test deactivate with open incidents returns 409 with count. Test role demotion (TECHNICIAN→USER) with open incidents returns 409. Test role demotion after reassigning incidents succeeds. Test audit events.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1046,7 +1160,8 @@
             ],
             "details": "Routes: GET/POST /v1/admin/organisations, GET/PATCH /v1/admin/organisations/:id, POST /v1/admin/organisations/:id/deactivate, GET/POST /v1/admin/organisations/:orgId/users, GET/PATCH /v1/admin/users/:id, POST /v1/admin/users/:id/reset-2fa, POST /v1/admin/users/:id/deactivate. All routes require ADMIN role middleware. Controllers do HTTP only: validate request with Zod schemas, call service, return DTO in standard envelope format. Deactivate and update endpoints should handle 409 responses from service when user has open incidents.",
             "status": "pending",
-            "testStrategy": "Integration tests: verify non-ADMIN gets 403. Test all routes return correct response envelope. Test validation errors return 400 with details. Test successful operations return correct DTOs. Test 409 response when deactivating/demoting user with open incidents."
+            "testStrategy": "Integration tests: verify non-ADMIN gets 403. Test all routes return correct response envelope. Test validation errors return 400 with details. Test successful operations return correct DTOs. Test 409 response when deactivating/demoting user with open incidents.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -1057,17 +1172,21 @@
             ],
             "details": "Test scenarios: 1) Non-admin user cannot access any admin endpoint (403). 2) PROVIDER org deactivation rejected (403). 3) PROVIDER org type change rejected (400). 4) TECHNICIAN/ADMIN role on non-PROVIDER org rejected (400). 5) User creation generates password, sends email, sets must_change_password. 6) 2FA reset clears TOTP fields. 7) Deactivated user cannot login. 8) All operations create correct audit logs. 9) Tenant isolation: admin cannot see/modify other tenant's data. **10) Open incident validation (re-review m3)**: create test data with staff user having incidents in ASSIGNED and IN_PROGRESS status; verify deactivation returns 409 with { error: { code: 'CONFLICT', details: { count: N } } }; verify demotion from TECHNICIAN to USER returns 409; reassign incidents and verify deactivation/demotion then succeeds; verify staff user with only RESOLVED/CLOSED incidents can be deactivated.",
             "status": "pending",
-            "testStrategy": "Run full integration test suite with test database. Verify all assertions pass. Check audit log entries in database after each operation. Specifically test open incident count edge cases: 0 incidents, 1 incident, multiple incidents, mixed statuses (some open, some closed)."
+            "testStrategy": "Run full integration test suite with test database. Verify all assertions pass. Check audit log entries in database after each operation. Specifically test open incident count edge cases: 0 incidents, 1 incident, multiple incidents, mixed statuses (some open, some closed).",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement organisation and user administration endpoints."
       },
       {
-        "id": 31,
+        "id": "31",
         "title": "Implement audit log viewing endpoints",
         "description": "Create endpoints for viewing audit logs with filtering by event type, user, entity, and date range. Requirements: BNF19, Phase S7. The s360_app role has no direct access to audit_logs table (L2 Table 13), so reading must use a SECURITY DEFINER function that verifies ADMIN context before returning data.",
         "status": "pending",
         "dependencies": [
-          16
+          "16"
         ],
         "priority": "medium",
         "details": "1. Create SECURITY DEFINER SQL function for audit log reading (in Prisma migration):\n   ```sql\n   -- Function to read audit logs with ADMIN-only access control\n   -- s360_app has no direct SELECT on audit_logs, must use this function\n   CREATE OR REPLACE FUNCTION read_audit_logs(\n     p_org_id UUID,\n     p_event_pattern TEXT DEFAULT NULL,\n     p_user_id UUID DEFAULT NULL,\n     p_entity_type TEXT DEFAULT NULL,\n     p_entity_id TEXT DEFAULT NULL,\n     p_date_from TIMESTAMPTZ DEFAULT NULL,\n     p_date_to TIMESTAMPTZ DEFAULT NULL,\n     p_cursor_created_at TIMESTAMPTZ DEFAULT NULL,\n     p_cursor_id BIGINT DEFAULT NULL,\n     p_limit INT DEFAULT 20\n   ) RETURNS TABLE (\n     id BIGINT,\n     event TEXT,\n     user_id UUID,\n     user_name TEXT,\n     entity_type TEXT,\n     entity_id TEXT,\n     old_data JSONB,\n     new_data JSONB,\n     ip_address INET,\n     request_id TEXT,\n     created_at TIMESTAMPTZ\n   ) LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$\n   BEGIN\n     -- Verify caller has ADMIN role (set by withTenant middleware)\n     IF current_setting('app.role', true) IS DISTINCT FROM 'ADMIN' THEN\n       RAISE EXCEPTION 'FORBIDDEN: audit log access requires ADMIN role';\n     END IF;\n     \n     -- Verify org_id matches session context\n     IF current_setting('app.org_id', true)::uuid IS DISTINCT FROM p_org_id THEN\n       RAISE EXCEPTION 'FORBIDDEN: organisation mismatch';\n     END IF;\n\n     RETURN QUERY\n     SELECT al.id, al.action AS event, al.user_id, u.first_name || ' ' || u.last_name AS user_name,\n            al.entity AS entity_type, al.entity_id, al.details->'old' AS old_data, al.details->'new' AS new_data,\n            al.ip, al.request_id, al.created_at\n     FROM audit_logs al\n     LEFT JOIN users u ON u.id = al.user_id\n     WHERE al.organization_id = p_org_id\n       AND (p_event_pattern IS NULL OR al.action ILIKE '%' || p_event_pattern || '%')\n       AND (p_user_id IS NULL OR al.user_id = p_user_id)\n       AND (p_entity_type IS NULL OR al.entity = p_entity_type)\n       AND (p_entity_id IS NULL OR al.entity_id = p_entity_id)\n       AND (p_date_from IS NULL OR al.created_at >= p_date_from)\n       AND (p_date_to IS NULL OR al.created_at <= p_date_to)\n       AND (p_cursor_created_at IS NULL OR (al.created_at, al.id) < (p_cursor_created_at, p_cursor_id))\n     ORDER BY al.created_at DESC, al.id DESC\n     LIMIT p_limit + 1;\n   END;\n   $$;\n\n   -- Grant execute to s360_app (no direct table access)\n   GRANT EXECUTE ON FUNCTION read_audit_logs TO s360_app;\n   -- Ensure no direct SELECT on audit_logs for s360_app\n   REVOKE SELECT ON audit_logs FROM s360_app;\n   ```\n\n2. Create apps/api/src/modules/audit/audit.repository.ts:\n   - `list(orgId, filters, cursor, limit)`: calls `read_audit_logs()` via `$queryRaw` tagged template\n   - Uses keyset pagination on (created_at, id)\n   - Returns { logs: AuditLogRow[], nextCursor, hasMore }\n\n3. Create apps/api/src/modules/audit/audit.service.ts:\n   - `list(orgId, filters, cursor?, limit)`: decode HMAC cursor (from packages/shared/src/utils/cursor.ts), call repository, encode nextCursor\n   - Invalid cursor returns VALIDATION_ERROR (never 500)\n   - Service does NOT add extra role checks - the SECURITY DEFINER function enforces ADMIN-only access at DB level\n\n4. Create apps/api/src/modules/audit/audit.dto.ts:\n   - `toAuditLogDTO(row)`: { id, event, user: { id, name } | null, entityType, entityId, changes: { old, new }, ipAddress, createdAt }\n   - Redact sensitive fields from old_data/new_data (password_hash, totp_secret, token_hash, refresh_token)\n   - Use a SENSITIVE_FIELDS constant for redaction keys\n\n5. Create GET /v1/admin/audit-logs endpoint (ADMIN only via middleware):\n   - Query params: event, userId, entityType, entityId, from, to, cursor, limit\n   - Validate with AuditLogFiltersSchema from packages/shared\n   - Returns listResponse envelope with HMAC-signed cursor\n   - Rate limited per L2 Table 5\n\n6. Retention policy: audit logs kept for 2 years (Law 2024/017 compliance) - enforced by maintenance job, not this endpoint.\n\n7. No deletion endpoint - audit logs are immutable (read-only endpoint only).\n\n8. Add AuditLogFiltersSchema to packages/shared/src/schemas/audit.schema.ts:\n   ```typescript\n   export const AuditLogFiltersSchema = z.object({\n     event: z.string().max(100).optional(),\n     userId: z.string().uuid().optional(),\n     entityType: z.string().max(50).optional(),\n     entityId: z.string().max(100).optional(),\n     from: z.coerce.date().optional(),\n     to: z.coerce.date().optional(),\n     cursor: z.string().optional(),\n     limit: z.coerce.number().int().min(1).max(100).default(20),\n   }).strict();",
@@ -1080,7 +1199,8 @@
             "dependencies": [],
             "details": "Create migration file in apps/api/prisma/migrations/ with:\n1. SECURITY DEFINER function read_audit_logs() that:\n   - Checks current_setting('app.role') = 'ADMIN'\n   - Verifies org_id matches app.org_id session var\n   - Applies all filters (event pattern, user_id, entity_type, entity_id, date range)\n   - Uses keyset pagination on (created_at, id)\n   - JOINs users table for user name\n   - SET search_path = public for security\n2. GRANT EXECUTE to s360_app\n3. REVOKE SELECT on audit_logs FROM s360_app (ensure no bypass)",
             "status": "pending",
-            "testStrategy": "Test function directly via psql: as s360_app with app.role='ADMIN' returns data; with other roles raises exception; verify SELECT audit_logs as s360_app returns permission denied."
+            "testStrategy": "Test function directly via psql: as s360_app with app.role='ADMIN' returns data; with other roles raises exception; verify SELECT audit_logs as s360_app returns permission denied.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1089,7 +1209,8 @@
             "dependencies": [],
             "details": "Create packages/shared/src/schemas/audit.schema.ts with:\n- AuditLogFiltersSchema using .strict()\n- event: z.string().max(100).optional() for pattern matching\n- userId: z.string().uuid().optional()\n- entityType: z.string().max(50).optional()\n- entityId: z.string().max(100).optional()\n- from/to: z.coerce.date().optional() for date range\n- cursor: z.string().optional() (HMAC-signed)\n- limit: z.coerce.number().int().min(1).max(100).default(20)\nExport from packages/shared/src/index.ts",
             "status": "pending",
-            "testStrategy": "Unit tests: valid filter combinations accepted; invalid UUID rejected; limit bounds enforced; extra properties rejected by strict mode."
+            "testStrategy": "Unit tests: valid filter combinations accepted; invalid UUID rejected; limit bounds enforced; extra properties rejected by strict mode.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1100,7 +1221,8 @@
             ],
             "details": "Create apps/api/src/modules/audit/audit.repository.ts:\n- list(orgId, filters, cursorPayload?, limit) method\n- Call read_audit_logs() via $queryRaw tagged template (never $queryRawUnsafe)\n- Pass all filter parameters to the function\n- Map results to typed AuditLogRow array\n- Calculate hasMore by fetching limit+1 and slicing\n- Return { logs, nextCursor: CursorPayload | null, hasMore }",
             "status": "pending",
-            "testStrategy": "Integration test with test database: verify function is called correctly; test with various filter combinations; verify pagination returns correct windows."
+            "testStrategy": "Integration test with test database: verify function is called correctly; test with various filter combinations; verify pagination returns correct windows.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1112,7 +1234,8 @@
             ],
             "details": "Create apps/api/src/modules/audit/audit.service.ts:\n- Inject CURSOR_HMAC_KEY from config\n- list(orgId, filters, cursor?, limit) method\n- If cursor provided: decode with decodeCursor(); if null, throw VALIDATION_ERROR\n- Call repository.list() with decoded cursor payload\n- Encode nextCursor with encodeCursor() if present\n- Note: no role check in service - SECURITY DEFINER function handles it",
             "status": "pending",
-            "testStrategy": "Unit tests with mocked repository: valid cursor decoded correctly; invalid cursor returns VALIDATION_ERROR; nextCursor encoded correctly."
+            "testStrategy": "Unit tests with mocked repository: valid cursor decoded correctly; invalid cursor returns VALIDATION_ERROR; nextCursor encoded correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1121,7 +1244,8 @@
             "dependencies": [],
             "details": "Create apps/api/src/modules/audit/audit.dto.ts:\n- SENSITIVE_FIELDS constant: ['password_hash', 'totp_secret', 'token_hash', 'refresh_token', 'secret', 'password']\n- redactSensitive(data: Record<string, unknown>) helper that replaces sensitive values with '[REDACTED]'\n- toAuditLogDTO(row): { id (string), event, user: { id, name } | null, entityType, entityId, changes: { old: redacted, new: redacted }, ipAddress, createdAt (ISO string) }\n- Handle null user_id (system events)",
             "status": "pending",
-            "testStrategy": "Unit tests: password_hash in old_data is redacted; non-sensitive fields preserved; null user_id returns user: null; nested sensitive fields handled."
+            "testStrategy": "Unit tests: password_hash in old_data is redacted; non-sensitive fields preserved; null user_id returns user: null; nested sensitive fields handled.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -1133,7 +1257,8 @@
             ],
             "details": "Create apps/api/src/modules/audit/audit.router.ts and audit.controller.ts:\n- GET /v1/admin/audit-logs route\n- Apply authMiddleware and requireRole('ADMIN') middleware\n- Validate query with AuditLogFiltersSchema\n- Call auditService.list(orgId, filters, cursor, limit)\n- Map logs through toAuditLogDTO\n- Return listResponse({ data: logs, meta: { nextCursor, hasMore } })\n- Apply rate limiting per L2 Table 5",
             "status": "pending",
-            "testStrategy": "Integration tests: ADMIN gets 200; non-ADMIN gets 403; filters work; pagination works; invalid cursor returns 400; response envelope correct."
+            "testStrategy": "Integration tests: ADMIN gets 200; non-ADMIN gets 403; filters work; pagination works; invalid cursor returns 400; response envelope correct.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -1144,12 +1269,16 @@
             ],
             "details": "Create tests/integration/audit/audit-security.test.ts:\n1. Test SECURITY DEFINER function directly:\n   - ADMIN role can read own org logs\n   - MANAGER/TECHNICIAN/EMPLOYEE roles get exception\n   - Mismatched org_id gets exception\n   - No role set gets exception\n2. Test API endpoint access control:\n   - Each role type (verify 403 for non-ADMIN)\n   - Cross-tenant isolation (ADMIN of org A cannot see org B)\n3. Test direct table access:\n   - Verify s360_app cannot SELECT from audit_logs directly\n4. Test sensitive data redaction in responses",
             "status": "pending",
-            "testStrategy": "Run full integration test suite with testcontainers PostgreSQL; verify all security assertions pass; check test coverage."
+            "testStrategy": "Run full integration test suite with testcontainers PostgreSQL; verify all security assertions pass; check test coverage.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement audit log viewing endpoints."
       },
       {
-        "id": 32,
+        "id": "32",
         "title": "Implement health check and Prometheus metrics endpoints",
         "description": "Create health check endpoints for load balancer probes and Prometheus metrics endpoint for observability. Requirements: Phase S7, L2 Table 23.",
         "details": "1. Install prom-client in apps/api.\n2. Create src/lib/metrics.ts:\n   ```typescript\n   import { Registry, Counter, Histogram, Gauge } from 'prom-client';\n   \n   export const registry = new Registry();\n   \n   export const httpRequestsTotal = new Counter({\n     name: 'http_requests_total',\n     help: 'Total HTTP requests',\n     labelNames: ['method', 'path', 'status'],\n     registers: [registry],\n   });\n   \n   export const httpRequestDuration = new Histogram({\n     name: 'http_request_duration_seconds',\n     help: 'HTTP request duration',\n     labelNames: ['method', 'path'],\n     buckets: [0.01, 0.05, 0.1, 0.5, 1, 5],\n     registers: [registry],\n   });\n   \n   export const activeWebsockets = new Gauge({\n     name: 'websocket_connections_active',\n     help: 'Active WebSocket connections',\n     registers: [registry],\n   });\n   ```\n3. Create metrics middleware to track requests.\n4. Create endpoints:\n   - GET /health/live: returns 200 if process running\n   - GET /health/ready: returns 200 if DB and Redis connected\n   - GET /metrics: Prometheus format (protected, s360_metrics role only)\n5. Collect default metrics: process CPU, memory, event loop lag.\n6. Custom metrics: queue depth, cache hit rate, auth failures.",
@@ -1166,7 +1295,7 @@
         "expansionPrompt": "Break down this task with a focus on implement health check and prometheus metrics endpoints."
       },
       {
-        "id": 33,
+        "id": "33",
         "title": "Generate OpenAPI 3.0 specification from Zod schemas and add Swagger UI",
         "description": "Auto-generate OpenAPI 3.0 specification from Zod schemas and serve Swagger UI for API documentation. Requirements: Phase S7, L5.",
         "details": "1. Install @anatine/zod-openapi, swagger-ui-express in apps/api.\n2. Create src/lib/openapi.ts:\n   - Register all Zod schemas with OpenAPI extensions\n   - Generate OpenAPI document with paths from router definitions\n3. Extend Zod schemas in @secure360/shared with .openapi():\n   ```typescript\n   export const CreateIncidentInputSchema = z.object({\n     category_code: z.string().openapi({ example: 'PHI-01' }),\n     description: z.string().min(10).max(2000).openapi({ example: 'Received suspicious email...' }),\n     is_anonymous: z.boolean().default(false),\n     guided_questions: GuidedQuestionsSchema,\n   }).strict().openapi('CreateIncidentInput');\n   ```\n4. Create route metadata for OpenAPI:\n   - Tags for grouping (Auth, Incidents, Messages, Admin, etc.)\n   - Response schemas for success and error cases\n   - Security requirements (Bearer auth)\n5. Serve Swagger UI at /api-docs (development only).\n6. Export OpenAPI JSON at /v1/openapi.json.\n7. Validate generated spec with openapi-lint.",
@@ -1183,7 +1312,7 @@
         "expansionPrompt": "Break down this task with a focus on generate openapi 3.0 specification from zod schemas and add swagger ui."
       },
       {
-        "id": 34,
+        "id": "34",
         "title": "Initialize Expo mobile app with routing, design tokens, and i18n",
         "description": "Create Expo SDK 57 mobile app with Expo Router route groups, NativeWind styling, design tokens from shared package, and bilingual i18n. Requirements: Phase S8, BNF07.",
         "details": "1. Run: npx create-expo-app apps/mobile --template expo-template-blank-typescript\n2. Install Expo SDK 57, expo-router, nativewind, react-native-reanimated.\n3. Configure app.json with scheme: 'secure360', plugins for router.\n4. Create route structure in app/:\n   ```\n   app/\n   ├── _layout.tsx           # Root layout with providers\n   ├── (auth)/               # Auth group (unauthenticated)\n   │   ├── _layout.tsx\n   │   ├── login.tsx\n   │   ├── verify-2fa.tsx\n   │   ├── forgot-password.tsx\n   │   └── first-login.tsx\n   ├── (app)/                # Main app group (authenticated)\n   │   ├── _layout.tsx\n   │   ├── (tabs)/           # Tab navigator\n   │   │   ├── _layout.tsx\n   │   │   ├── home.tsx\n   │   │   ├── incidents.tsx\n   │   │   └── profile.tsx\n   │   └── (report)/         # Report flow stack\n   │       ├── _layout.tsx\n   │       ├── category.tsx\n   │       ├── questions.tsx\n   │       ├── details.tsx\n   │       └── confirm.tsx\n   ```\n5. Create src/theme/ importing tokens from @secure360/shared.\n6. Configure NativeWind with custom theme from tokens.\n7. Set up i18n with expo-localization and i18next, loading keys from @secure360/shared.\n8. Create development build: eas build --profile development --platform android.",
@@ -1199,7 +1328,7 @@
         "expansionPrompt": "Break down Task 34 into subtasks: 1) Expo SDK 57 project creation with expo-router and app.json configuration, 2) Route groups structure ((auth)/, (app)/, (report)/) with nested layouts, 3) NativeWind configuration with design tokens from @secure360/shared, 4) i18n setup with expo-localization and i18next loading shared translations, 5) Development build creation with EAS for Android emulator testing."
       },
       {
-        "id": 35,
+        "id": "35",
         "title": "Verify Expo SDK 57 compatibility with react-native-firebase and MMKV",
         "description": "Day 1 verification that react-native-firebase messaging and react-native-mmkv v4 work with Expo SDK 57. Requirements: O2, Phase S8.",
         "details": "1. Install @react-native-firebase/app, @react-native-firebase/messaging.\n2. Install react-native-mmkv v4.\n3. Configure expo plugins in app.json:\n   ```json\n   {\n     \"plugins\": [\n       \"@react-native-firebase/app\",\n       \"@react-native-firebase/messaging\",\n       [\"react-native-mmkv\", {}]\n     ]\n   }\n   ```\n4. Add google-services.json to project root.\n5. Create test component verifying:\n   - Firebase messaging initializes\n   - Can request notification permissions\n   - Can get FCM token\n   - MMKV storage works (set/get/delete)\n   - MMKV encryption works\n6. Build development build and test on physical Android device.\n7. Document any issues or workarounds needed.\n8. Fallback: If react-native-firebase fails, evaluate expo-notifications (requires supervisor approval).",
@@ -1215,7 +1344,7 @@
         "expansionPrompt": "Break down this task with a focus on verify expo sdk 57 compatibility with react-native-firebase and mmkv."
       },
       {
-        "id": 36,
+        "id": "36",
         "title": "Implement mobile secure session with SecureStore and Axios refresh",
         "description": "Create secure token storage using expo-secure-store, Axios client with automatic single-flight token refresh, and session persistence. Requirements: Phase S8, BF01.",
         "details": "1. Install expo-secure-store, axios.\n2. Create src/lib/secure-storage.ts:\n   - Store tokens in SecureStore (keychain/keystore)\n   - Keys: 'secure360_access_token', 'secure360_refresh_token'\n3. Create src/lib/api-client.ts:\n   ```typescript\n   let isRefreshing = false;\n   let refreshSubscribers: ((token: string) => void)[] = [];\n   \n   const apiClient = axios.create({ baseURL: config.apiUrl });\n   \n   apiClient.interceptors.request.use(async (config) => {\n     const token = await secureStorage.getAccessToken();\n     if (token) config.headers.Authorization = `Bearer ${token}`;\n     return config;\n   });\n   \n   apiClient.interceptors.response.use(\n     (response) => response,\n     async (error) => {\n       if (error.response?.status === 401 && !error.config._retry) {\n         if (isRefreshing) {\n           return new Promise((resolve) => {\n             refreshSubscribers.push((token) => {\n               error.config.headers.Authorization = `Bearer ${token}`;\n               resolve(apiClient(error.config));\n             });\n           });\n         }\n         \n         isRefreshing = true;\n         error.config._retry = true;\n         \n         try {\n           const { accessToken, refreshToken } = await refreshTokens();\n           await secureStorage.setTokens(accessToken, refreshToken);\n           refreshSubscribers.forEach((cb) => cb(accessToken));\n           refreshSubscribers = [];\n           error.config.headers.Authorization = `Bearer ${accessToken}`;\n           return apiClient(error.config);\n         } finally {\n           isRefreshing = false;\n         }\n       }\n       throw error;\n     }\n   );\n   ```\n4. Handle session expiry: redirect to login, clear tokens.",
@@ -1231,7 +1360,7 @@
         "expansionPrompt": "Break down this task with a focus on implement mobile secure session with securestore and axios refresh."
       },
       {
-        "id": 37,
+        "id": "37",
         "title": "Implement mobile authentication screens and flow",
         "description": "Create login, 2FA verification, forgot password, and first login screens with Redux state management. Requirements: Phase S8, BF01, M01-M05.",
         "details": "1. Install @reduxjs/toolkit, react-redux.\n2. Create src/store/slices/auth.slice.ts:\n   - State: { user, isAuthenticated, requiresTwoFactor, requiresPasswordChange, loading, error }\n   - Actions: login, verifyTwoFactor, forgotPassword, resetPassword, changePassword, logout\n3. Create auth screens following M01-M05 mockups:\n   - (auth)/login.tsx: email + password form, loading state, error display\n   - (auth)/verify-2fa.tsx: 6-digit code input with auto-submit\n   - (auth)/forgot-password.tsx: email input, success message\n   - (auth)/first-login.tsx: new password + confirm with requirements\n4. Implement navigation guards in _layout.tsx:\n   - Redirect to login if not authenticated\n   - Redirect to first-login if must_change_password\n   - Redirect to verify-2fa if requiresTwoFactor\n5. Add biometric prompt option for returning users (optional, stored preference).\n6. All error messages from i18n, never hardcoded.",
@@ -1249,7 +1378,7 @@
         "expansionPrompt": "Break down this task with a focus on implement mobile authentication screens and flow."
       },
       {
-        "id": 38,
+        "id": "38",
         "title": "Implement encrypted MMKV Redux persistence with migrations",
         "description": "Configure Redux persistence using encrypted MMKV storage with versioned migrations for offline data. Requirements: Phase S8, BNF08.",
         "details": "1. Install redux-persist.\n2. Create src/lib/mmkv-storage.ts:\n   ```typescript\n   import { MMKV } from 'react-native-mmkv';\n   import * as SecureStore from 'expo-secure-store';\n   \n   const getEncryptionKey = async (): Promise<string> => {\n     let key = await SecureStore.getItemAsync('mmkv_key');\n     if (!key) {\n       key = generateSecureKey(); // crypto.getRandomValues\n       await SecureStore.setItemAsync('mmkv_key', key);\n     }\n     return key;\n   };\n   \n   export const createEncryptedMMKV = async () => {\n     const key = await getEncryptionKey();\n     return new MMKV({ id: 'secure360', encryptionKey: key });\n   };\n   ```\n3. Create MMKV storage adapter for redux-persist.\n4. Create src/store/migrations.ts:\n   ```typescript\n   export const migrations = {\n     0: (state) => state, // initial version\n     1: (state) => ({ ...state, incidents: { ...state.incidents, offlineQueue: [] } }),\n     // Add migrations as schema evolves\n   };\n   ```\n5. Configure persist in store:\n   - Whitelist: incidents (for offline), user preferences\n   - Blacklist: auth tokens (in SecureStore), loading states\n6. Add version tracking for migrations.\n7. Handle migration errors gracefully (clear and re-sync).",
@@ -1266,7 +1395,7 @@
         "expansionPrompt": "Break down this task with a focus on implement encrypted mmkv redux persistence with migrations."
       },
       {
-        "id": 39,
+        "id": "39",
         "title": "Implement mobile incident reporting flow with guided questions",
         "description": "Create the incident reporting flow screens (M08a-M11b) with category selection, guided severity questions, description, and photo attachment. Requirements: BF02-BF05, Phase S9.",
         "details": "1. Create report screens following mockups:\n   - (report)/category.tsx: 9 category groups, 34 categories from shared\n   - (report)/questions.tsx: 3 yes/no guided questions for severity\n   - (report)/details.tsx: title, description (multiline), confidential toggle\n   - (report)/photos.tsx: capture/select up to 5 photos, preview, remove\n   - (report)/confirm.tsx: summary, submit button\n2. Create src/store/slices/report.slice.ts:\n   - State: { step, categoryCode, guidedQuestions, title, description, isAnonymous, photos, submitting }\n   - Actions: setCategory, setQuestions, setDetails, addPhoto, removePhoto, submit, reset\n3. Photo handling:\n   - Use expo-image-picker with MediaTypeOptions.Images\n   - Compress to max 2 MiB using expo-image-manipulator\n   - Store as base64 temporarily, upload separately\n4. Form validation with react-hook-form and Zod schemas from shared.\n5. Progress indicator showing current step.\n6. Back navigation with confirmation if data entered.\n7. Handle keyboard avoiding for description input.",
@@ -1282,7 +1411,7 @@
         "expansionPrompt": "Break down this task with a focus on implement mobile incident reporting flow with guided questions."
       },
       {
-        "id": 40,
+        "id": "40",
         "title": "Implement offline mutation queue with idempotency and retry",
         "description": "Create offline mutation queue with idempotency keys, exponential backoff retry, dependencies between operations, and NEEDS_USER state for failures. Requirements: BF10, BNF08, Phase S9.",
         "details": "1. Create src/lib/offline-queue.ts:\n   ```typescript\n   interface QueuedMutation {\n     id: string;\n     idempotencyKey: string;\n     type: 'CREATE_INCIDENT' | 'UPLOAD_ATTACHMENT' | 'SEND_MESSAGE';\n     payload: unknown;\n     dependsOn?: string;  // id of mutation that must complete first\n     status: 'PENDING' | 'IN_PROGRESS' | 'NEEDS_USER' | 'COMPLETED' | 'FAILED';\n     retryCount: number;\n     lastError?: string;\n     createdAt: number;\n   }\n   \n   class OfflineQueue {\n     async enqueue(mutation: Omit<QueuedMutation, 'id' | 'status' | 'retryCount'>): Promise<string>;\n     async process(): Promise<void>;\n     async retry(id: string): Promise<void>;\n     async remove(id: string): Promise<void>;\n   }\n   ```\n2. Create src/store/slices/offline.slice.ts for queue state.\n3. Implement processing logic:\n   - Check network connectivity (NetInfo)\n   - Process in order, respecting dependsOn\n   - Exponential backoff with jitter: delay = min(2^n * 1000 + random(0, 1000), 60000)\n   - After 5 retries, set NEEDS_USER status for manual retry\n4. Create AttachmentUploader that queues uploads after incident creation.\n5. Show queue status in UI (pending count, failed items).\n6. Trigger processing on: app foreground, network restore, manual refresh.",
@@ -1299,7 +1428,7 @@
         "expansionPrompt": "Break down this task with a focus on implement offline mutation queue with idempotency and retry."
       },
       {
-        "id": 41,
+        "id": "41",
         "title": "Implement mobile incidents list and detail screens",
         "description": "Create My Incidents list screen with pull-to-refresh and incident detail screen with status timeline and conversation. Requirements: BF06, BF08, BF09, Phase S9, M12-M15.",
         "details": "1. Create RTK Query API slice for incidents:\n   ```typescript\n   export const incidentsApi = createApi({\n     reducerPath: 'incidentsApi',\n     baseQuery: fetchBaseQuery({ baseUrl: '/v1' }),\n     tagTypes: ['Incident', 'Message'],\n     endpoints: (builder) => ({\n       getMyIncidents: builder.query({ query: (params) => ({ url: '/incidents', params }) }),\n       getIncident: builder.query({ query: (id) => `/incidents/${id}` }),\n       getMessages: builder.query({ query: (incidentId) => `/incidents/${incidentId}/messages` }),\n       sendMessage: builder.mutation({ ... }),\n     }),\n   });\n   ```\n2. Create screens:\n   - (tabs)/incidents.tsx: FlatList with cursor pagination, pull-to-refresh, empty state\n   - incident/[id].tsx: detail view with tabs (Details, Timeline, Conversation)\n3. Incident card component showing: reference, category icon, severity badge, status chip, date.\n4. Detail screen:\n   - Header with reference, severity, status\n   - Description section\n   - Attachments gallery (tap to view full)\n   - Status timeline with dates\n   - Conversation with message input\n5. Optimistic UI for sending messages.\n6. Handle offline: show cached data with 'Last synced' timestamp.",
@@ -1315,7 +1444,7 @@
         "expansionPrompt": "Break down this task with a focus on implement mobile incidents list and detail screens."
       },
       {
-        "id": 42,
+        "id": "42",
         "title": "Implement mobile notifications centre and push handling",
         "description": "Create in-app notifications centre screen and handle incoming push notifications with deep linking. Requirements: BF07, BNF14, BNF16, Phase S9, M16-M17.",
         "details": "1. Create src/lib/push-notifications.ts:\n   - Register for push notifications on login\n   - Send FCM token to backend\n   - Handle foreground notifications (show in-app alert)\n   - Handle background/killed notifications (deep link on tap)\n2. Create notifications screen:\n   - (tabs)/notifications.tsx: list with unread indicator\n   - Mark as read on view\n   - Mark all read button\n3. Create NotificationItem component:\n   - Icon based on type\n   - Title and body from i18n keys\n   - Timestamp with relative formatting\n   - Unread dot indicator\n4. Deep linking configuration in app.json:\n   ```json\n   {\n     \"scheme\": \"secure360\",\n     \"android\": {\n       \"intentFilters\": [{\n         \"action\": \"VIEW\",\n         \"data\": [{ \"scheme\": \"secure360\", \"host\": \"incident\", \"pathPrefix\": \"/\" }]\n       }]\n     }\n   }\n   ```\n5. Handle deep links: secure360://incident/{id} opens incident detail.\n6. Badge count on tab icon for unread notifications.",
@@ -1332,7 +1461,7 @@
         "expansionPrompt": "Break down this task with a focus on implement mobile notifications centre and push handling."
       },
       {
-        "id": 43,
+        "id": "43",
         "title": "Complete mobile app with remaining screens and release hardening",
         "description": "Implement remaining screens (home, profile, settings, help) and apply release build hardening. Requirements: Phase S10, BF17, M01-M21.",
         "details": "1. Create remaining screens:\n   - (tabs)/home.tsx: dashboard summary, quick actions, recent incidents\n   - profile/index.tsx: user info, edit profile\n   - profile/security.tsx: change password, 2FA settings, biometric toggle\n   - profile/language.tsx: language selector (fr/en) with immediate switch\n   - help/index.tsx: FAQ, category descriptions, contact info\n2. Implement UI states:\n   - Loading: skeleton screens\n   - Empty: illustrations with helpful text\n   - Error: retry button, error message\n   - Offline: banner with last sync time\n   - Session expired: redirect to login with message\n3. Release hardening (eas.json production profile):\n   - Enable Hermes\n   - Enable R8/ProGuard minification\n   - Remove source maps (keep for crash reporting upload)\n   - Strip console.* calls\n   - Enable certificate pinning (TrustKit or similar)\n   - Enable root/jailbreak detection\n4. Verify APK size < 50 MB (use per-ABI splits if needed).\n5. Add version info in settings screen.",
@@ -1348,7 +1477,7 @@
         "expansionPrompt": "Break down this task with a focus on complete mobile app with remaining screens and release hardening."
       },
       {
-        "id": 44,
+        "id": "44",
         "title": "Initialize web dashboard with Vite, React 19, and authentication",
         "description": "Create web dashboard app with Vite, React 19, TanStack Query, and secure authentication using HttpOnly refresh cookies. Requirements: Phase S11, W01-W03.",
         "details": "1. Run: npm create vite@latest apps/web -- --template react-ts\n2. Install: @tanstack/react-query, zustand, react-router-dom@7, tailwindcss@4.\n3. Install shadcn/ui components: button, input, card, dialog, etc.\n4. Configure Vite proxy for /api/v1 to backend.\n5. Create src/lib/auth.ts:\n   - Store access token in memory (not localStorage)\n   - Refresh token via HttpOnly cookie (set by backend)\n   - Automatic refresh before expiry\n6. Create auth routes:\n   - /login: email + password form\n   - /verify-2fa: code input\n   - /forgot-password: email form\n7. Create protected route wrapper checking auth state.\n8. Configure Content Security Policy headers:\n   ```\n   default-src 'self';\n   script-src 'self';\n   style-src 'self' 'unsafe-inline';\n   connect-src 'self' wss://;\n   img-src 'self' data: blob:;\n   ```\n9. Create layout with sidebar navigation.",
@@ -1366,7 +1495,7 @@
         "expansionPrompt": "Break down Task 44 into subtasks: 1) Vite project setup with React 19, TanStack Query, Zustand, react-router-dom v7, 2) Tailwind v4 and shadcn/ui component installation, 3) Auth module with in-memory access token and HttpOnly cookie refresh (fixing opacity:0 bug from Stitch), 4) Vite proxy configuration for /api/v1 and CSP headers, 5) Protected route wrapper and sidebar layout scaffolding."
       },
       {
-        "id": 45,
+        "id": "45",
         "title": "Implement web incident queue with live updates and SLA timers",
         "description": "Create technician queue view with real-time updates via WebSocket and visual SLA timers. Requirements: BF13, Phase S11, W04-W06.",
         "details": "1. Create src/pages/Queue.tsx:\n   - Table view with columns: Reference, Category, Severity, Status, Assigned, Created, SLA\n   - Filters: status, severity, category, assigned (me/unassigned/all)\n   - Sort by: created date, SLA remaining\n2. Create SLA timer component:\n   - Calculate time remaining based on severity and created date\n   - Visual indicator: green (>50%), yellow (25-50%), red (<25%), black (breached)\n   - Update every minute\n3. Integrate WebSocket for live updates:\n   - Connect on mount, reconnect on disconnect\n   - Handle events: incident.created, incident.updated, incident.assigned\n   - Optimistically update UI, reconcile with server data\n4. Create incident actions:\n   - Assign to me button\n   - Re-qualify severity modal\n   - Status transition buttons based on state machine\n5. Keyboard shortcuts:\n   - 'a': assign selected to me\n   - 'r': open resolve modal\n   - 'j/k': navigate list\n6. URL state sync for filters.",
@@ -1383,7 +1512,7 @@
         "expansionPrompt": "Break down this task with a focus on implement web incident queue with live updates and sla timers."
       },
       {
-        "id": 46,
+        "id": "46",
         "title": "Implement web incident detail with conversation and internal notes",
         "description": "Create incident detail page with full information, conversation thread, and internal notes for SFC staff. Requirements: BF08, Phase S11, W07-W10.",
         "status": "pending",
@@ -1399,7 +1528,7 @@
         "expansionPrompt": "Break down this task with a focus on implement web incident detail with conversation and internal notes."
       },
       {
-        "id": 47,
+        "id": "47",
         "title": "Implement web statistics dashboard with charts",
         "description": "Create statistics dashboard with at least 5 chart types using Recharts for manager and executive views. Requirements: BF11, BF12, BF16, Phase S11, W13-W16.",
         "details": "1. Install recharts.\n2. Create src/pages/Statistics.tsx:\n   - Date range picker (preset: today, 7d, 30d, 90d, custom)\n   - Summary cards: total incidents, by status, avg resolution time\n3. Create chart components:\n   - PieChart: incidents by status\n   - BarChart: incidents by severity\n   - HorizontalBarChart: incidents by category (top 10)\n   - LineChart: incident trend over time\n   - Histogram: resolution time distribution\n4. Create executive summary view:\n   - Key metrics in large cards\n   - Trend arrows (up/down vs previous period)\n   - Top issues requiring attention\n5. Create manager view:\n   - Organisation-specific stats\n   - Team performance metrics\n   - Comparison to previous period\n6. Responsive layout:\n   - Desktop: 2-3 charts per row\n   - Tablet: 2 charts per row\n   - Mobile: 1 chart per row\n7. Export to PDF button using client-side PDF generation.",
@@ -1416,7 +1545,7 @@
         "expansionPrompt": "Break down this task with a focus on implement web statistics dashboard with charts."
       },
       {
-        "id": 48,
+        "id": "48",
         "title": "Implement web admin pages for organisations, users, and audit logs",
         "description": "Create admin pages for managing organisations, users, and viewing audit logs. Requirements: BF15, BNF19, Phase S11, W17-W22.",
         "details": "1. Create src/pages/admin/Organisations.tsx:\n   - Table: name, slug, users count, incidents count, status, actions\n   - Create organisation modal\n   - Edit organisation modal\n   - Deactivate with confirmation\n2. Create src/pages/admin/Users.tsx:\n   - Table: name, email, role, organisation, 2FA status, status, actions\n   - Create user modal (generates password, sends email)\n   - Edit user modal\n   - Reset 2FA with confirmation\n   - Deactivate with confirmation\n3. Create src/pages/admin/AuditLog.tsx:\n   - Table: timestamp, event, user, entity, IP\n   - Filters: event type, user, entity type, date range\n   - Click to expand: show changes (old → new)\n   - Export to CSV button\n4. Implement role-based access:\n   - ADMIN: own organisation users only\n   - SUPER_ADMIN: all organisations and users\n5. Add confirmation dialogs for destructive actions.\n6. Show toast notifications for success/error.",
@@ -1434,7 +1563,7 @@
         "expansionPrompt": "Break down Task 48 into subtasks: 1) Organizations CRUD pages with table, create/edit modals, deactivation confirmation, 2) Users management with table, create (generates password), edit, 2FA reset, deactivation, 3) Audit log viewer with filters (event type, user, entity, date range) and CSV export, 4) Role-based UI guards (ADMIN vs SUPER_ADMIN visibility), 5) Toast notifications and confirmation dialogs for destructive actions."
       },
       {
-        "id": 49,
+        "id": "49",
         "title": "Create production Docker Compose with Nginx, monitoring, and backups",
         "description": "Set up production Docker Compose configuration with Nginx TLS, API replicas, worker, PostgreSQL, Redis, Prometheus, Grafana, and backup job. Requirements: Phase S12, L9.",
         "details": "1. Create infra/docker-compose.prod.yml:\n   ```yaml\n   services:\n     nginx:\n       image: nginx:1.27-alpine\n       ports: ['80:80', '443:443']\n       volumes:\n         - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro\n         - ./nginx/certs:/etc/nginx/certs:ro\n         - ./nginx/acme:/var/www/acme:ro\n       depends_on: [api]\n     api:\n       build: ../../apps/api\n       deploy:\n         replicas: 2\n         resources:\n           limits: { memory: 512M }\n       environment:\n         - NODE_ENV=production\n       secrets: [jwt_secret, db_password, encryption_key]\n     worker:\n       build: ../../apps/api\n       command: npm run worker\n       deploy:\n         resources:\n           limits: { memory: 256M }\n     postgres:\n       image: postgres:16-alpine\n       volumes:\n         - pgdata:/var/lib/postgresql/data\n       deploy:\n         resources:\n           limits: { memory: 1G }\n     redis:\n       image: redis:8-alpine\n       command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru\n     prometheus:\n       image: prom/prometheus\n       volumes:\n         - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro\n     grafana:\n       image: grafana/grafana\n       volumes:\n         - grafana_data:/var/lib/grafana\n     backup:\n       image: postgres:16-alpine\n       command: /scripts/backup.sh\n       volumes:\n         - ./backup/scripts:/scripts:ro\n         - backup_data:/backups\n   ```\n2. Create Nginx config with least_conn load balancing, TLS 1.2+.\n3. Create Prometheus config scraping /metrics.\n4. Create Grafana dashboards (import existing).\n5. Create backup script with pg_dump, retention policy.",
@@ -1451,7 +1580,7 @@
         "expansionPrompt": "Break down this task with a focus on create production docker compose with nginx, monitoring, and backups."
       },
       {
-        "id": 50,
+        "id": "50",
         "title": "Implement CI/CD with GitHub Actions for testing and deployment",
         "description": "Create a GitHub Actions CD workflow triggered by v* tags for secure container image deployment to GHCR with rolling restart to the SFC host. CI already exists in .github/workflows/ci.yml and codeql.yml (do NOT modify). Requirements: L10, L2 section 14.",
         "status": "pending",
@@ -1587,7 +1716,7 @@
         "expansionPrompt": "Task 50 already has 10 subtasks defined covering: deploy.yml creation, multi-stage Dockerfile, Trivy scanning, GHCR push, production environment with manual approval, Prisma migrations with owner role, rolling restart with health checks, smoke tests, automatic rollback, and deployment notifications. The existing subtask breakdown is comprehensive and should be used."
       },
       {
-        "id": 51,
+        "id": "51",
         "title": "Execute load testing for 500 concurrent users",
         "description": "Perform load testing validating system handles 500 concurrent users with acceptable response times. Requirements: BNF09, Phase S12.",
         "details": "1. Install k6 for load testing.\n2. Create tests/load/scenarios.js:\n   ```javascript\n   import http from 'k6/http';\n   import { check, sleep } from 'k6';\n   \n   export const options = {\n     stages: [\n       { duration: '1m', target: 100 },  // ramp up\n       { duration: '3m', target: 500 },  // peak\n       { duration: '1m', target: 0 },    // ramp down\n     ],\n     thresholds: {\n       http_req_duration: ['p(95)<500'],  // 95% under 500ms\n       http_req_failed: ['rate<0.01'],    // <1% errors\n     },\n   };\n   \n   export default function () {\n     // Login flow\n     const loginRes = http.post('/api/v1/auth/login', { email, password });\n     check(loginRes, { 'login succeeded': (r) => r.status === 200 });\n     \n     // List incidents\n     const listRes = http.get('/api/v1/incidents', { headers: { Authorization } });\n     check(listRes, { 'list succeeded': (r) => r.status === 200 });\n     \n     sleep(1);\n   }\n   ```\n3. Test scenarios:\n   - Authentication: login, refresh, logout\n   - Incidents: list, create, update\n   - Messages: send, list\n   - Statistics: dashboard queries\n4. Identify and fix bottlenecks:\n   - Database query optimization\n   - Redis caching effectiveness\n   - Connection pooling\n5. Document results: p50, p95, p99 latencies, error rate.",
@@ -1603,7 +1732,7 @@
         "expansionPrompt": "Break down this task with a focus on execute load testing for 500 concurrent users."
       },
       {
-        "id": 52,
+        "id": "52",
         "title": "Execute security review and OWASP Mobile checklist",
         "description": "Perform comprehensive security review of all critical modules and verify OWASP Mobile Application Security score >= 8/10. Requirements: BNF12, Phase S12.",
         "status": "pending",
@@ -1620,7 +1749,7 @@
         "expansionPrompt": "Break down this task with a focus on execute security review and owasp mobile checklist."
       },
       {
-        "id": 53,
+        "id": "53",
         "title": "Build and test production APK with EAS",
         "description": "Create production Android APK using EAS Build with all hardening measures and verify on physical devices. Requirements: Phase S12, L6.",
         "details": "1. Configure eas.json production profile:\n   ```json\n   {\n     \"build\": {\n       \"production\": {\n         \"android\": {\n           \"buildType\": \"apk\",\n           \"gradleCommand\": \":app:assembleRelease\",\n           \"env\": {\n             \"EXPO_PUBLIC_API_URL\": \"https://api.secure360.cm\"\n           }\n         },\n         \"env\": {\n           \"APP_ENV\": \"production\"\n         }\n       }\n     }\n   }\n   ```\n2. Generate upload keystore and configure signing.\n3. Build APK: eas build --platform android --profile production\n4. Verify APK:\n   - Size < 50 MB (use per-ABI splits if needed)\n   - No debug symbols\n   - ProGuard/R8 minification applied\n   - Hermes enabled\n   - Source maps uploaded to crash reporting (not in APK)\n5. Test on physical devices:\n   - Samsung Galaxy (mid-range)\n   - Low-memory device (2GB RAM)\n   - Various Android versions (10, 11, 12, 13)\n6. Test scenarios:\n   - Full reporting flow offline then sync\n   - Push notifications\n   - Deep linking\n   - Session expiry handling\n7. Perform SUS usability test with >= 5 users (BNF13).",
@@ -1637,7 +1766,7 @@
         "expansionPrompt": "Break down this task with a focus on build and test production apk with eas."
       },
       {
-        "id": 54,
+        "id": "54",
         "title": "Create backup and restore procedure with verification",
         "description": "Implement automated backup job with off-host storage and verified restore procedure. Requirements: O4, Phase S12.",
         "details": "1. Create infra/backup/scripts/backup.sh:\n   ```bash\n   #!/bin/bash\n   set -euo pipefail\n   \n   TIMESTAMP=$(date +%Y%m%d_%H%M%S)\n   BACKUP_FILE=\"secure360_${TIMESTAMP}.sql.gz\"\n   \n   # Dump database\n   pg_dump -h postgres -U secure360 secure360 | gzip > /backups/${BACKUP_FILE}\n   \n   # Upload to off-host storage (within Cameroon)\n   rclone copy /backups/${BACKUP_FILE} remote:secure360-backups/\n   \n   # Cleanup old backups (keep 30 days)\n   find /backups -name '*.sql.gz' -mtime +30 -delete\n   rclone delete remote:secure360-backups/ --min-age 30d\n   \n   # Verify backup integrity\n   gunzip -t /backups/${BACKUP_FILE}\n   \n   echo \"Backup completed: ${BACKUP_FILE}\"\n   ```\n2. Create infra/backup/scripts/restore.sh:\n   ```bash\n   #!/bin/bash\n   BACKUP_FILE=$1\n   \n   # Stop API and worker\n   docker compose stop api worker\n   \n   # Restore database\n   gunzip -c ${BACKUP_FILE} | psql -h postgres -U secure360 secure360\n   \n   # Restart services\n   docker compose start api worker\n   ```\n3. Configure backup schedule: daily at 2 AM.\n4. Configure off-host target within Cameroon (Law 2024/017).\n5. Test restore procedure:\n   - Create backup\n   - Modify data\n   - Restore backup\n   - Verify data restored correctly\n6. Document RTO (Recovery Time Objective) and RPO (Recovery Point Objective).",
@@ -1653,7 +1782,7 @@
         "expansionPrompt": "Break down Task 54 into subtasks: 1) Backup shell script with pg_dump, gzip, and rclone upload to Cameroon-hosted off-site storage, 2) Restore script with service stop/start and psql import, 3) Docker Compose backup service configuration with daily cron at 2 AM, 4) Verification test procedure with documented RTO (<1 hour) and RPO (<24 hours). Include retention policy (30 days)."
       },
       {
-        "id": 55,
+        "id": "55",
         "title": "Create user manual and administrator documentation",
         "description": "Write bilingual user manual (fr/en) for mobile app and administrator manual for web dashboard. Requirements: Phase S13, L11-L12.",
         "details": "1. Create docs/user-manual/ directory.\n2. Mobile user manual (fr/en):\n   - Getting started: login, first password change, 2FA setup\n   - Reporting an incident: step-by-step with screenshots\n   - Tracking incidents: viewing status, timeline, messages\n   - Offline mode: what works, how to sync\n   - Notifications: enabling, managing\n   - Profile and settings: language, security\n   - FAQ and troubleshooting\n3. Administrator manual:\n   - Dashboard overview\n   - Queue management: assign, re-qualify, resolve\n   - Incident details: conversation, internal notes\n   - Statistics and reports\n   - User management: create, edit, deactivate, 2FA reset\n   - Organisation management\n   - Audit log review\n   - System health monitoring\n4. Use consistent formatting:\n   - Screenshots with annotations\n   - Step-by-step numbered lists\n   - Warning callouts for important notes\n5. Export as PDF for offline distribution.\n6. Include version number and last updated date.",
@@ -1670,7 +1799,7 @@
         "expansionPrompt": "Break down Task 55 into subtasks: 1) Mobile user manual (fr/en) covering login, 2FA, reporting flow, offline mode, notifications, profile settings with screenshots, 2) Administrator manual covering dashboard, queue management, user management, audit logs, system health with screenshots, 3) PDF export and version tracking. Focus on non-technical users for mobile manual."
       },
       {
-        "id": 56,
+        "id": "56",
         "title": "Implement email consumer and maintenance scheduler in worker",
         "description": "Create the BullMQ email consumer for the notify.email queue with SMTP/STARTTLS transport and bilingual (fr/en) templates, plus a maintenance scheduler with repeatable jobs for SLA breach scanning, incident auto-closure, and database housekeeping purges. Includes a new migration to grant s360_worker explicit DELETE privileges (or SECURITY DEFINER purge functions) for purge-target tables.",
         "status": "pending",
@@ -1692,7 +1821,8 @@
             "dependencies": [],
             "details": "Create migration file `apps/api/prisma/migrations/YYYYMMDDHHMMSS_worker_purge_grants/migration.sql`. Define five SECURITY DEFINER functions: `purge_expired_refresh_tokens()`, `purge_expired_password_reset_tokens()`, `purge_expired_idempotency_keys()`, `purge_processed_outbox_events()`, and `purge_old_notifications(p_days_old integer)`. Each function should use WITH deleted AS (DELETE ... RETURNING 1) SELECT count(*)::bigint FROM deleted pattern. Set search_path to pg_catalog, public, pg_temp for security. REVOKE EXECUTE from PUBLIC, GRANT EXECUTE only to s360_worker. The purge_old_notifications function should use GREATEST(p_days_old, 90) to enforce minimum 90-day retention.",
             "status": "pending",
-            "testStrategy": "Run migration on test database. Verify functions exist in pg_catalog.pg_proc. Verify function owner is s360_owner. Verify EXECUTE granted only to s360_worker via information_schema.routine_privileges query."
+            "testStrategy": "Run migration on test database. Verify functions exist in pg_catalog.pg_proc. Verify function owner is s360_owner. Verify EXECUTE granted only to s360_worker via information_schema.routine_privileges query.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -1703,7 +1833,8 @@
             ],
             "details": "Add new describe block 's360_worker purge functions' to grants.test.ts. Test that worker connection can call each of the five purge functions via $queryRaw and receives bigint result. Test that app connection calling any purge function receives PERMISSION_DENIED error. Test that metrics connection also receives PERMISSION_DENIED. Add EXPECTED_GRANTS comment noting these are function grants not table grants. Use the existing dbError helper and PERMISSION_DENIED constant from helpers/db.ts.",
             "status": "pending",
-            "testStrategy": "Run `npm run test:integration -- grants.test.ts`. All new tests in 's360_worker purge functions' describe block should pass. Verify coverage shows the new test file sections are executed."
+            "testStrategy": "Run `npm run test:integration -- grants.test.ts`. All new tests in 's360_worker purge functions' describe block should pass. Verify coverage shows the new test file sections are executed.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -1714,7 +1845,8 @@
             ],
             "details": "Create new test file `apps/api/tests/integration/purge-functions.test.ts`. For each purge function: (1) Create test data with both purgeable and non-purgeable rows, (2) Call the function, (3) Verify correct rows deleted and others retained. Test purge_expired_refresh_tokens deletes only where expires_at < NOW() OR revoked_at IS NOT NULL. Test purge_old_notifications with p_days_old=30 still uses 90 days minimum. Test purge_processed_outbox_events never deletes unprocessed events. Use inRolledBackTenant helper from helpers/db.ts with worker connection (null context). Create test fixtures for tokens and notifications with specific timestamps.",
             "status": "pending",
-            "testStrategy": "Run `npm run test:integration -- purge-functions.test.ts`. All tests should pass. Test cases: expired tokens deleted, valid tokens retained; old notifications deleted, recent retained; processed old outbox deleted, unprocessed retained; minimum 90-day retention enforced for notifications."
+            "testStrategy": "Run `npm run test:integration -- purge-functions.test.ts`. All tests should pass. Test cases: expired tokens deleted, valid tokens retained; old notifications deleted, recent retained; processed old outbox deleted, unprocessed retained; minimum 90-day retention enforced for notifications.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -1723,7 +1855,8 @@
             "dependencies": [],
             "details": "Install nodemailer and @types/nodemailer in apps/api. Create src/lib/email.ts with transporter using STARTTLS (secure: false, requireTLS: true, tls: { minVersion: 'TLSv1.2' }). Add smtp config to src/config/index.ts reading from SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_FROM env vars and smtp_password secret. Create src/worker/email/templates/ directory with index.ts exporting template map. Create password-reset.ts, critical-incident-alert.ts, token-reuse-alert.ts each implementing EmailTemplate interface with subject(), html(), text() functions accepting locale and data parameters.",
             "status": "pending",
-            "testStrategy": "Unit test each template renders correctly for fr and en locales. Test subject, html, and text outputs contain expected interpolated values. Test missing data throws clear error. Test SMTP config loads correctly from environment."
+            "testStrategy": "Unit test each template renders correctly for fr and en locales. Test subject, html, and text outputs contain expected interpolated values. Test missing data throws clear error. Test SMTP config loads correctly from environment.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -1734,7 +1867,8 @@
             ],
             "details": "Create src/worker/consumers/email.consumer.ts. Define EmailJobData interface with template, to, locale, data fields. Create Worker for 'notify.email' queue with concurrency: 5 and limiter: { max: 10, duration: 1000 }. Process jobs by looking up template, calling transporter.sendMail with from, to, subject, html, text. Log success with email address REDACTED. Add 'failed' event handler that moves jobs exceeding max attempts to Redis sorted set 'notify.email:dlq' with job data and error. Export job default options with attempts: 5 and exponential backoff starting at 60000ms.",
             "status": "pending",
-            "testStrategy": "Integration test enqueuing job results in sendMail call with correct params. Test retry with mocked failing sendMail. Test DLQ population after 5 failures. Test rate limiter blocks >10 emails/second. Test logs redact email addresses."
+            "testStrategy": "Integration test enqueuing job results in sendMail call with correct params. Test retry with mocked failing sendMail. Test DLQ population after 5 failures. Test rate limiter blocks >10 emails/second. Test logs redact email addresses.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -1743,7 +1877,8 @@
             "dependencies": [],
             "details": "Create src/worker/maintenance/scheduler.ts. Create maintenanceQueue using BullMQ Queue with redis connection. Export registerMaintenanceJobs() function that adds repeatable jobs: sla-breach-scan (every 60000ms), auto-close-resolved (cron '0 2 * * *' tz Africa/Douala), purge-expired-tokens (cron '0 3 * * *'), purge-old-notifications (cron '30 3 * * *'), purge-outbox (cron '0 4 * * *'), purge-idempotency-keys (cron '30 4 * * *'). Each job should have unique jobId matching its name.",
             "status": "pending",
-            "testStrategy": "Test registerMaintenanceJobs creates all repeatable jobs. Verify job patterns via maintenanceQueue.getRepeatableJobs(). Test timezone is Africa/Douala. Test jobIds are unique and match names."
+            "testStrategy": "Test registerMaintenanceJobs creates all repeatable jobs. Verify job patterns via maintenanceQueue.getRepeatableJobs(). Test timezone is Africa/Douala. Test jobIds are unique and match names.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -1754,7 +1889,8 @@
             ],
             "details": "Create src/worker/maintenance/sla-breach.ts with scanSlaBreaches() function. Use raw SQL query to find incidents WHERE status NOT IN ('RESOLVED', 'CLOSED') AND sla_breached_at IS NULL with CASE-based interval check per severity (CRITICAL 4h, HIGH 8h, MODERATE 24h, LOW 72h). For each breached incident, insert outbox event 'incident.sla_breached' and update incident sla_breached_at. Create src/worker/maintenance/auto-close.ts with autoCloseResolvedIncidents() using $executeRaw to UPDATE incidents SET status='CLOSED', closed_at=NOW() WHERE status='RESOLVED' AND resolved_at < 7 days ago.",
             "status": "pending",
-            "testStrategy": "Integration test: create incidents at various ages/severities, run scanner, verify correct ones marked breached. Test auto-close only closes RESOLVED incidents >7 days old. Test outbox events created for breaches."
+            "testStrategy": "Integration test: create incidents at various ages/severities, run scanner, verify correct ones marked breached. Test auto-close only closes RESOLVED incidents >7 days old. Test outbox events created for breaches.",
+            "parentId": "undefined"
           },
           {
             "id": 8,
@@ -1765,7 +1901,8 @@
             ],
             "details": "Create src/worker/maintenance/purges.ts exporting async functions: purgeExpiredRefreshTokens(), purgeExpiredResetTokens(), purgeExpiredIdempotencyKeys(), purgeProcessedOutboxEvents(), purgeOldNotifications(). Each function uses prisma.$queryRaw to SELECT the corresponding SECURITY DEFINER function, extracts the bigint result, converts to number, and returns it. Import prisma from lib/prisma and logger from lib/logger. Type the raw query result as [{ function_name: bigint }].",
             "status": "pending",
-            "testStrategy": "Unit test each wrapper calls correct SQL function. Integration test wrappers return correct counts after creating test data. Test return type is number not bigint."
+            "testStrategy": "Unit test each wrapper calls correct SQL function. Integration test wrappers return correct counts after creating test data. Test return type is number not bigint.",
+            "parentId": "undefined"
           },
           {
             "id": 9,
@@ -1779,12 +1916,16 @@
             ],
             "details": "Create src/worker/consumers/maintenance.consumer.ts with Worker for 'maintenance' queue, concurrency: 1. Switch on job.name to call appropriate handler: sla-breach-scan -> scanSlaBreaches(), auto-close-resolved -> autoCloseResolvedIncidents(), purge-expired-tokens -> { refresh: purgeExpiredRefreshTokens(), reset: purgeExpiredResetTokens() }, purge-old-notifications, purge-outbox, purge-idempotency-keys. Log job name, duration, and result with 'maintenance.completed'. Create/update src/worker/index.ts to call registerMaintenanceJobs() on startup and log worker start message.",
             "status": "pending",
-            "testStrategy": "Integration test maintenance worker processes each job type correctly. Test concurrency: 1 prevents parallel execution. Test unknown job name throws error. Test startup logs correct message."
+            "testStrategy": "Integration test maintenance worker processes each job type correctly. Test concurrency: 1 prevents parallel execution. Test unknown job name throws error. Test startup logs correct message.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 5,
+        "recommendedSubtasks": 3,
+        "expansionPrompt": "Break down this task with a focus on implement email consumer and maintenance scheduler in worker."
       },
       {
-        "id": 57,
+        "id": "57",
         "title": "Benchmark Prisma interactive transaction overhead and tune connection pool",
         "description": "Execute spike O8: measure the latency overhead of using one Prisma interactive transaction per tenant-scoped request under load, benchmark with autocannon at ~50 RPS, record p95 latency and connection pool metrics, then tune pool size within the max_connections 60 budget and document findings.",
         "details": "## 1. Prerequisites\nEnsure Task 8 (withTenant middleware with Prisma interactive transactions) and Task 4 (Prisma schema with RLS) are complete and working. The benchmark requires a representative list endpoint that uses the tenant context middleware.\n\n## 2. Install Benchmarking Tools\n```bash\n# In apps/api\nnpm install -D autocannon clinic\n```\n- `autocannon`: HTTP benchmarking tool (MIT license, ~200 KB)\n- `clinic`: Node.js performance profiling (optional, for deeper analysis)\n\n## 3. Create Benchmark Endpoint\nCreate a minimal list endpoint (e.g., GET /v1/incidents with pagination) that:\n- Passes through auth middleware (use a pre-generated valid JWT)\n- Uses withTenant() to set RLS context via interactive transaction\n- Executes a simple Prisma query with tenant isolation\n\n## 4. Configure Connection Pool Variations\nCreate test configurations in apps/api/prisma/schema.prisma or via DATABASE_URL:\n```\n# L2 Table 20 budget: max_connections = 60 total\n# Split: s360_app (API) ~40, s360_worker ~15, s360_metrics ~5\n\n# Test configurations for s360_app pool:\n# Baseline: connection_limit=10\n# Test 1: connection_limit=15\n# Test 2: connection_limit=20\n# Test 3: connection_limit=25\n```\n\nAdd Prisma connection pool settings:\n```typescript\n// datasources.db.url with ?connection_limit=N&pool_timeout=10\n```\n\n## 5. Run Benchmark Script\nCreate scripts/benchmark-tx-overhead.ts:\n```typescript\nimport autocannon from 'autocannon';\n\nconst config = {\n  url: 'http://localhost:3000/v1/incidents?limit=20',\n  connections: 10,       // concurrent connections\n  pipelining: 1,         // no pipelining\n  duration: 60,          // 60 seconds\n  headers: {\n    'Authorization': `Bearer ${process.env.BENCH_JWT}`,\n  },\n};\n\n// Target ~50 RPS\nautocannon(config, (err, result) => {\n  console.log('p50 latency:', result.latency.p50);\n  console.log('p95 latency:', result.latency.p95);\n  console.log('p99 latency:', result.latency.p99);\n  console.log('requests/sec:', result.requests.average);\n  console.log('errors:', result.errors);\n});\n```\n\n## 6. Monitor Connection Pool Usage\nDuring benchmarks, monitor PostgreSQL connection usage:\n```sql\n-- Active connections by role\nSELECT usename, state, count(*)\nFROM pg_stat_activity\nWHERE datname = 'secure360'\nGROUP BY usename, state;\n\n-- Connection wait events\nSELECT wait_event_type, wait_event, count(*)\nFROM pg_stat_activity\nWHERE datname = 'secure360' AND state = 'active'\nGROUP BY wait_event_type, wait_event;\n```\n\nAdd Prisma metrics logging:\n```typescript\nimport { createPrismaQueryEventHandler } from '@prisma/instrumentation';\n// Log query durations and pool wait times\n```\n\n## 7. Collect Metrics\nFor each pool size configuration, record:\n- **p50, p95, p99 latency** (ms)\n- **Throughput** (requests/sec achieved)\n- **Error rate** (connection timeouts, pool exhaustion)\n- **Avg concurrent connections** (from pg_stat_activity)\n- **Pool wait time** (if Prisma metrics available)\n\n## 8. Analyze Results\nCompare overhead of interactive transaction vs. baseline:\n- If p95 > 200ms under 50 RPS, investigate connection pool exhaustion\n- If pool wait times are high, increase connection_limit\n- Ensure total connections stay within 60 budget across all roles\n\n## 9. Document Decision in docs/decisions/\nCreate docs/decisions/ADR-O8-prisma-tx-overhead.md:\n```markdown\n# ADR-O8: Prisma Interactive Transaction Overhead\n\n## Status\nAccepted\n\n## Context\nL2 architecture specifies one interactive Prisma transaction per tenant-scoped\nrequest to set RLS context via set_config(). Need to verify this does not\nintroduce unacceptable latency overhead under production load.\n\n## Decision\n[Results from benchmark]\n- Pool size set to: N connections for s360_app\n- Measured p95 latency: Xms at 50 RPS\n- Connection utilization: Y%\n\n## Consequences\n[Document any trade-offs, tuning recommendations, or follow-up actions]\n```\n\n## 10. Update Configuration\nBased on findings, update:\n- Prisma connection pool settings in DATABASE_URL\n- Docker Compose PostgreSQL max_connections if needed\n- Add connection pool metrics to Prometheus (Task 32)",
@@ -1801,7 +1942,7 @@
         "expansionPrompt": "Break down this task with a focus on benchmark prisma interactive transaction overhead and tune connection pool."
       },
       {
-        "id": 58,
+        "id": "58",
         "title": "Implement remaining web dashboard pages: Reports, Client Manager, Settings, and interface states",
         "description": "Create the Reports page (W12: PDF generation for incidents/periods, job status tracking, download with 7-day retention), Client Manager overview dashboard (W22: organisation-scoped KPIs, charts, latest incidents with confidential masking, monthly PDF export, restricted sidebar), Settings pages (W19/W20: profile, language, notification preferences, TOTP re-enrolment with QR code, password change, sign out other sessions), and standardized interface states (W23: loading skeletons, empty states, error banners, toast notifications). Also fix the login page opacity:0 issue on Sign In button and Forgot Password link per BUILD_CHECKLIST.md.",
         "details": "## 1. Reports Page (W12) - src/pages/Reports.tsx\n\n### 1.1 Page Structure (from secure360_reports_classic_soc_enterprise Stitch export)\n```typescript\n// Components to create:\n// - ReportGeneratorCard: left column form for new report\n// - ReportListTable: right column showing generated reports\n// - ReportStatusBadge: Ready/Generating/Failed states\n```\n\n### 1.2 Report Generator Form\n- Radio group: \"Period report for an organization\" vs \"Single incident report\"\n- Organization selector dropdown\n- Date range picker (from/to with DD/MM/YYYY format, WAT timezone display)\n- Language selector (FR/EN segmented control)\n- Checkbox: \"Include incident list\"\n- Submit button: \"Generate PDF\"\n- Helper text showing ETA (10-25 seconds)\n\n### 1.3 Generated Reports Table\n- Columns: Name, Organization, Period, Requested by (avatar+name), Status, Actions\n- Status states with distinct styling:\n  - Ready: green badge with check_circle icon, Download button\n  - Generating: blue badge with spinner, elapsed time, \"Processing...\" disabled\n  - Failed: red badge with error icon, error tooltip, Retry button\n- Filter input for searching by organization or ID\n- Refresh button\n- Pagination footer\n- Retention notice: \"Reports are kept for 7 days\" with info icon\n\n### 1.4 API Integration\n- Use RTK Query to call POST /api/v1/reports (create job)\n- Poll GET /api/v1/reports/:id for job status\n- Download via GET /api/v1/reports/:id/download (blob response)\n- List via GET /api/v1/reports with pagination\n\n---\n\n## 2. Client Manager Overview (W22) - src/pages/ClientDashboard.tsx\n\n### 2.1 Restricted Sidebar Navigation\nCreate a separate sidebar component for MANAGER role with limited navigation:\n- Overview (active)\n- Incidents\n- Statistics\n- Reports\n- Settings\n\n### 2.2 Page Header\n- Organization badge with icon (e.g., \"ORAC · Yaoundé Central Station\")\n- WAT timezone indicator\n- Period selector dropdown (October 2026)\n- \"Export monthly PDF report\" CTA button\n\n### 2.3 KPI Cards Grid (4 columns)\n- Reported this month: count with trend vs previous month\n- Open: count with \"Active\" badge\n- Critical: count with \"P1 Escalation\" badge (danger styling)\n- Resolved within SLA: percentage with \"Healthy\" badge\n\n### 2.4 Charts Row (7/5 column split)\n- Left: \"Reports per week\" line+area chart with Recharts\n  - X-axis: W1, W2, W3, W4 with date ranges\n  - Two series: Reported (solid line) and Resolved (dashed)\n  - Gradient area fills\n- Right: \"By category group\" horizontal progress bars\n  - Top 5 categories with percentages\n  - Primary threat category summary\n\n### 2.5 Latest Incidents Table\n- Scoped to organization\n- Confidential reporter masking: show \"Confidential reporter\" badge with shield_lock icon instead of reporter name for is_anonymous=true incidents\n- Columns: Reference, Title & Subject, Severity, Status, Assigned SFC Analyst, Reported Time\n- Footer showing count and SLA metrics\n\n### 2.6 Footer\n- Support SFC phone number\n\n---\n\n## 3. Settings Pages (W19/W20) - src/pages/Settings.tsx\n\n### 3.1 Tabbed Layout\n- Tab navigation: Profile | Security | Notifications\n- Tab switching with URL hash updates\n\n### 3.2 Profile Tab (W19)\nLeft column (8/12):\n- User summary header card with avatar, name, role badge, status indicator\n- Personal information form:\n  - First name, Last name (editable inputs)\n  - Work email (disabled, locked icon, \"Corporate directory locked\")\n  - Mobile phone with country code prefix (+237)\n  - Dashboard interface language (FR/EN radio buttons)\n- Save/Cancel buttons\n\nRight column (4/12):\n- Security health widget: 2FA status, password age, link to Security tab\n- Monthly activity stats card (dark themed)\n\n### 3.3 Security Tab (W20)\nTwo-step verification card:\n- Status badge (On/Off)\n- \"Set up again\" button to re-enrol\n- TOTP re-enrolment panel (collapsible):\n  - QR code display (generate with qrcode library from TOTP URI)\n  - Manual key display with copy button\n  - 6-digit verification input\n  - Verify and save / Cancel buttons\n- Backup codes info\n\nPassword card:\n- Last changed date with rotation policy info\n- Change password form (collapsible):\n  - Current password input with visibility toggle\n  - New password + Confirm password inputs\n  - Password policy requirements checklist (12+ chars, uppercase, number, special)\n  - Update password button\n\nActive sessions table:\n- Columns: Browser & OS, IP Address, Location, Active Since, Action\n- Current session badge\n- Terminate button for other sessions\n- \"Sign out of all other sessions\" bulk action\n\n### 3.4 Notifications Tab\nToggle switches for preferences:\n- New critical incident (email) - with email icon, danger styling\n- SLA at risk (in-app) - with timer icon\n- New message on my incidents (in-app) - with chat icon\n- Play sound for critical incidents - with volume icon\n\nEach toggle shows description and saves immediately with toast feedback.\n\n---\n\n## 4. Interface States Components (W23)\n\n### 4.1 Create src/components/ui/states/ directory\n\n### 4.2 ConnectionBanner.tsx\n- Amber/warning colored banner for network disconnection\n- Animated ping dot\n- \"Live updates paused — reconnecting…\" message\n- \"Reconnect now\" button with sync icon\n- Auto-dismiss when connection restored\n\n### 4.3 ErrorBanner.tsx\n- Red left-border with error styling\n- Icon, title, HTTP error code badge\n- Descriptive message\n- Retry button\n- Diagnostics link (optional)\n\n### 4.4 TableSkeleton.tsx\n- Animated pulse skeleton rows matching table structure\n- Configurable column widths and row count\n- Header row preserved\n- \"Loading incidents...\" indicator\n\n### 4.5 EmptyState.tsx\n- Centered content with illustration/icon\n- search_off icon with tune badge for filtered empty\n- Headline and description\n- \"Clear filters\" and \"Reset to default view\" buttons\n\n### 4.6 Toast Notifications - use react-hot-toast or shadcn/ui Toast\n- Incident assigned toast: left primary border, assignment_ind icon\n- Critical incident toast: red top border with animated ping, audio alert indicator\n- Success/error/info variants\n\n### 4.7 SessionExpiredModal.tsx\n- Lock overlay with scrim backdrop\n- lock_clock icon\n- User identity card snippet\n- Password re-auth form\n- \"Sign in again\" button\n- \"Switch user / Logout\" link\n\n### 4.8 KeyboardShortcutsModal.tsx\n- List of hotkeys with kbd styled keys\n- J/K navigation, A assign, S status, / search, ? shortcuts, Esc close\n\n---\n\n## 5. Login Page Fix (docs/BUILD_CHECKLIST.md)\n\n### 5.1 Fix opacity:0 on Sign In button and Forgot Password link\nIn src/pages/Login.tsx or LoginForm component:\n```typescript\n// Remove or override style=\"opacity: 0;\" from:\n// - Submit button: should be fully visible\n// - \"Forgot password?\" link: should be visible\n\n// If using Tailwind, ensure no opacity-0 class\n// If rendering from Stitch HTML, manually fix the styles\n```\n\nThe Stitch export at line 109-112 has:\n- `<button ... style=\"opacity: 0;\">Sign in</button>`\n- `<a ... style=\"opacity: 0;\">Forgot password?</a>`\n\nThese must NOT be carried over to production code.\n\n---\n\n## 6. File Structure\n```\nsrc/\n├── pages/\n│   ├── Reports.tsx\n│   ├── ClientDashboard.tsx\n│   ├── Settings.tsx\n│   └── Login.tsx (fix opacity)\n├── components/\n│   ├── reports/\n│   │   ├── ReportGeneratorCard.tsx\n│   │   ├── ReportListTable.tsx\n│   │   └── ReportStatusBadge.tsx\n│   ├── dashboard/\n│   │   ├── ClientKPICards.tsx\n│   │   ├── WeeklyReportsChart.tsx\n│   │   ├── CategoryDistributionChart.tsx\n│   │   └── LatestIncidentsTable.tsx\n│   ├── settings/\n│   │   ├── ProfileForm.tsx\n│   │   ├── SecurityTab.tsx\n│   │   ├── TotpReenrollment.tsx\n│   │   ├── PasswordChangeForm.tsx\n│   │   ├── SessionsTable.tsx\n│   │   └── NotificationPreferences.tsx\n│   └── ui/\n│       └── states/\n│           ├── ConnectionBanner.tsx\n│           ├── ErrorBanner.tsx\n│           ├── TableSkeleton.tsx\n│           ├── EmptyState.tsx\n│           ├── SessionExpiredModal.tsx\n│           └── KeyboardShortcutsModal.tsx\n├── hooks/\n│   ├── useReportJobs.ts\n│   ├── useConnectionStatus.ts\n│   └── useSessionTimeout.ts\n└── store/\n    └── slices/\n        └── reportsApi.ts (RTK Query)\n```\n\n---\n\n## 7. Security Considerations\n\n### 7.1 Confidential Reporter Masking (BF06)\nIn LatestIncidentsTable, when rendering reporter column:\n```typescript\n{incident.is_anonymous ? (\n  <span className=\"inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container text-text-secondary text-[11px]\">\n    <ShieldLockIcon className=\"w-3 h-3\" />\n    Confidential reporter\n  </span>\n) : (\n  <span>{incident.reporter.full_name}</span>\n)}\n```\n\n### 7.2 TOTP Re-enrolment Security\n- Require current password verification before showing QR code\n- Generate new TOTP secret server-side\n- Validate 6-digit code before saving\n- Clear QR/secret from DOM after successful enrolment\n\n### 7.3 Session Management\n- Call DELETE /api/v1/auth/sessions/:id to terminate individual sessions\n- Call DELETE /api/v1/auth/sessions to terminate all other sessions\n- Current session identified by matching JWT session ID\n\n---\n\n## 8. Accessibility\n- All form inputs have labels\n- Error messages linked via aria-describedby\n- Modals trap focus and close on Esc\n- Toast notifications use role=\"alert\"\n- Severity badges have aria-label for screen readers\n\n---\n\n## 9. i18n\nAll user-facing text uses i18n keys from @secure360/shared:\n- `pages.reports.title`, `pages.reports.generate_pdf`\n- `pages.settings.profile`, `pages.settings.security`\n- `components.states.loading`, `components.states.empty_results`\n- `auth.session_expired`, `auth.sign_in_again`",
@@ -1821,7 +1962,7 @@
         "expansionPrompt": "Break down this task with a focus on implement remaining web dashboard pages: reports, client manager, settings, and interface states."
       },
       {
-        "id": 59,
+        "id": "59",
         "title": "Performance and usability validation for test report L9",
         "description": "Execute performance benchmarks (screen load < 2s, report submission < 5s on Android 10/4GB device over throttled 3G), measure push notification end-to-end latency (< 5s), and conduct SUS questionnaire with 5+ representative users (target > 70). Document methodology and results for L9 deliverable.",
         "details": "## 1. Prerequisites and Test Environment Setup\n\n### 1.1 Reference Device Configuration\n- **Device**: Android 10 (API 29) smartphone with 4 GB RAM (as specified in Spec §11.1)\n- **Network**: Throttled 3G simulation using Android Developer Options or Chrome DevTools network throttling\n  - Download: 750 Kbps\n  - Upload: 250 Kbps\n  - Latency: 100ms RTT\n- Ensure device is connected to the test backend (staging or local with Docker Compose)\n\n### 1.2 Test Data Preparation\n- Create test organisation with seeded incidents from Task 5\n- Create test user accounts for each persona (Aimé, Christelle, Jean-Paul)\n- Ensure FCM is configured and device token registered (Task 25, 42)\n\n## 2. Performance Testing (BNF01)\n\n### 2.1 Screen Load Time Measurement (< 2 seconds)\n```typescript\n// Create apps/mobile/src/utils/performance-tracker.ts\nimport { PerformanceObserver, performance } from 'react-native-performance';\n\nexport const measureScreenLoad = (screenName: string) => {\n  const startTime = performance.now();\n  return {\n    complete: () => {\n      const duration = performance.now() - startTime;\n      console.log(`[PERF] ${screenName} loaded in ${duration.toFixed(2)}ms`);\n      return duration;\n    }\n  };\n};\n```\n\n**Screens to measure** (from M01-M21):\n- Login screen (M01)\n- Home/Dashboard (M06)\n- Incidents list (M12)\n- Incident detail (M13/M14)\n- Report category selection (M08a)\n- Notifications centre (M16)\n\n**Test procedure**:\n1. Clear app cache before each test run\n2. Measure time from navigation start to `InteractionManager.runAfterInteractions` completion\n3. Run 5 iterations per screen, record median\n4. Use React Native Performance library or manual timestamps\n\n### 2.2 Report Submission Time (< 5 seconds)\n```typescript\n// Measure full report submission flow\nconst measureReportSubmission = async (reportData: CreateIncidentInput) => {\n  const startTime = Date.now();\n  \n  // Include: validation, image compression, API call, response parsing\n  await submitIncident(reportData);\n  \n  const totalTime = Date.now() - startTime;\n  console.log(`[PERF] Report submitted in ${totalTime}ms`);\n  return totalTime;\n};\n```\n\n**Test scenarios**:\n- Text-only report (no attachments)\n- Report with 1 photo (1.5 MB before compression)\n- Report with 5 photos (maximum allowed)\n- Offline queue submission (measure queue + sync when online)\n\n**3G throttling verification**:\n```bash\n# Use adb to verify throttled speeds\nadb shell settings put global captive_portal_mode 0\n# Or use Charles Proxy / mitmproxy for precise throttling\n```\n\n## 3. Push Notification Latency Testing (BNF14)\n\n### 3.1 End-to-End Latency Measurement\n```typescript\n// Create tests/performance/push-latency.test.ts\ninterface LatencyMeasurement {\n  eventTimestamp: number;      // Server event creation time\n  fcmSendTimestamp: number;    // FCM API call time\n  deviceReceiveTimestamp: number; // onMessage callback time\n  totalLatency: number;\n}\n\n// Server-side: Add timestamp to push job data\nconst enqueuePushNotification = async (data: PushData) => {\n  await pushQueue.add('notify.push', {\n    ...data,\n    _perf_enqueued_at: Date.now()\n  });\n};\n\n// Mobile-side: Record receive time\nmessaging().onMessage(async (remoteMessage) => {\n  const receiveTime = Date.now();\n  const sendTime = remoteMessage.data?._perf_sent_at;\n  const latency = receiveTime - parseInt(sendTime, 10);\n  console.log(`[PERF] Push latency: ${latency}ms`);\n});\n```\n\n### 3.2 Test Procedure\n1. Trigger notification from web dashboard (assign incident, send message)\n2. Record server timestamp when outbox event created\n3. Record timestamp when FCM send completes (in push.consumer.ts)\n4. Record timestamp when mobile app receives notification\n5. Calculate total latency: device_receive - server_event_created\n\n**Target**: < 5000ms end-to-end (server to device)\n\n### 3.3 Measurement Points\n- `T0`: Outbox event inserted (server)\n- `T1`: BullMQ job processed, FCM API called (worker)\n- `T2`: FCM acknowledgement received (worker)\n- `T3`: `messaging().onMessage` triggered (mobile)\n- **Latency** = `T3 - T0`\n\nRun 20 measurements, record: min, max, median, p95\n\n## 4. System Usability Scale (SUS) Testing (BNF13)\n\n### 4.1 Participant Selection\nRecruit 5+ representative users matching personas:\n- 2-3 Aimé-type users (non-technical employees, various age groups)\n- 1 Christelle-type user (IT manager)\n- 1 Jean-Paul-type user (analyst/technician)\n\n### 4.2 SUS Questionnaire (Standard 10 Questions)\n```\n1. I think that I would like to use this system frequently.\n2. I found the system unnecessarily complex.\n3. I thought the system was easy to use.\n4. I think that I would need the support of a technical person to use this system.\n5. I found the various functions in this system were well integrated.\n6. I thought there was too much inconsistency in this system.\n7. I would imagine that most people would learn to use this system very quickly.\n8. I found the system very cumbersome to use.\n9. I felt very confident using the system.\n10. I needed to learn a lot of things before I could get going with this system.\n\nScale: 1 (Strongly Disagree) to 5 (Strongly Agree)\n```\n\n### 4.3 Test Tasks (Before Questionnaire)\nHave each participant complete these tasks:\n1. Login and complete 2FA setup\n2. Report an incident (phishing email category, moderate severity)\n3. Add a photo to an incident report\n4. View incident status and timeline\n5. Read and respond to a message from SFC analyst\n6. Change language from French to English\n7. Find help/FAQ section\n\n### 4.4 SUS Score Calculation\n```typescript\n// Create docs/testing/sus-calculator.ts\nconst calculateSUS = (responses: number[]): number => {\n  // For odd questions (1,3,5,7,9): score = response - 1\n  // For even questions (2,4,6,8,10): score = 5 - response\n  let totalScore = 0;\n  \n  for (let i = 0; i < 10; i++) {\n    if (i % 2 === 0) {\n      totalScore += responses[i] - 1;\n    } else {\n      totalScore += 5 - responses[i];\n    }\n  }\n  \n  return totalScore * 2.5; // Scale to 0-100\n};\n\n// Target: > 70 (above average usability)\n// 68 = average; 80+ = excellent\n```\n\n## 5. Results Documentation (L9 Deliverable)\n\n### 5.1 Create Performance Test Report\nCreate `docs/testing/L9_performance_report.md`:\n```markdown\n# Secure360 Performance and Usability Test Report (L9)\n\n## 1. Test Environment\n- Device: [Model], Android [Version], [RAM]\n- Network: Throttled 3G ([Download/Upload/Latency])\n- Backend: [Staging/Local] version [commit hash]\n- Date: [YYYY-MM-DD]\n\n## 2. Screen Load Times (BNF01: < 2s target)\n| Screen | Run 1 | Run 2 | Run 3 | Run 4 | Run 5 | Median | Pass |\n|--------|-------|-------|-------|-------|-------|--------|------|\n| Login  | Xms   | Xms   | Xms   | Xms   | Xms   | Xms    | ✓/✗  |\n...\n\n## 3. Report Submission Times (BNF01: < 5s target)\n| Scenario | Time | Pass |\n|----------|------|------|\n| Text only | Xms | ✓/✗ |\n| 1 photo   | Xms | ✓/✗ |\n| 5 photos  | Xms | ✓/✗ |\n\n## 4. Push Notification Latency (BNF14: < 5s target)\n| Metric | Value |\n|--------|-------|\n| Min    | Xms   |\n| Median | Xms   |\n| P95    | Xms   |\n| Max    | Xms   |\n\n## 5. SUS Usability Results (BNF13: > 70 target)\n| Participant | Type | Score |\n|-------------|------|-------|\n| P1 | Aimé | XX |\n...\n| **Average** | | **XX** |\n\n## 6. Conclusion\n[Summary of findings, pass/fail status for each requirement]\n```\n\n### 5.2 Evidence Collection\n- Screenshots of throttled network settings\n- Console logs with timing measurements\n- Filled SUS questionnaire forms (anonymized)\n- Video recordings of test sessions (optional)\n\n## 6. Tooling\n\n### 6.1 Mobile Performance Profiling\n```bash\n# Enable React Native Performance monitor\nnpm install --save-dev react-native-performance\n\n# Use Flipper for detailed profiling\nnpx react-native start --experimental-debugger\n```\n\n### 6.2 Network Throttling Options\n- Android Developer Options > Network speed simulation\n- Charles Proxy with throttling preset\n- Chrome DevTools (for web testing)\n\n### 6.3 Timestamp Synchronization\nEnsure server and mobile device clocks are NTP-synchronized for accurate latency measurements.",
@@ -1841,7 +1982,7 @@
         "expansionPrompt": "Break down this task with a focus on performance and usability validation for test report l9."
       },
       {
-        "id": 60,
+        "id": "60",
         "title": "Write internship report (L13) and defence presentation (L14)",
         "description": "Author the internship report for the academic jury documenting the complete project lifecycle (L1-L12), AI-assisted development methodology, and decision records, plus create a clean, minimal defence presentation with visual summaries of architecture, implementation, and results.",
         "details": "## 1. Prerequisites\n- All deliverables L1-L12 must be complete and available in `docs/reference/deliverables/`\n- Decision records D1-D9 accessible from L1 Needs Analysis\n- AI tier usage data collected from merged pull requests (PR template field \"AI tier used\")\n- Performance and usability results from Task 59 (L9)\n- User and administrator manuals from Task 55 (L11-L12)\n\n## 2. Internship Report (L13) Structure\n\n### 2.1 Create `docs/deliverables/L13_Internship_Report.md` (source)\n\nFollowing academic internship report conventions (~60-80 pages when rendered):\n\n**Front Matter**\n- Title page: \"Secure360: Cybersecurity Incident Reporting Platform for Security First Cameroon\"\n- Abstract (fr/en, 250 words each)\n- Acknowledgements\n- Table of contents, list of figures, list of tables\n- Glossary (RLS, TOTP, JWT, SLA, etc.)\n\n**Chapter 1: Introduction (5-7 pages)**\n- Context: cybersecurity landscape in Cameroon, SME challenges\n- Problem statement: employees witness incidents but lack reporting tools\n- Objectives: mobile app, web dashboard, offline capability, compliance with Law 2024/017\n- Report structure overview\n\n**Chapter 2: Literature Review and State of the Art (8-10 pages)**\n- Existing incident reporting solutions (commercial, open-source)\n- Mobile offline-first architecture patterns\n- Row-Level Security in multi-tenant applications\n- OWASP Mobile/API security guidelines\n- Comparative analysis table\n\n**Chapter 3: Requirements Analysis (L1 Summary) (10-12 pages)**\n- Personas: Aimé (employee), Christelle (manager), Jean-Paul (analyst), Paul (executive)\n- Functional requirements (BF01-BF18) with MoSCoW priorities\n- Non-functional requirements (BNF01-BNF19)\n- 34 incident categories taxonomy (L1 Table 12)\n- Decision Record D1-D9 summary with rationale:\n  - D1: Confidential reporter protection\n  - D2: Server-side severity calculation\n  - D3: Guided questions algorithm\n  - D4: Technology stack selection\n  - D5: Authentication strategy (TOTP vs SMS)\n  - D6: Offline sync strategy (idempotency keys)\n  - D7: Push notification payload minimization\n  - D8: Data residency (Cameroon hosting)\n  - D9: Single-server deployment constraints\n\n**Chapter 4: Architecture Design (L2 Summary) (12-15 pages)**\n- System overview diagram (L2 F01)\n- Layered architecture: Router → Controller → Service → Repository\n- Data model with RLS policies (L2 §7.2)\n- Event-driven architecture: outbox → BullMQ → consumers\n- Security architecture:\n  - Tenant isolation via PostgreSQL RLS\n  - JWT with refresh rotation and family reuse detection\n  - AES-256-GCM encryption at rest\n- Mobile architecture: Expo SDK 57, encrypted MMKV, offline queue\n- Web architecture: React 19, TanStack Query, shadcn/ui\n- Deployment topology (Nginx → 2× API → Worker → PostgreSQL → Redis)\n\n**Chapter 5: UI/UX Design (L3 Summary) (6-8 pages)**\n- Design system: SFC brand colours, WCAG AA compliance\n- Mobile journey: incident reporting flow (M08-M11)\n- Web journey: analyst queue management (W04-W10)\n- Accessibility considerations\n- Key mockup screenshots\n\n**Chapter 6: Implementation (15-20 pages)**\n- Development methodology: AI-assisted workflow with tiers\n- Sprint breakdown by phase (S5-S12)\n- Key implementation challenges and solutions:\n  - RLS with Prisma interactive transactions (O8 spike results)\n  - Offline mutation queue with dependency ordering\n  - Push notification latency optimization\n  - Confidential reporter masking across all DTOs\n- Code highlights with file references:\n  - `apps/api/src/middleware/tenant.middleware.ts`: withTenant() implementation\n  - `apps/api/src/lib/crypto.ts`: AES-256-GCM encryption\n  - `apps/mobile/src/lib/offline-queue.ts`: idempotency and retry logic\n- Test coverage summary per module\n\n**Chapter 7: AI-Assisted Development Analysis (8-10 pages)**\n- Tier system explanation (docs/AI_WORKFLOW.md)\n- Quantitative analysis from PR data:\n  - Total PRs merged\n  - PRs by tier (Tier 1 Claude vs Tier 2 Antigravity/Gemini)\n  - Security-critical areas touched by tier\n- Qualitative observations:\n  - Where AI accelerated development\n  - Where AI required significant correction\n  - Security review findings addressed\n- Table: \"AI tier usage per module\" with columns: Module, Tier, PRs, Critical Issues Found\n\n**Chapter 8: Testing and Validation (L9 Summary) (8-10 pages)**\n- Testing strategy: unit, integration, E2E\n- Performance results (BNF01):\n  - Screen load times vs 2s target\n  - Report submission times vs 5s target\n- Push notification latency (BNF14): p50, p95, p99\n- Usability (BNF13): SUS scores from 5+ users\n- Security validation: OWASP MASVS checklist score\n- Load testing results: 500 concurrent users (BNF09)\n\n**Chapter 9: Deployment and Operations (L10 Summary) (5-7 pages)**\n- Docker Compose production configuration\n- CI/CD pipeline with GitHub Actions\n- Monitoring: Prometheus + Grafana dashboards\n- Backup strategy with Cameroon data residency\n- Incident response procedures\n\n**Chapter 10: Conclusion and Future Work (4-5 pages)**\n- Objectives achieved vs initial requirements\n- Lessons learned\n- Future enhancements:\n  - iOS application\n  - Machine learning for category suggestion\n  - Integration with SIEM systems\n\n**Appendices**\n- A: API endpoint catalogue (L2 Table 6)\n- B: Error codes (L2 Table 7)\n- C: SUS questionnaire raw data\n- D: Security review findings summary\n- E: Git commit history statistics\n\n### 2.2 Collect AI Tier Data from PRs\n\nCreate script `scripts/collect-pr-tier-data.ts`:\n```typescript\n// Use GitHub API (gh) to fetch merged PRs\n// Parse PR body for \"AI tier used:\" field\n// Generate CSV: PR#, Title, Tier, Security-Critical, Date\n```\n\nRun: `npx tsx scripts/collect-pr-tier-data.ts > docs/deliverables/ai-tier-analysis.csv`\n\n### 2.3 Generate PDF\n\nUse Pandoc with LaTeX template:\n```bash\npandoc docs/deliverables/L13_Internship_Report.md \\\n  --template=docs/templates/internship-report.tex \\\n  --toc --number-sections \\\n  -o docs/deliverables/L13_Internship_Report.pdf\n```\n\n## 3. Defence Presentation (L14) Structure\n\n### 3.1 Create `docs/deliverables/L14_Defence_Presentation.md` (source for slides)\n\nTarget: 15-20 slides, 20-minute presentation\n\n**Slide 1: Title**\n- Secure360: Cybersecurity Incident Reporting Platform\n- Student name, supervisor, academic year\n- Security First Cameroon logo\n\n**Slide 2: Agenda**\n- Context & Problem\n- Solution Overview\n- Technical Architecture\n- Key Implementations\n- AI-Assisted Development\n- Results & Validation\n- Demo highlights\n- Conclusion\n\n**Slide 3: Context**\n- Cameroon cybersecurity landscape visual\n- SME challenge: employees witness but don't report\n- SFC's need: unified incident management\n\n**Slide 4: Problem Statement**\n- No structured reporting for non-technical users\n- Offline reporting essential (weak network coverage)\n- Confidentiality and data residency requirements\n\n**Slide 5: Solution Overview**\n- Mobile app (Android) for employees\n- Web dashboard for analysts\n- Offline-first architecture\n- Visual: high-level system diagram\n\n**Slide 6: User Personas**\n- Aimé (employee), Christelle (manager), Jean-Paul (analyst), Paul (executive)\n- Photos/avatars with key characteristics\n\n**Slide 7: Key Functional Requirements**\n- 34 incident categories (visual taxonomy)\n- Guided severity calculation\n- Confidential reporting\n- Real-time notifications\n\n**Slide 8: Architecture Overview**\n- Monorepo structure diagram\n- API layers (clean architecture)\n- Event-driven flow (outbox → queues)\n\n**Slide 9: Security Architecture**\n- PostgreSQL RLS for tenant isolation\n- JWT rotation with reuse detection\n- AES-256-GCM encryption\n- Visual: security layers diagram\n\n**Slide 10: Mobile Implementation**\n- Expo SDK 57 + TypeScript\n- Encrypted MMKV storage\n- Offline queue with idempotency\n- Screenshot: reporting flow\n\n**Slide 11: Web Implementation**\n- React 19 + Vite + shadcn/ui\n- Real-time WebSocket updates\n- SLA timers and queue management\n- Screenshot: analyst dashboard\n\n**Slide 12: AI-Assisted Development**\n- Two-tier system visual\n- Tier 1: Security-critical (Claude)\n- Tier 2: Production code (Antigravity/Gemini)\n- Statistics: X% Tier 1, Y% Tier 2\n\n**Slide 13: AI Usage Analysis**\n- Bar chart: PRs by tier per phase\n- Security review findings addressed\n- Time saved vs human-only estimate\n\n**Slide 14: Testing Results**\n- Performance metrics table (load times, submission times)\n- Push latency graph (p50, p95, p99)\n- SUS score gauge (target > 70)\n\n**Slide 15: Deployment**\n- Docker Compose stack diagram\n- CI/CD pipeline flow\n- Cameroon hosting (Law 2024/017 compliance)\n\n**Slide 16: Demo Highlights**\n- 3-4 key workflow screenshots\n- Offline reporting → sync\n- Analyst queue → resolution\n\n**Slide 17: Challenges & Solutions**\n- Challenge 1: RLS with Prisma → interactive transactions\n- Challenge 2: Offline sync → idempotency keys\n- Challenge 3: Push latency → FCM optimization\n\n**Slide 18: Future Work**\n- iOS application\n- ML-based category suggestions\n- SIEM integration\n\n**Slide 19: Conclusion**\n- Objectives achieved checklist\n- Key metrics (100% requirements, SUS > 70)\n- Production-ready status\n\n**Slide 20: Questions**\n- Thank you\n- Contact information\n- QR code to repository (if public)\n\n### 3.2 Generate Slides\n\nOption A - Marp (Markdown to slides):\n```bash\nnpx @marp-team/marp-cli docs/deliverables/L14_Defence_Presentation.md \\\n  --theme docs/templates/sfc-theme.css \\\n  --pdf -o docs/deliverables/L14_Defence_Presentation.pdf\n```\n\nOption B - reveal.js export for interactive presentation\n\n### 3.3 Design Guidelines (Minimal, Clean)\n- White/light grey background\n- SFC navy (#003366) for headings\n- Maximum 6 bullet points per slide\n- Large, clear diagrams\n- Screenshots with annotations\n- No decorative clip art\n- Consistent typography (Inter or similar)\n\n## 4. File Structure\n\n```\ndocs/\n├── deliverables/\n│   ├── L13_Internship_Report.md\n│   ├── L13_Internship_Report.pdf\n│   ├── L14_Defence_Presentation.md\n│   ├── L14_Defence_Presentation.pdf\n│   └── ai-tier-analysis.csv\n├── templates/\n│   ├── internship-report.tex\n│   └── sfc-theme.css (Marp theme)\n└── reference/\n    └── deliverables/  (L1-L12 source documents)\n```\n\n## 5. Quality Checklist\n\n### L13 Report\n- [ ] All chapters complete with page counts in target range\n- [ ] Decision records D1-D9 accurately summarized\n- [ ] AI tier analysis includes quantitative PR data\n- [ ] Performance/usability results from L9 included\n- [ ] Code references include file paths and line numbers\n- [ ] Figures numbered and captioned\n- [ ] Bibliography in consistent citation style\n- [ ] French and English abstracts\n- [ ] No confidential SFC data (use fictitious examples)\n\n### L14 Presentation\n- [ ] 15-20 slides maximum\n- [ ] Clean, minimal design\n- [ ] Architecture diagrams legible at projection size\n- [ ] Screenshots current (match deployed version)\n- [ ] AI usage statistics accurate\n- [ ] Timing: ~1 minute per slide average\n- [ ] Backup slides for anticipated questions",
@@ -1860,14 +2001,12 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-10-19T09:31:56.360Z",
+      "lastModified": "2026-11-26T14:51:58.370Z",
       "taskCount": 60,
-      "completedCount": 3,
+      "completedCount": 5,
       "tags": [
         "master"
-      ],
-      "created": "2026-10-19T10:01:52.821Z",
-      "description": "Tasks for master context"
+      ]
     }
   }
 }
