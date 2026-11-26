@@ -1,0 +1,9 @@
+{
+  // Seed scripts live outside rootDir "src": their own project for typecheck and ESLint (run by tsx, never built).
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": ".."
+  },
+  "include": ["../src/**/*", "./seed/**/*"]
+}

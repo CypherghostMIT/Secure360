@@ -12,19 +12,24 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.api.js",
     "pretypecheck": "npm run build -w @secure360/shared && npm run db:generate",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tests/tsconfig.json && tsc --noEmit -p prisma/tsconfig.json",
     "pretest": "npm run build -w @secure360/shared && npm run db:generate",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:integration": "node --experimental-vm-modules --disable-warning=ExperimentalWarning ../../node_modules/jest/bin/jest.js -c jest.integration.config.cjs --runInBand",
     "pretest:integration": "npm run build -w @secure360/shared && npm run db:generate",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "predb:seed": "npm run build -w @secure360/shared && npm run db:generate",
+    "db:seed": "tsx prisma/seed/categories.ts",
+    "predb:seed:dev": "npm run build -w @secure360/shared && npm run db:generate",
+    "db:seed:dev": "tsx prisma/seed/dev-data.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "@secure360/shared": "*",
+    "bcryptjs": "3.0.3",
     "express": "5.3.0",
     "zod": "4.6.7"
   },

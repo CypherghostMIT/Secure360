@@ -131,6 +131,20 @@ PostgreSQL 16 and Redis 8 run in Docker (`infra/compose.dev.yml`), bound to `127
 | `npm run dev:down`    | Stops the services; data is kept in the named volumes.                                                                                                                                                                                                             |
 | `npm run dev:reset`   | Asks for confirmation, then stops the services and **deletes all local data** (volumes).                                                                                                                                                                           |
 
+Once the services are up, create the schema and the data (from the repository root):
+
+| Command                                 | What it does                                                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run db:migrate -w @secure360/api`  | Applies the migrations as `s360_owner` (`MIGRATION_DATABASE_URL`).                                                                                                                                                                                                                                    |
+| `npm run db:seed -w @secure360/api`     | **All environments.** Upserts the 34 incident categories from `@secure360/shared` (codes, groups, fr/en labels, order). Idempotent. Never overwrites a `default_severity` SFC has tuned, never deletes: a code removed from shared becomes `is_active = false`.                                       |
+| `npm run db:seed:dev -w @secure360/api` | **Local only.** Runs `db:seed`, then adds fictitious data: SFC and four client organisations, the L1 personas plus two users, and six incidents (one per status, including a confidential Mobile Money fraud). Idempotent (stable keys). Every e-mail is `@example.com`, every phone `+237000000xxx`. |
+
+`db:seed:dev` refuses to run when `NODE_ENV=production`, when the database in `MIGRATION_DATABASE_URL` is neither
+`secure360` nor `*_test`, or when `DEV_SEED_PASSWORD` (in `.env`) is missing or fails the password policy. All seeded
+users share that password, hashed with bcrypt cost 12, and must change it at first login. Both seeds run as
+`s360_owner` under an app context, through RLS and the guard triggers (§3.4); they print short summaries only, never
+the password or a hash.
+
 The roles and the init settings (`POSTGRES_INITDB_ARGS`, `infra/postgres/init/`) are applied only when the database
 volume is empty, so a secret file or an init setting changed later has no effect until you run `npm run dev:reset`,
 then `npm run dev:up`. Password authentication applies everywhere, including `docker exec … psql`.

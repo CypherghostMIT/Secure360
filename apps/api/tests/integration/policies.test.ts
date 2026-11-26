@@ -60,6 +60,15 @@ const EXPECTED_POLICIES: PolicyRow[] = [
   ],
   [
     'incident_categories',
+    'incident_categories_owner_insert',
+    'INSERT',
+    's360_owner',
+    null,
+    `(app_role() = 'ADMIN'::text)`,
+  ],
+  ['incident_categories', 'incident_categories_owner_lookup', 'SELECT', 's360_owner', `true`, null],
+  [
+    'incident_categories',
     'incident_categories_select',
     'SELECT',
     'public',

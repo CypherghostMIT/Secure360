@@ -3,6 +3,8 @@ import path from 'node:path';
 
 // The integration suite drops and recreates this database on every run, so it must never be a real one.
 export const TEST_DATABASE = 'secure360_test';
+// Seed tests (task 5) get their own database: the RLS suite's fixtures already hold the PROVIDER organisation.
+export const SEED_TEST_DATABASE = 'secure360_seed_test';
 
 export const REPO_ROOT = path.resolve(__dirname, '../../../../..');
 
@@ -13,6 +15,8 @@ export const URL_ENV = {
   app: 'S360_IT_APP_URL',
   worker: 'S360_IT_WORKER_URL',
   metrics: 'S360_IT_METRICS_URL',
+  seedSuperuser: 'S360_IT_SEED_SUPERUSER_URL',
+  seedOwner: 'S360_IT_SEED_OWNER_URL',
 } as const;
 
 export type Connection = keyof typeof URL_ENV;

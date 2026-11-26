@@ -3,7 +3,7 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../../../src/generated/prisma/client';
-import { deriveUrl, readAdminUrl, TEST_DATABASE, URL_ENV } from './env';
+import { deriveUrl, readAdminUrl, SEED_TEST_DATABASE, TEST_DATABASE, URL_ENV } from './env';
 import { ensureRoles } from './roles';
 import { seed } from './seed';
 
@@ -13,21 +13,36 @@ const API_ROOT = path.resolve(__dirname, '../../..');
 const connect = (url: string) =>
   new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
 
-/** Fresh database owned by s360_owner, with the same schema hardening as infra/postgres/init/01-roles.sh. */
-async function recreateDatabase(adminUrl: URL): Promise<void> {
-  const maintenance = connect(deriveUrl(adminUrl, { database: 'postgres' }));
-  try {
-    // Fixed identifier (readAdminUrl checked it): CREATE/DROP DATABASE take no parameters.
+type TestDatabase = typeof TEST_DATABASE | typeof SEED_TEST_DATABASE;
+
+// CREATE/DROP DATABASE take no parameters, so each database has its own fixed statements.
+async function dropAndCreate(maintenance: PrismaClient, database: TestDatabase): Promise<void> {
+  if (database === TEST_DATABASE) {
     await maintenance.$executeRaw`DROP DATABASE IF EXISTS secure360_test WITH (FORCE)`;
     await maintenance.$executeRaw`CREATE DATABASE secure360_test OWNER s360_owner`;
+  } else {
+    await maintenance.$executeRaw`DROP DATABASE IF EXISTS secure360_seed_test WITH (FORCE)`;
+    await maintenance.$executeRaw`CREATE DATABASE secure360_seed_test OWNER s360_owner`;
+  }
+}
+
+/** Fresh database owned by s360_owner, with the same schema hardening as infra/postgres/init/01-roles.sh. */
+async function recreateDatabase(adminUrl: URL, database: TestDatabase): Promise<void> {
+  const maintenance = connect(deriveUrl(adminUrl, { database: 'postgres' }));
+  try {
+    await dropAndCreate(maintenance, database);
   } finally {
     await maintenance.$disconnect();
   }
-  const testDb = connect(adminUrl.href);
+  const testDb = connect(deriveUrl(adminUrl, { database }));
   try {
     await testDb.$executeRaw`ALTER SCHEMA public OWNER TO s360_owner`;
     await testDb.$executeRaw`REVOKE CREATE ON SCHEMA public FROM PUBLIC`;
-    await testDb.$executeRaw`REVOKE TEMPORARY ON DATABASE secure360_test FROM PUBLIC`;
+    if (database === TEST_DATABASE) {
+      await testDb.$executeRaw`REVOKE TEMPORARY ON DATABASE secure360_test FROM PUBLIC`;
+    } else {
+      await testDb.$executeRaw`REVOKE TEMPORARY ON DATABASE secure360_seed_test FROM PUBLIC`;
+    }
   } finally {
     await testDb.$disconnect();
   }
@@ -56,7 +71,8 @@ export default async function globalSetup(): Promise<void> {
   } finally {
     await bootstrap.$disconnect();
   }
-  await recreateDatabase(adminUrl);
+  await recreateDatabase(adminUrl, TEST_DATABASE);
+  await recreateDatabase(adminUrl, SEED_TEST_DATABASE);
 
   const urlFor = (user: keyof typeof passwords) =>
     deriveUrl(adminUrl, { database: TEST_DATABASE, user, password: passwords[user] });
@@ -67,6 +83,16 @@ export default async function globalSetup(): Promise<void> {
   process.env[URL_ENV.metrics] = urlFor('s360_metrics');
 
   await migrate(urlFor('s360_owner'));
+
+  // Migrated but not seeded: the seed tests run the real seeds against it.
+  const seedOwnerUrl = deriveUrl(adminUrl, {
+    database: SEED_TEST_DATABASE,
+    user: 's360_owner',
+    password: passwords.s360_owner,
+  });
+  process.env[URL_ENV.seedSuperuser] = deriveUrl(adminUrl, { database: SEED_TEST_DATABASE });
+  process.env[URL_ENV.seedOwner] = seedOwnerUrl;
+  await migrate(seedOwnerUrl);
 
   const superuser = connect(adminUrl.href);
   try {
