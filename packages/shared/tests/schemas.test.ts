@@ -18,6 +18,7 @@ import {
   LoginInputSchema,
   PasswordSchema,
   RefreshInputSchema,
+  RequestIdHeaderSchema,
   ResetPasswordInputSchema,
   SeverityAnswersSchema,
   successResponse,
@@ -37,6 +38,8 @@ const TOKEN = 'A'.repeat(43); // 43 = base64url length of a 256-bit token
 const PASSWORD = 'Aa1'.repeat(4); // 12 chars with an uppercase, a lowercase and a digit
 // Deliberately low-entropy: test fixture, not a secret (gitleaks)
 const CURSOR = 'A'.repeat(16);
+// Shape of an Nginx $request_id: 32 lowercase hex characters.
+const NGINX_REQUEST_ID = '0123456789abcdef'.repeat(2);
 
 const accepts = (schema: z.ZodType, value: unknown) =>
   expect(schema.safeParse(value).success, JSON.stringify(value)).toBe(true);
@@ -485,6 +488,51 @@ describe('response envelopes', () => {
         success: false,
         error: { code: 'VALIDATION_ERROR', message: 'x', details },
       });
+    }
+  });
+  // L2 §11.1 / Table 7: the request id is returned so a user can quote it to support.
+  it('accepts an optional requestId on every error code', () => {
+    const error = errorResponse();
+    for (const requestId of [NGINX_REQUEST_ID, UUID_V4]) {
+      accepts(error, {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'x', requestId },
+      });
+    }
+    accepts(error, {
+      success: false,
+      error: { code: 'VALIDATION_ERROR', message: 'x', details: [], requestId: NGINX_REQUEST_ID },
+    });
+    for (const requestId of ['', 'not-an-id', 42, NGINX_REQUEST_ID.toUpperCase()]) {
+      rejects(error, { success: false, error: { code: 'NOT_FOUND', message: 'x', requestId } });
+    }
+  });
+});
+
+describe('RequestIdHeaderSchema', () => {
+  it('keeps an Nginx $request_id (32 lowercase hex characters)', () => {
+    expect(RequestIdHeaderSchema.parse(NGINX_REQUEST_ID)).toBe(NGINX_REQUEST_ID);
+  });
+
+  it('keeps a UUID and normalises it to lower case', () => {
+    expect(RequestIdHeaderSchema.parse(UUID_V4)).toBe(UUID_V4);
+    const upper = 'ABCDEF01-2345-4678-89AB-CDEF01234567';
+    expect(RequestIdHeaderSchema.parse(upper)).toBe(upper.toLowerCase());
+  });
+
+  it('rejects anything else, without trimming', () => {
+    for (const value of [
+      '',
+      NGINX_REQUEST_ID.toUpperCase(),
+      `${NGINX_REQUEST_ID}0`,
+      NGINX_REQUEST_ID.slice(1),
+      ` ${UUID_V4}`,
+      `${UUID_V4}
+{"level":"error"}`,
+      'g'.repeat(32),
+      `${UUID_V4}, ${UUID_V4}`,
+    ]) {
+      rejects(RequestIdHeaderSchema, value);
     }
   });
 });

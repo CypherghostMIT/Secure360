@@ -36,4 +36,13 @@ describe('error codes (L2 Table 7)', () => {
       expect(Object.keys(locale.errors).sort()).toEqual([...ERROR_CODES].sort());
     }
   });
+
+  // Server text stays generic: the upload limits (2 MB, JPEG/PNG/WebP) belong to the client screen, chosen from
+  // the code, because the same codes also answer an oversized JSON body or an unsupported charset.
+  it('keeps PAYLOAD_TOO_LARGE and UNSUPPORTED_MEDIA_TYPE generic', () => {
+    expect(fr.errors.PAYLOAD_TOO_LARGE).toBe('Contenu trop volumineux.');
+    expect(en.errors.PAYLOAD_TOO_LARGE).toBe('Content too large.');
+    expect(fr.errors.UNSUPPORTED_MEDIA_TYPE).toBe('Type de contenu non pris en charge.');
+    expect(en.errors.UNSUPPORTED_MEDIA_TYPE).toBe('Unsupported content type.');
+  });
 });

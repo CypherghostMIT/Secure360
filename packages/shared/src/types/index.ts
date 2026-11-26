@@ -33,6 +33,7 @@ import type {
 import type {
   AcceptLanguageSchema,
   IdempotencyKeyHeaderSchema,
+  RequestIdHeaderSchema,
 } from '../schemas/headers.schema.js';
 import type {
   CreateMessageInputSchema,
@@ -72,6 +73,7 @@ export type CursorPaginationQueryPayload = z.input<typeof CursorPaginationQueryS
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 export type ValidationIssue = z.infer<typeof ValidationIssueSchema>;
 export type IdempotencyKeyHeader = z.infer<typeof IdempotencyKeyHeaderSchema>;
+export type RequestId = z.infer<typeof RequestIdHeaderSchema>;
 export type AcceptLanguage = z.infer<typeof AcceptLanguageSchema>;
 
 export type GuidedAnswer = z.infer<typeof GuidedAnswerSchema>;
