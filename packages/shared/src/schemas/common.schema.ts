@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ErrorCodeSchema } from '../constants/error-codes.js';
+import { RequestIdHeaderSchema } from './headers.schema.js';
 import { UuidSchema } from './primitives.schema.js';
 
 export const UuidParamsSchema = z.object({ id: UuidSchema }).strict();
@@ -58,6 +59,8 @@ export const ErrorResponseSchema = z
         code: ErrorCodeSchema,
         message: z.string(),
         details: z.array(ValidationIssueSchema).optional(),
+        // Returned so a user can quote it to support; the same id is in every log line (L2 §11.1, Table 7).
+        requestId: RequestIdHeaderSchema.optional(),
       })
       .strict()
       .refine((error) => error.details === undefined || error.code === 'VALIDATION_ERROR', {

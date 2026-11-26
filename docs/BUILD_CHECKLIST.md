@@ -26,10 +26,29 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **O6** (optional) Host RAM upgrade to 8 GB.
 - [ ] **O7** Retention periods and SLA targets aligned with SFC contracts and Law 2024/017.
 - [ ] **O8** (S5 spike) Measure the overhead of one Prisma interactive transaction per request; tune the pool.
+- [ ] **O8 pool tuning:** set `connectionTimeoutMillis` before deployment (the pool currently waits forever); the
+      pool-timeout → 503 mapping depends on it.
 
 ## Task 7 — Error handling
 
-- [ ] Replace Express default HTML error pages (413 and others) with the JSON envelope; never expose stack traces.
+- [x] Replace Express default HTML error pages (413 and others) with the JSON envelope; never expose stack traces.
+- [ ] **Prisma upgrades:** `tests/integration/db-errors.test.ts` must stay green (P2039/P2010 +
+      `meta.driverAdapterError` shape).
+
+## Task 9 — Redis and rate limiting
+
+- [ ] **Task 10:** switch rate-limit e-mail keys to HMAC-SHA256 with a server key (`hashEmailKey` in
+      `apps/api/src/platform/cache/rate-limit-policies.ts`). An unkeyed hash of an e-mail can be reversed by trying
+      known e-mail addresses.
+- [ ] **Task 32:** add the Redis check to `/health/ready` (no health routes existed in task 9). Redis down must not
+      make the API unready on its own: the rate limiter falls back in-process (L2 §9.2).
+- [ ] **Every route mounting a rate-limit policy:** the key field must be REQUIRED in its Zod schema, with a test
+      proving a request without it gets 400 and cannot bypass the limit (the middleware lets a keyless request
+      through to the validator). Use `emailKey` / `deviceIdKey` from `apps/api/src/http/rate-limit.ts` for client
+      values. Flag-mode routes (password.forgot, client.errors) must test that `req.context.rateLimited` skips the work.
+- [ ] **BullMQ task:** use bullmq 6.x (ioredis optional peer) so ioredis stays a single copy (`npm ls ioredis`);
+      keep `protocol: 2`; BullMQ workers get their own connection with `maxRetriesPerRequest: null`, never the
+      limiter connection.
 
 ## Task 49 — Production Docker Compose
 

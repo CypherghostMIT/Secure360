@@ -11,6 +11,9 @@ export const SECRET_KEYS = [
 
 const AES_256_KEY_BYTES = 32;
 
+export const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
+export type LogLevel = (typeof LOG_LEVELS)[number];
+
 export const ConfigSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -18,6 +21,8 @@ export const ConfigSchema = z
     // Number of reverse proxies in front of the API (Nginx = 1). 0 trusts no X-Forwarded-* header, so a
     // directly exposed API cannot be fooled about the client IP.
     TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
+    // No schema default: the default depends on NODE_ENV and is resolved in toAppConfig().
+    LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
     REDIS_URL: z.url({ protocol: /^rediss?$/ }),
     JWT_SECRET: z.string().min(32),
@@ -34,6 +39,7 @@ export interface AppConfig {
   readonly nodeEnv: RawConfig['NODE_ENV'];
   readonly port: number;
   readonly trustProxy: number;
+  readonly logLevel: LogLevel;
   readonly databaseUrl: string;
   readonly redisUrl: string;
   readonly jwtSecret: string;

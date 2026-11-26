@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { ErrorResponseSchema } from '@secure360/shared';
-import { createApp } from '../src/app';
+import { buildTestApp, errorOf } from './helpers/test-app';
 
-const app = createApp({ trustProxy: 0 });
+const { app } = buildTestApp();
 
 describe('createApp', () => {
   it('returns 404 with the shared error envelope on an unknown route', async () => {
@@ -13,7 +13,11 @@ describe('createApp', () => {
     expect(ErrorResponseSchema.safeParse(res.body).success).toBe(true);
     expect(res.body).toEqual({
       success: false,
-      error: { code: 'NOT_FOUND', message: 'Élément introuvable.' },
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Élément introuvable.',
+        requestId: res.headers['x-request-id'],
+      },
     });
   });
 
@@ -23,7 +27,11 @@ describe('createApp', () => {
     expect(res.status).toBe(404);
     expect(res.body).toEqual({
       success: false,
-      error: { code: 'NOT_FOUND', message: 'Item not found.' },
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Item not found.',
+        requestId: res.headers['x-request-id'],
+      },
     });
   });
 
@@ -47,6 +55,7 @@ describe('createApp', () => {
       .send(body);
 
     expect(res.status).toBe(413);
+    expect(errorOf(res).code).toBe('PAYLOAD_TOO_LARGE');
   });
 
   it('accepts a JSON body under 100 kb (then 404, as no route exists yet)', async () => {

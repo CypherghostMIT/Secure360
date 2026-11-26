@@ -58,6 +58,7 @@ function toAppConfig(parsed: RawConfig): AppConfig {
     nodeEnv: parsed.NODE_ENV,
     port: parsed.API_PORT,
     trustProxy: parsed.TRUST_PROXY,
+    logLevel: parsed.LOG_LEVEL ?? (parsed.NODE_ENV === 'development' ? 'debug' : 'info'),
     databaseUrl: parsed.DATABASE_URL,
     redisUrl: parsed.REDIS_URL,
     jwtSecret: parsed.JWT_SECRET,

@@ -99,4 +99,33 @@ describe('loadConfig', () => {
 
     expect(loadConfig({ env: validEnv(), secretsDir }).port).toBe(3000);
   });
+
+  it.each([
+    ['development', 'debug'],
+    ['test', 'info'],
+    ['production', 'info'],
+  ] as const)('defaults LOG_LEVEL for %s to %s', (nodeEnv, level) => {
+    expect(loadConfig({ env: { ...validEnv(), NODE_ENV: nodeEnv }, secretsDir }).logLevel).toBe(
+      level,
+    );
+  });
+
+  it('reads an explicit LOG_LEVEL', () => {
+    const env = { ...validEnv(), NODE_ENV: 'production', LOG_LEVEL: 'warn' };
+    expect(loadConfig({ env, secretsDir }).logLevel).toBe('warn');
+  });
+
+  it('rejects an unknown LOG_LEVEL', () => {
+    const error = captureError(() =>
+      loadConfig({ env: { ...validEnv(), LOG_LEVEL: 'verbose' }, secretsDir }),
+    );
+
+    expect(error.message).toContain('invalid: LOG_LEVEL');
+  });
+
+  it('never reads LOG_LEVEL from a secret file', () => {
+    writeSecret('log_level', 'trace');
+
+    expect(loadConfig({ env: validEnv(), secretsDir }).logLevel).toBe('debug');
+  });
 });
