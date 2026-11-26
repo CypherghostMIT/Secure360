@@ -23,6 +23,8 @@ updates:
       # Expo pins React Native and many native modules: upgrade those with "npx expo install --fix", not Dependabot.
       - dependency-name: react-native
       - dependency-name: 'expo*'
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
@@ -32,6 +34,11 @@ updates:
       prefix: 'chore(ci)'
     cooldown:
       default-days: 7
+    groups:
+      # init and analyze must always move together (CodeQL refuses mixed versions).
+      codeql:
+        patterns:
+          - 'github/codeql-action*'
 
   - package-ecosystem: docker
     directory: /infra
