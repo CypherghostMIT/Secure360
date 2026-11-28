@@ -38,7 +38,8 @@ function childEnv(port: number): NodeJS.ProcessEnv {
     DATABASE_URL: readConnectionUrl('app'),
     // The CI service or the local compose Redis; an unreachable one still has to close (hard disconnect).
     REDIS_URL: process.env['REDIS_URL'] ?? 'redis://127.0.0.1:1/0',
-    JWT_SECRET: randomBytes(32).toString('hex'),
+    JWT_SIGNING_KEYS: `1:${randomBytes(32).toString('base64')}`,
+    JWT_ACTIVE_KEY_ID: '1',
     DATA_ENCRYPTION_KEYS: `1:${randomBytes(32).toString('base64')}`,
     DATA_ENCRYPTION_ACTIVE_KEY_ID: '1',
     RATE_LIMIT_HMAC_KEY: randomBytes(32).toString('base64'),

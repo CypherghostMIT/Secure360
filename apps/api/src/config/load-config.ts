@@ -6,6 +6,7 @@ import { ConfigSchema, SECRET_KEYS } from './config.schema';
 import {
   createKeyring,
   decodeCanonicalBase64,
+  HMAC_SHA256_KEY_SIZE,
   parseKeyringEntries,
   toSecretKey,
 } from '../platform/crypto/keyring';
@@ -60,27 +61,27 @@ function describeFailure(raw: Record<string, string | undefined>, keys: string[]
   return `Invalid configuration (${parts.join('; ')})`;
 }
 
-// Both values were validated by ConfigSchema; the checks here only satisfy the types.
-function toKeys(parsed: RawConfig): Pick<AppConfig, 'dataEncryption' | 'rateLimitHmacKey'> {
-  const ring = parseKeyringEntries(parsed.DATA_ENCRYPTION_KEYS);
+type KeyFields = Pick<AppConfig, 'jwtSigning' | 'dataEncryption' | 'rateLimitHmacKey'>;
+
+// Every value was validated by ConfigSchema; the checks here only satisfy the types.
+function toKeys(parsed: RawConfig): KeyFields {
+  const jwtRing = parseKeyringEntries(parsed.JWT_SIGNING_KEYS, HMAC_SHA256_KEY_SIZE);
+  const dataRing = parseKeyringEntries(parsed.DATA_ENCRYPTION_KEYS);
   const hmacBytes = decodeCanonicalBase64(parsed.RATE_LIMIT_HMAC_KEY);
-  if (ring === undefined || hmacBytes === undefined) {
+  if (jwtRing === undefined || dataRing === undefined || hmacBytes === undefined) {
     throw new ConfigError(
-      'Invalid configuration (invalid: DATA_ENCRYPTION_KEYS, RATE_LIMIT_HMAC_KEY)',
+      'Invalid configuration (invalid: DATA_ENCRYPTION_KEYS, JWT_SIGNING_KEYS, RATE_LIMIT_HMAC_KEY)',
     );
   }
   return {
-    dataEncryption: createKeyring(parsed.DATA_ENCRYPTION_ACTIVE_KEY_ID, ring),
+    jwtSigning: createKeyring(parsed.JWT_ACTIVE_KEY_ID, jwtRing, HMAC_SHA256_KEY_SIZE),
+    dataEncryption: createKeyring(parsed.DATA_ENCRYPTION_ACTIVE_KEY_ID, dataRing),
     rateLimitHmacKey: toSecretKey(hmacBytes),
   };
 }
 
 // Plain-string fields holding a secret, or a password inside a URL. Keys are KeyObjects and print nothing anyway.
-const SECRET_FIELDS = [
-  'databaseUrl',
-  'redisUrl',
-  'jwtSecret',
-] as const satisfies readonly (keyof AppConfig)[];
+const SECRET_FIELDS = ['databaseUrl', 'redisUrl'] as const satisfies readonly (keyof AppConfig)[];
 
 function redactedView(config: AppConfig): Record<string, unknown> {
   const view: Record<string, unknown> = { ...config };
@@ -110,7 +111,6 @@ function toAppConfig(parsed: RawConfig): AppConfig {
     logLevel: parsed.LOG_LEVEL ?? (parsed.NODE_ENV === 'development' ? 'debug' : 'info'),
     databaseUrl: parsed.DATABASE_URL,
     redisUrl: parsed.REDIS_URL,
-    jwtSecret: parsed.JWT_SECRET,
     ...toKeys(parsed),
   });
 }

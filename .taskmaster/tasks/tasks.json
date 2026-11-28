@@ -430,28 +430,29 @@
         "dependencies": [
           "6"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement crypto utilities for password hashing, token generation, and encryption.",
-        "updatedAt": "2026-11-26T22:47:19.756Z"
+        "updatedAt": "2026-11-28T00:32:00.780Z"
       },
       {
         "id": 11,
         "title": "Implement JWT authentication utilities with access/refresh token handling",
         "description": "Create JWT token generation and verification with pinned HS256 algorithm, 1h access tokens, and 7d refresh tokens. Requirements: BF01, Technical Architecture.",
-        "details": "1. Install jsonwebtoken, @types/jsonwebtoken in apps/api.\n2. Create src/lib/jwt.ts:\n   ```typescript\n   import jwt from 'jsonwebtoken';\n   import { config } from '../config';\n   \n   interface AccessTokenPayload {\n     sub: string;      // userId\n     org: string;      // organizationId\n     role: UserRole;\n     sv: number;       // session version\n     type: 'access';\n   }\n   \n   interface RefreshTokenPayload {\n     sub: string;\n     fam: string;      // family ID for reuse detection\n     type: 'refresh';\n   }\n   \n   export const signAccessToken = (payload: Omit<AccessTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'access' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '1h',\n     });\n   };\n   \n   export const signRefreshToken = (payload: Omit<RefreshTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'refresh' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '7d',\n     });\n   };\n   \n   export const verifyToken = <T>(token: string): T => {\n     return jwt.verify(token, config.jwt.secret, {\n       algorithms: ['HS256'],  // CRITICAL: pin algorithm\n     }) as T;\n   };\n   ```\n3. CRITICAL: Always specify algorithms array in jwt.verify to prevent algorithm confusion attacks.\n4. Create middleware/auth.middleware.ts that extracts and verifies Bearer token.",
+        "details": "1. Install jsonwebtoken, @types/jsonwebtoken in apps/api.\n2. Create src/lib/jwt.ts:\n   ```typescript\n   import jwt from 'jsonwebtoken';\n   import { config } from '../config';\n   \n   interface AccessTokenPayload {\n     sub: string;      // userId\n     org: string;      // organizationId\n     role: UserRole;\n     sv: number;       // session version\n     type: 'access';\n   }\n   \n   interface RefreshTokenPayload {\n     sub: string;\n     fam: string;      // family ID for reuse detection\n     type: 'refresh';\n   }\n   \n   export const signAccessToken = (payload: Omit<AccessTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'access' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '1h',\n     });\n   };\n   \n   export const signRefreshToken = (payload: Omit<RefreshTokenPayload, 'type'>): string => {\n     return jwt.sign({ ...payload, type: 'refresh' }, config.jwt.secret, {\n       algorithm: 'HS256',\n       expiresIn: '7d',\n     });\n   };\n   \n   export const verifyToken = <T>(token: string): T => {\n     return jwt.verify(token, config.jwt.secret, {\n       algorithms: ['HS256'],  // CRITICAL: pin algorithm\n     }) as T;\n   };\n   ```\n3. CRITICAL: Always specify algorithms array in jwt.verify to prevent algorithm confusion attacks.\n4. Create middleware/auth.middleware.ts that extracts and verifies Bearer token.\n<info added on 2026-11-28T00:50:12.664Z>\nNow I have a comprehensive understanding of the codebase. Let me generate the update text based on the user request and the codebase analysis.\n\n5. L2 §8.2/F04/Table 7 Compliance - Revised JWT Architecture:\n\nRefresh tokens remain opaque (256-bit random, base64url) as already implemented in src/platform/crypto/tokens.ts. The JWT keyring builds on the existing AES-256 keyring pattern in src/platform/crypto/keyring.ts: add JWT_SIGNING_KEYS (same id:base64 format) parsed into KeyObjects with kid header support, keeping multiple keys live during rotation overlap.\n\n6. JWT Claims (L2 Table 7):\n   - sub: userId (UUID)\n   - org: organizationId (UUID)\n   - role: UserRole enum value\n   - sv: session version (integer, from users.session_version)\n   - jti: unique token ID (UUID, enables revocation logging)\n   - iss: \"secure360-api\"\n   - aud: [\"secure360-access\"] for access tokens\n   - kid: signing key id (header, not payload)\n\n7. MFA Token (5-minute, separate audience):\n   - Create signMfaToken() with aud: [\"secure360-mfa\"], expiresIn: \"5m\"\n   - MFA tokens carry sub only (no org/role/sv until full auth completes)\n   - verifyToken() must check aud claim; MFA tokens rejected by authenticate middleware\n   - MFA token is returned after password validation when is_2fa_enabled=true, consumed by POST /auth/verify-totp\n\n8. Zod Claim Validation (packages/shared):\n   - Add AccessTokenClaimsSchema with sub, org, role (UserRoleSchema), sv (z.number().int().min(1)), jti, iss, aud\n   - Add MfaTokenClaimsSchema with sub, iss, aud: z.literal(\"secure360-mfa\")\n   - verifyToken() parses decoded payload through the appropriate schema; invalid claims throw UNAUTHENTICATED\n\n9. Authenticate Middleware (src/http/authenticate.ts):\n   - Extract Bearer token from Authorization header\n   - Verify JWT signature with pinned HS256, validate aud contains \"secure360-access\" (rejects MFA tokens)\n   - Parse claims through AccessTokenClaimsSchema\n   - Session-version check: GET Redis key sv:{userId}, compare with JWT sv claim\n   - On Redis failure (ECONNREFUSED, timeout): fall back to JWT sv claim (accept token), log degraded mode\n   - If sv mismatch: throw AppError(\"TOKEN_EXPIRED\") - user must re-authenticate\n   - If token expired (jwt.verify throws TokenExpiredError): throw AppError(\"TOKEN_EXPIRED\")\n   - If signature invalid or claims malformed: throw AppError(\"UNAUTHENTICATED\")\n   - Set req.auth = { userId, organizationId, role, sessionVersion, tokenId } for downstream use\n\n10. Error Code Distinction (already defined in packages/shared/src/constants/error-codes.ts):\n    - TOKEN_EXPIRED (401): valid token structure but expired or session version mismatch - client should attempt refresh\n    - UNAUTHENTICATED (401): missing, malformed, or invalid token - client should redirect to login\n</info added on 2026-11-28T00:50:12.664Z>\n<info added on 2026-11-28T12:13:22.802Z>\nCorrections to earlier notes based on implemented code:\n\n11. Access token audience is \"secure360-api\" (ACCESS_TOKEN_AUDIENCE constant in apps/api/src/platform/auth/token-claims.ts:7), not \"secure360-access\".\n\n12. Token claim schemas (AccessTokenClaimsSchema, MfaTokenClaimsSchema, TokenHeaderSchema) are defined in apps/api/src/platform/auth/token-claims.ts, not packages/shared. This is intentional: clients treat tokens as opaque and never decode them (see comment at token-claims.ts:4-5).\n\n13. Session version error handling (apps/api/src/http/authenticate.ts:31,52,83): stale session version (sv claim < current Redis/DB version) returns TOKEN_EXPIRED via AppError, allowing the client to attempt a refresh.\n\n14. Deny-listed jti handling (apps/api/src/http/authenticate.ts:71): when sessionState.read() returns state.isDenied = true, the middleware throws AuthFailure('denied'), which maps to UNAUTHENTICATED (not TOKEN_EXPIRED) since denied tokens cannot be refreshed.\n</info added on 2026-11-28T12:13:22.802Z>",
         "testStrategy": "Unit test signAccessToken produces valid JWT; test verifyToken rejects expired tokens; test verifyToken with wrong algorithm fails; test payload contains correct claims; test pinned algorithm prevents RS256 tokens.",
         "priority": "high",
         "dependencies": [
           "10"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement jwt authentication utilities with access/refresh token handling."
+        "expansionPrompt": "Break down this task with a focus on implement jwt authentication utilities with access/refresh token handling.",
+        "updatedAt": "2026-11-28T00:47:41.803Z"
       },
       {
         "id": 12,
@@ -2005,13 +2006,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-26T22:47:19.759Z",
+      "lastModified": "2026-11-28T00:47:41.806Z",
       "taskCount": 60,
-      "completedCount": 8,
+      "completedCount": 9,
       "tags": [
         "master"
       ],
-      "created": "2026-11-26T22:48:25.966Z",
+      "created": "2026-11-28T00:48:10.682Z",
       "description": "Tasks for master context"
     }
   }

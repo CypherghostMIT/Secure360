@@ -58,6 +58,9 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **Task 49 (from task 10):** production compose uses the secrets `data_encryption_keys` and `rate_limit_hmac_key`
       (the old `data_encryption_key` is removed); `DATA_ENCRYPTION_ACTIVE_KEY_ID` is set for the api AND the worker;
       rotation = deploy the new key everywhere first, then switch the active id.
+- [ ] **Task 49 (from task 11):** production compose adds the secret `jwt_signing_keys` (`<id>:<base64 of 32–64 bytes>`
+      per line) and sets `JWT_ACTIVE_KEY_ID` for the api; `jwt_secret` / `JWT_SECRET` no longer exist. Rotation (yearly,
+      L2 §8.6) = deploy the ring with the new key to every replica, switch the active id, remove the old key after 1 h.
 - [ ] Prisma schema-engine binary: install scripts are not approved, so the binary downloads on first CLI use; the production migrate step needs it available (no internet on the server, or pre-fetched in the image).
 
 ## Task 4 — Database schema and RLS
@@ -71,11 +74,44 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **Attachments task:** the AAD for encrypted files binds the attachment id (`aadFor('attachments.file', id)`);
       consider binding the organization id too.
 
+## Task 11 — JWT utilities and authenticate
+
+- [x] JWT signing secrets held as KeyObjects with kid (two valid during rotation, L2 §8.2); no plain secret string in config.
+- [ ] **Residual risk (accepted, L2 §9.2):** while Redis is down, `authenticate` trusts the token's sv and skips the
+      deny-list, so a logged-out or revoked access token stays valid until Redis returns or the token expires (≤ 1 h).
+      Refresh still checks the database. Record it in the security report.
+
 ## Task 12 — Authentication
 
 - [ ] Password hashing uses bcryptjs (pure JS, bcrypt $2b$ hashes, async API) to avoid native install scripts; measure hash time at cost 12 on the target server during task 12 and switch to native bcrypt if login latency exceeds the BNF01 budget.
-- [ ] JWT signing secrets held as KeyObjects with kid (two valid during rotation, L2 §8.2); no plain secret string in config.
+- [ ] Supply the `SessionVersionLoader` (withTenant + set-if-greater write-back). `createAuthenticate` cannot be built
+      without it (required in `AuthenticateDeps`, checked at runtime too), so `authenticate` cannot be mounted before
+      it exists; a cache miss always reads the database. (`apps/api/src/http/authenticate.ts`)
+- [ ] The `SessionVersionLoader` reads the caller's own row via RLS in `withTenant(claims)` (`users_select` allows
+      `id = app_user_id()`; `session_version` and `is_active` are in the SELECT grant) and returns sv + is_active.
+      Every `sv:{userId}` write, everywhere, uses one set-if-greater Lua script; build keys with `sessionVersionKey()`.
+- [ ] Login seeds `sv:{userId}` (set-if-greater) from the `auth_find_user_by_email` row.
 - [ ] Login timing: the unknown-e-mail path must match the known-e-mail path end-to-end (lookup + dummy bcrypt), not only bcrypt; add a test.
+
+## Task 13 — Refresh rotation
+
+- [ ] Refresh re-reads role, organization, sv and is_active from the DB before issuing an access token (never copies
+      them from the old token); inactive → revoke the family. A stale-sv access token answers TOKEN_EXPIRED so the
+      client refreshes into the new role/sv; refresh is where a revoked session ends.
+- [ ] Reuse detection deny-lists with `denyListKey(jti)` (value "1", TTL = token exp − now) if it can know the live
+      jtis; the sv increment of "revoke all the user's sessions" already invalidates them.
+
+## Task 14 / Task 30 — Credential and account changes
+
+- [ ] Password reset, password change, deactivation and role change increment `session_version` AND update
+      `sv:{userId}` (set-if-greater, after commit); reset and deactivation also revoke all refresh families; role change
+      keeps them (the client refreshes into the new role).
+- [ ] Logout deny-lists the presented access token: `denyListKey(req.context.tokenId)`, value "1", PX = exp − now.
+
+## 2FA verification task
+
+- [ ] MFA token jti single use (Redis `SET NX` until exp); at most 5 code attempts per MFA token, then the token is
+      burned; TOTP step replay check (L2 §8.2: reject any step not greater than the last accepted one).
 
 ## Repository and publication
 

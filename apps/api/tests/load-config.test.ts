@@ -15,7 +15,8 @@ function validEnv(): NodeJS.ProcessEnv {
   return {
     DATABASE_URL: `postgresql://app:${urlPassword()}@127.0.0.1:5432/secure360`,
     REDIS_URL: `redis://:${urlPassword()}@127.0.0.1:6379`,
-    JWT_SECRET: randomBytes(48).toString('base64'),
+    JWT_SIGNING_KEYS: keyringEntry(1),
+    JWT_ACTIVE_KEY_ID: '1',
     DATA_ENCRYPTION_KEYS: keyringEntry(1),
     DATA_ENCRYPTION_ACTIVE_KEY_ID: '1',
     RATE_LIMIT_HMAC_KEY: randomBytes(32).toString('base64'),
@@ -61,10 +62,10 @@ describe('loadConfig', () => {
 
   it('names every missing key and never prints a value', () => {
     const env = validEnv();
-    const { JWT_SECRET: _omitted, ...rest } = env;
+    const { JWT_SIGNING_KEYS: _omitted, ...rest } = env;
     const error = captureError(() => loadConfig({ env: { ...rest, REDIS_URL: '' }, secretsDir }));
 
-    expect(error.message).toContain('missing: JWT_SECRET, REDIS_URL');
+    expect(error.message).toContain('missing: JWT_SIGNING_KEYS, REDIS_URL');
     for (const value of Object.values(rest)) expect(error.message).not.toContain(value);
   });
 
@@ -87,12 +88,22 @@ describe('loadConfig', () => {
   });
 
   it('prefers a secret file over the environment', () => {
-    const fromFile = randomBytes(48).toString('base64');
-    writeSecret('jwt_secret', `${fromFile}\n`);
+    const fromFile = `redis://:${urlPassword()}@127.0.0.1:6379`;
+    writeSecret('redis_url', `${fromFile}\n`);
 
     const config = loadConfig({ env: validEnv(), secretsDir });
 
-    expect(config.jwtSecret).toBe(fromFile);
+    expect(config.redisUrl).toBe(fromFile);
+  });
+
+  it('no longer boots on a plain JWT_SECRET or jwt_secret file (replaced by the JWT keyring)', () => {
+    const { JWT_SIGNING_KEYS: _omitted, ...rest } = validEnv();
+    writeSecret('jwt_secret', randomBytes(48).toString('base64'));
+    const error = captureError(() =>
+      loadConfig({ env: { ...rest, JWT_SECRET: randomBytes(48).toString('base64') }, secretsDir }),
+    );
+
+    expect(error.message).toBe('Invalid configuration (missing: JWT_SIGNING_KEYS)');
   });
 
   it('satisfies a key missing from the environment with its secret file', () => {
@@ -141,15 +152,18 @@ describe('loadConfig', () => {
 describe('loadConfig: encryption and HMAC keys', () => {
   const bytesOf = (base64: string | undefined) => Buffer.from(base64 ?? '', 'base64');
 
-  it.each(['DATA_ENCRYPTION_KEYS', 'DATA_ENCRYPTION_ACTIVE_KEY_ID', 'RATE_LIMIT_HMAC_KEY'])(
-    'fails to boot when %s is missing',
-    (key) => {
-      const env: NodeJS.ProcessEnv = { ...validEnv(), [key]: undefined };
-      expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
-        `Invalid configuration (missing: ${key})`,
-      );
-    },
-  );
+  it.each([
+    'DATA_ENCRYPTION_KEYS',
+    'DATA_ENCRYPTION_ACTIVE_KEY_ID',
+    'RATE_LIMIT_HMAC_KEY',
+    'JWT_SIGNING_KEYS',
+    'JWT_ACTIVE_KEY_ID',
+  ])('fails to boot when %s is missing', (key) => {
+    const env: NodeJS.ProcessEnv = { ...validEnv(), [key]: undefined };
+    expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
+      `Invalid configuration (missing: ${key})`,
+    );
+  });
 
   it.each([
     ['a 31-byte data key', { DATA_ENCRYPTION_KEYS: keyringEntry(1, randomBytes(31)) }],
@@ -235,6 +249,44 @@ describe('loadConfig: encryption and HMAC keys', () => {
     expect(decrypt(dataEncryption, blob, aad).toString()).toBe('x');
   });
 
+  it.each([
+    ['a 31-byte JWT key', keyringEntry(1, randomBytes(31))],
+    ['a 65-byte JWT key', keyringEntry(1, randomBytes(65))],
+    ['a malformed second JWT key', `${keyringEntry(1)}\n2:short`],
+  ])('fails to boot with %s, without echoing it', (_label, value) => {
+    const error = captureError(() =>
+      loadConfig({ env: { ...validEnv(), JWT_SIGNING_KEYS: value }, secretsDir }),
+    );
+
+    expect(error.message).toBe('Invalid configuration (invalid: JWT_SIGNING_KEYS)');
+    for (const part of value.split(/[:\n]/)) expect(error.message).not.toContain(part);
+  });
+
+  it.each(['2', '0x1', ' 1 ', '01', '0'])('rejects the JWT active key id %p', (activeKeyId) => {
+    const env = { ...validEnv(), JWT_ACTIVE_KEY_ID: activeKeyId };
+    expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
+      'Invalid configuration (invalid: JWT_ACTIVE_KEY_ID)',
+    );
+  });
+
+  it('reads the JWT keyring from its secret file, separate from the data keys', () => {
+    const oldBytes = randomBytes(32);
+    const newBytes = randomBytes(48);
+    writeSecret(
+      'jwt_signing_keys',
+      `${keyringEntry(1, Buffer.from(oldBytes))}\n${keyringEntry(2, Buffer.from(newBytes))}\n`,
+    );
+    const env = { ...validEnv(), JWT_SIGNING_KEYS: undefined, JWT_ACTIVE_KEY_ID: '2' };
+
+    const { jwtSigning, dataEncryption } = loadConfig({ env, secretsDir });
+
+    expect(jwtSigning.activeKeyId).toBe(2);
+    expect(jwtSigning.keyFor(1)?.type).toBe('secret');
+    expect(jwtSigning.keyFor(1)?.export().equals(oldBytes)).toBe(true);
+    expect(jwtSigning.keyFor(2)?.export().equals(newBytes)).toBe(true);
+    expect(dataEncryption.keyFor(1)?.export().equals(oldBytes)).toBe(false);
+  });
+
   it('holds the HMAC key as a KeyObject with the configured bytes', () => {
     const env = validEnv();
     const { rateLimitHmacKey } = loadConfig({ env, secretsDir });
@@ -250,6 +302,7 @@ describe('loadConfig: encryption and HMAC keys', () => {
     const env: NodeJS.ProcessEnv = {
       ...validEnv(),
       DATA_ENCRYPTION_KEYS: `${keyringEntry(1)}\n${keyringEntry(2)}`,
+      JWT_SIGNING_KEYS: `${keyringEntry(1)}\n${keyringEntry(2, randomBytes(48))}`,
     };
     const config = loadConfig({ env, secretsDir });
     const { logger, raw } = captureLogger();
@@ -260,6 +313,7 @@ describe('loadConfig: encryption and HMAC keys', () => {
     const shown = [inspect(config, { depth: 10, showHidden: true }), JSON.stringify(config), raw()];
     const keyTexts = [
       ...(env['DATA_ENCRYPTION_KEYS'] ?? '').split('\n').map((entry) => entry.slice(2)),
+      ...(env['JWT_SIGNING_KEYS'] ?? '').split('\n').map((entry) => entry.slice(2)),
       env['RATE_LIMIT_HMAC_KEY'] ?? '',
     ];
     for (const keyText of keyTexts) {
@@ -271,7 +325,6 @@ describe('loadConfig: encryption and HMAC keys', () => {
       }
     }
     const secretTexts = [
-      env['JWT_SECRET'] ?? '',
       new URL(env['DATABASE_URL'] ?? '').password,
       new URL(env['REDIS_URL'] ?? '').password,
     ];
@@ -286,12 +339,12 @@ describe('loadConfig: encryption and HMAC keys', () => {
     const config = loadConfig({ env, secretsDir });
     const json = JSON.parse(JSON.stringify(config)) as Record<string, unknown>;
 
-    for (const field of ['jwtSecret', 'databaseUrl', 'redisUrl'] as const) {
+    for (const field of ['databaseUrl', 'redisUrl'] as const) {
       expect(json[field]).toBe('[REDACTED]');
       expect(inspect(config)).toContain(`${field}: '[REDACTED]'`);
     }
     expect(json['port']).toBe(3000);
-    expect(config.jwtSecret).toBe(env['JWT_SECRET']);
+    expect(config.redisUrl).toBe(env['REDIS_URL']);
     expect(config.databaseUrl).toBe(env['DATABASE_URL']);
     expect(Object.keys(config)).not.toContain('toJSON');
   });
