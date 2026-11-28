@@ -1,10 +1,11 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac, createSecretKey, randomBytes } from 'node:crypto';
 import {
   hashEmailKey,
   RATE_LIMIT_POLICIES,
   type RateLimitPolicy,
 } from '../../src/platform/cache/rate-limit-policies';
 import { applyWindow, type WindowState } from '../../src/platform/cache/sliding-window';
+import { randomKey } from '../helpers/keys';
 
 const MINUTE = 60_000;
 // Aligned on a window boundary so the arithmetic in the tests is easy to follow.
@@ -149,19 +150,39 @@ describe('policies (L2 Table 5)', () => {
 });
 
 describe('hashEmailKey', () => {
-  it('hashes the trimmed, NFC-normalised, lower-cased address with SHA-256', () => {
-    const expected = createHash('sha256').update('amélie@example.test').digest('hex');
+  const keyBytes = randomBytes(32);
+  const key = randomKey();
+  const hmacOf = (text: string) =>
+    createHmac('sha256', keyBytes).update(text, 'utf8').digest('hex');
+
+  it('is HMAC-SHA256 of the trimmed, NFC-normalised, lower-cased address with the server key', () => {
+    const expected = hmacOf('amélie@example.test');
+    const serverKey = createSecretKey(keyBytes);
 
     // "e" + combining acute accent (NFD) must give the same key as the precomposed "é".
-    expect(hashEmailKey('  Amélie@Example.TEST ')).toBe(expected);
-    expect(hashEmailKey('amélie@example.test')).toBe(expected);
+    expect(hashEmailKey('  Amélie@Example.TEST ', serverKey)).toBe(expected);
+    expect(hashEmailKey('amélie@example.test', serverKey)).toBe(expected);
+  });
+
+  it('is no longer the plain SHA-256 of the address', () => {
+    const plain = createHash('sha256').update('someone@example.test', 'utf8').digest('hex');
+    expect(hashEmailKey('someone@example.test', key)).not.toBe(plain);
+  });
+
+  it('is stable for the same input and key, and changes with the key', () => {
+    expect(hashEmailKey('someone@example.test', key)).toBe(
+      hashEmailKey('Someone@example.test', key),
+    );
+    expect(hashEmailKey('someone@example.test', key)).not.toBe(
+      hashEmailKey('someone@example.test', randomKey()),
+    );
   });
 
   it('returns 64 hex characters and no trace of the address', () => {
-    const key = hashEmailKey('someone@example.test');
+    const hashed = hashEmailKey('someone@example.test', key);
 
-    expect(key).toMatch(/^[0-9a-f]{64}$/);
-    expect(key).not.toContain('someone');
+    expect(hashed).toMatch(/^[0-9a-f]{64}$/);
+    expect(hashed).not.toContain('someone');
   });
 });
 

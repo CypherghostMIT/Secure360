@@ -1,7 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { inspect } from 'node:util';
 import type { AppConfig, RawConfig } from './config.schema';
 import { ConfigSchema, SECRET_KEYS } from './config.schema';
+import {
+  createKeyring,
+  decodeCanonicalBase64,
+  parseKeyringEntries,
+  toSecretKey,
+} from '../platform/crypto/keyring';
 
 export const DEFAULT_SECRETS_DIR = '/run/secrets';
 
@@ -53,8 +60,50 @@ function describeFailure(raw: Record<string, string | undefined>, keys: string[]
   return `Invalid configuration (${parts.join('; ')})`;
 }
 
+// Both values were validated by ConfigSchema; the checks here only satisfy the types.
+function toKeys(parsed: RawConfig): Pick<AppConfig, 'dataEncryption' | 'rateLimitHmacKey'> {
+  const ring = parseKeyringEntries(parsed.DATA_ENCRYPTION_KEYS);
+  const hmacBytes = decodeCanonicalBase64(parsed.RATE_LIMIT_HMAC_KEY);
+  if (ring === undefined || hmacBytes === undefined) {
+    throw new ConfigError(
+      'Invalid configuration (invalid: DATA_ENCRYPTION_KEYS, RATE_LIMIT_HMAC_KEY)',
+    );
+  }
+  return {
+    dataEncryption: createKeyring(parsed.DATA_ENCRYPTION_ACTIVE_KEY_ID, ring),
+    rateLimitHmacKey: toSecretKey(hmacBytes),
+  };
+}
+
+// Plain-string fields holding a secret, or a password inside a URL. Keys are KeyObjects and print nothing anyway.
+const SECRET_FIELDS = [
+  'databaseUrl',
+  'redisUrl',
+  'jwtSecret',
+] as const satisfies readonly (keyof AppConfig)[];
+
+function redactedView(config: AppConfig): Record<string, unknown> {
+  const view: Record<string, unknown> = { ...config };
+  for (const field of SECRET_FIELDS) view[field] = '[REDACTED]';
+  return view;
+}
+
+/**
+ * JSON.stringify and util.inspect (console, error reports, a logged `{ config }`) see the redacted view. The
+ * properties are non-enumerable, so spreading or iterating the config still yields only its fields.
+ */
+function withRedactedViews(config: AppConfig): AppConfig {
+  Object.defineProperties(config, {
+    toJSON: { value: () => redactedView(config) },
+    [inspect.custom]: {
+      value: (_depth: number, options: object) => inspect(redactedView(config), options),
+    },
+  });
+  return Object.freeze(config);
+}
+
 function toAppConfig(parsed: RawConfig): AppConfig {
-  return Object.freeze({
+  return withRedactedViews({
     nodeEnv: parsed.NODE_ENV,
     port: parsed.API_PORT,
     trustProxy: parsed.TRUST_PROXY,
@@ -62,7 +111,7 @@ function toAppConfig(parsed: RawConfig): AppConfig {
     databaseUrl: parsed.DATABASE_URL,
     redisUrl: parsed.REDIS_URL,
     jwtSecret: parsed.JWT_SECRET,
-    dataEncryptionKey: parsed.DATA_ENCRYPTION_KEY,
+    ...toKeys(parsed),
   });
 }
 

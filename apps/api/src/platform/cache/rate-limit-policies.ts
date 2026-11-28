@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHmac, type KeyObject } from 'node:crypto';
 
 /**
  * What happens when a policy is exceeded:
@@ -45,11 +45,11 @@ export const RATE_LIMIT_POLICIES = {
 } as const satisfies Record<string, RateLimitPolicy>;
 
 /**
- * Rate-limit identifier for an e-mail address, so no personal data is stored in Redis (BNF16, OWASP M6).
- * TODO(task 10): switch to HMAC-SHA256 with a server key. An unkeyed hash of an e-mail can be reversed by hashing
- * candidate addresses (BUILD_CHECKLIST).
+ * Rate-limit identifier for an e-mail address, so no personal data is stored in Redis (BNF16, OWASP M6). Keyed
+ * (HMAC-SHA256 with RATE_LIMIT_HMAC_KEY): an unkeyed hash could be reversed by hashing known addresses.
+ * Rotating RATE_LIMIT_HMAC_KEY only changes every key, which resets the rate-limit windows; that is accepted.
  */
-export function hashEmailKey(email: string): string {
+export function hashEmailKey(email: string, key: KeyObject): string {
   const normalized = email.trim().normalize('NFC').toLowerCase();
-  return createHash('sha256').update(normalized, 'utf8').digest('hex');
+  return createHmac('sha256', key).update(normalized, 'utf8').digest('hex');
 }

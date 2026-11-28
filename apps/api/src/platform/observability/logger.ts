@@ -21,6 +21,12 @@ const SENSITIVE_KEYS = [
   'secret',
   // Message bodies (CreateMessageInputSchema.body).
   'body',
+  // AppConfig fields holding a secret or a URL with a password (the config itself also redacts them, see load-config).
+  'jwtSecret',
+  'databaseUrl',
+  'migrationDatabaseUrl',
+  'redisUrl',
+  'testDatabaseAdminUrl',
 ] as const;
 
 const SENSITIVE_HEADERS = ['authorization', 'cookie', '["set-cookie"]'] as const;

@@ -17,6 +17,12 @@ const SENSITIVE = [
   'resetCode',
   'secret',
   'body',
+  // AppConfig fields holding a secret or a URL with a password.
+  'jwtSecret',
+  'databaseUrl',
+  'migrationDatabaseUrl',
+  'redisUrl',
+  'testDatabaseAdminUrl',
 ] as const;
 
 // Recognisable markers, not secrets: the test asserts they never reach the output.

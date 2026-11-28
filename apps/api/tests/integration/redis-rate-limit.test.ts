@@ -1,6 +1,6 @@
 // Rate limiting against a real Redis 8 (local compose, or the CI service). Uses database 15 and deletes only the
 // keys it creates. REDIS_URL comes from the environment (CI) or the repository .env (loaded by the global setup).
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import type { Redis } from 'ioredis';
 import request from 'supertest';
@@ -12,6 +12,7 @@ import { RateLimiter } from '../../src/platform/cache/rate-limiter';
 import { createRedisConnection, type RedisConnection } from '../../src/platform/cache/redis';
 import { RedisRateLimitStore } from '../../src/platform/cache/redis-store';
 import { applyWindow, type WindowState } from '../../src/platform/cache/sliding-window';
+import { randomKey } from '../helpers/keys';
 import { captureLogger } from '../helpers/log-capture';
 import { buildTestApp, errorOf } from '../helpers/test-app';
 
@@ -122,19 +123,22 @@ describe('RateLimiter on Redis', () => {
     expect(ttl).toBeLessThanOrEqual(2 * MINUTE);
   });
 
-  it('stores e-mail identifiers only as a SHA-256 hash', async () => {
+  it('stores e-mail identifiers only as an HMAC-SHA256, never the address or its plain SHA-256', async () => {
     const clock = { now: Date.now() };
     const { limiter } = limiterAt(clock);
+    const hmacKey = randomKey();
     const email = `Someone.${runId}@Example.test`;
-    const key = `rl:password.forgot:${hashEmailKey(email)}`;
+    const key = `rl:password.forgot:${hashEmailKey(email, hmacKey)}`;
     createdKeys.add(key);
-    await limiter.consume(RATE_LIMIT_POLICIES.passwordForgot, hashEmailKey(email));
+    await limiter.consume(RATE_LIMIT_POLICIES.passwordForgot, hashEmailKey(email, hmacKey));
+    const plainSha256 = createHash('sha256').update(email.toLowerCase(), 'utf8').digest('hex');
 
     expect(await redis.exists(key)).toBe(1);
     expect(key).toMatch(/^rl:password\.forgot:[0-9a-f]{64}$/);
     const stored = JSON.stringify([key, await redis.hgetall(key)]).toLowerCase();
     expect(stored).not.toContain(`someone.${runId}`);
     expect(stored).not.toContain('example.test');
+    expect(stored).not.toContain(plainSha256);
   });
 });
 

@@ -1,3 +1,4 @@
+import type { KeyObject } from 'node:crypto';
 import type { Request, RequestHandler } from 'express';
 import { hashEmailKey, type RateLimitPolicy } from '../platform/cache/rate-limit-policies';
 import type { RateLimiter } from '../platform/cache/rate-limiter';
@@ -26,10 +27,13 @@ function boundedString(value: unknown, maxLength: number): string | undefined {
   return trimmed !== '' && trimmed.length <= maxLength ? trimmed : undefined;
 }
 
-/** Key for an e-mail taken from an unvalidated body (password.forgot); hashed, never stored as is. */
-export function emailKey(value: unknown): string | undefined {
+/**
+ * Key for an e-mail taken from an unvalidated body (password.forgot); HMAC'd with config.rateLimitHmacKey, never
+ * stored as is.
+ */
+export function emailKey(value: unknown, hmacKey: KeyObject): string | undefined {
   const email = boundedString(value, MAX_EMAIL_KEY_LENGTH);
-  return email === undefined ? undefined : hashEmailKey(email);
+  return email === undefined ? undefined : hashEmailKey(email, hmacKey);
 }
 
 /** Key for a device id taken from an unvalidated body or header (client.errors). */

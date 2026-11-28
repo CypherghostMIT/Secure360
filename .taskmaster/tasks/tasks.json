@@ -362,12 +362,12 @@
         "dependencies": [
           "2"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement platform kernel: configuration, logger, and request context.",
-        "updatedAt": "2026-11-26T15:24:40.395Z"
+        "updatedAt": "2026-11-26T22:38:05.958Z"
       },
       {
         "id": 7,
@@ -379,12 +379,12 @@
         "dependencies": [
           "6"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement error handler and api response envelope.",
-        "updatedAt": "2026-11-26T15:24:40.523Z"
+        "updatedAt": "2026-11-26T22:38:06.063Z"
       },
       {
         "id": 8,
@@ -413,28 +413,29 @@
         "dependencies": [
           "6"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Break down this task with a focus on implement redis client and rate limiting middleware.",
-        "updatedAt": "2026-11-26T15:24:40.634Z"
+        "updatedAt": "2026-11-26T22:38:06.148Z"
       },
       {
         "id": 10,
         "title": "Implement crypto utilities for password hashing, token generation, and encryption",
         "description": "Create cryptographic helper functions for bcrypt password hashing (cost 12), secure token generation, AES-256-GCM encryption, and SHA-256 hashing. Requirements: Technical Architecture, BF01.",
-        "details": "1. Install bcrypt in apps/api.\n2. Create src/lib/crypto.ts:\n   ```typescript\n   import { randomBytes, createCipheriv, createDecipheriv, createHash } from 'crypto';\n   import bcrypt from 'bcrypt';\n   \n   const BCRYPT_COST = 12;\n   const AES_ALGORITHM = 'aes-256-gcm';\n   \n   export const hashPassword = (password: string): Promise<string> => bcrypt.hash(password, BCRYPT_COST);\n   export const verifyPassword = (password: string, hash: string): Promise<boolean> => bcrypt.compare(password, hash);\n   \n   export const generateToken = (bytes = 32): string => randomBytes(bytes).toString('base64url');\n   export const generateUUID = (): string => crypto.randomUUID();\n   \n   export const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex');\n   \n   export const encrypt = (plaintext: string, key: Buffer): { ciphertext: string; iv: string; tag: string } => {\n     const iv = randomBytes(16);\n     const cipher = createCipheriv(AES_ALGORITHM, key, iv);\n     let ciphertext = cipher.update(plaintext, 'utf8', 'base64');\n     ciphertext += cipher.final('base64');\n     return { ciphertext, iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64') };\n   };\n   \n   export const decrypt = (ciphertext: string, iv: string, tag: string, key: Buffer): string => {\n     const decipher = createDecipheriv(AES_ALGORITHM, key, Buffer.from(iv, 'base64'));\n     decipher.setAuthTag(Buffer.from(tag, 'base64'));\n     let plaintext = decipher.update(ciphertext, 'base64', 'utf8');\n     plaintext += decipher.final('utf8');\n     return plaintext;\n   };\n   ```\n3. Never use Math.random() for any security-related operations.\n4. Encryption key loaded from config (32 bytes for AES-256).",
+        "details": "1. Install bcrypt in apps/api.\n2. Create src/lib/crypto.ts:\n   ```typescript\n   import { randomBytes, createCipheriv, createDecipheriv, createHash } from 'crypto';\n   import bcrypt from 'bcrypt';\n   \n   const BCRYPT_COST = 12;\n   const AES_ALGORITHM = 'aes-256-gcm';\n   \n   export const hashPassword = (password: string): Promise<string> => bcrypt.hash(password, BCRYPT_COST);\n   export const verifyPassword = (password: string, hash: string): Promise<boolean> => bcrypt.compare(password, hash);\n   \n   export const generateToken = (bytes = 32): string => randomBytes(bytes).toString('base64url');\n   export const generateUUID = (): string => crypto.randomUUID();\n   \n   export const hashToken = (token: string): string => createHash('sha256').update(token).digest('hex');\n   \n   export const encrypt = (plaintext: string, key: Buffer): { ciphertext: string; iv: string; tag: string } => {\n     const iv = randomBytes(16);\n     const cipher = createCipheriv(AES_ALGORITHM, key, iv);\n     let ciphertext = cipher.update(plaintext, 'utf8', 'base64');\n     ciphertext += cipher.final('base64');\n     return { ciphertext, iv: iv.toString('base64'), tag: cipher.getAuthTag().toString('base64') };\n   };\n   \n   export const decrypt = (ciphertext: string, iv: string, tag: string, key: Buffer): string => {\n     const decipher = createDecipheriv(AES_ALGORITHM, key, Buffer.from(iv, 'base64'));\n     decipher.setAuthTag(Buffer.from(tag, 'base64'));\n     let plaintext = decipher.update(ciphertext, 'base64', 'utf8');\n     plaintext += decipher.final('utf8');\n     return plaintext;\n   };\n   ```\n3. Never use Math.random() for any security-related operations.\n4. Encryption key loaded from config (32 bytes for AES-256).\n<info added on 2026-11-26T22:51:25.877Z>\nBased on the codebase analysis, here is the update text:\n\nL2 §8.2/§8.6 requirements implementation:\n\n5. Use bcryptjs (pure JS, already in package.json v3.0.3) instead of native bcrypt to avoid native compilation issues. Keep cost factor 12.\n\n6. Add a precomputed dummy hash constant. Use it in verifyPassword when the user is not found (unknown e-mail) to prevent timing-based account enumeration.\n\n7. AES-256-GCM changes per L2 §8.6:\n   - Use 12-byte IV (96 bits) instead of 16-byte (the GCM recommended size).\n   - Implement keyring support: store key id (1 byte or short string) with every ciphertext so keys can be rotated without re-encrypting all data.\n   - Require AAD (additional authenticated data) parameter in encrypt/decrypt; callers must pass context (e.g., user id, field name) to bind ciphertext to its purpose.\n\n8. Token generation: 32 bytes converted to base64url (43 chars). SHA-256 hash for storage. Already specified.\n\n9. File location: src/platform/crypto/ (aligns with existing src/platform structure per README.md). Create crypto/index.ts for password, token, encryption, and hashing utilities.\n\n10. ESLint Math.random ban already configured in eslint.config.mjs:54-61 via no-restricted-properties rule referencing OWASP M10.\n\n11. Rate-limit e-mail key hashing (src/platform/cache/rate-limit-policies.ts:52-55): Replace plain SHA-256 hash with HMAC-SHA256 using a dedicated server key (add RATE_LIMIT_HMAC_KEY to config.schema.ts SECRET_KEYS). This prevents offline dictionary attacks against hashed e-mail addresses stored in Redis.\n\n12. Add RATE_LIMIT_HMAC_KEY (32 bytes, base64) to SECRET_KEYS in config/config.schema.ts alongside DATA_ENCRYPTION_KEY.\n</info added on 2026-11-26T22:51:25.877Z>",
         "testStrategy": "Unit test hashPassword produces different hashes for same input (salt); test verifyPassword returns true for correct password, false for wrong; test encrypt/decrypt round-trip preserves plaintext; test hashToken produces consistent output for same input.",
         "priority": "high",
         "dependencies": [
           "6"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Break down this task with a focus on implement crypto utilities for password hashing, token generation, and encryption."
+        "expansionPrompt": "Break down this task with a focus on implement crypto utilities for password hashing, token generation, and encryption.",
+        "updatedAt": "2026-11-26T22:47:19.756Z"
       },
       {
         "id": 11,
@@ -2004,13 +2005,13 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-11-26T15:24:40.636Z",
+      "lastModified": "2026-11-26T22:47:19.759Z",
       "taskCount": 60,
-      "completedCount": 5,
+      "completedCount": 8,
       "tags": [
         "master"
       ],
-      "created": "2026-11-26T15:25:17.211Z",
+      "created": "2026-11-26T22:48:25.966Z",
       "description": "Tasks for master context"
     }
   }

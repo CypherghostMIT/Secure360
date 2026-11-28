@@ -37,7 +37,7 @@ Items decided during design that must not be forgotten during the build. Tick th
 
 ## Task 9 — Redis and rate limiting
 
-- [ ] **Task 10:** switch rate-limit e-mail keys to HMAC-SHA256 with a server key (`hashEmailKey` in
+- [x] **Task 10:** switch rate-limit e-mail keys to HMAC-SHA256 with a server key (`hashEmailKey` in
       `apps/api/src/platform/cache/rate-limit-policies.ts`). An unkeyed hash of an e-mail can be reversed by trying
       known e-mail addresses.
 - [ ] **Task 32:** add the Redis check to `/health/ready` (no health routes existed in task 9). Redis down must not
@@ -55,6 +55,9 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [ ] **Production secrets:** ensure secret files are readable by the container users (postgres uid 70, redis uid 999)
       on Linux — mode 600 with host ownership will not work; use a root init step or matching ownership.
 - [ ] API behind Nginx: `TRUST_PROXY=1`.
+- [ ] **Task 49 (from task 10):** production compose uses the secrets `data_encryption_keys` and `rate_limit_hmac_key`
+      (the old `data_encryption_key` is removed); `DATA_ENCRYPTION_ACTIVE_KEY_ID` is set for the api AND the worker;
+      rotation = deploy the new key everywhere first, then switch the active id.
 - [ ] Prisma schema-engine binary: install scripts are not approved, so the binary downloads on first CLI use; the production migrate step needs it available (no internet on the server, or pre-fetched in the image).
 
 ## Task 4 — Database schema and RLS
@@ -63,9 +66,16 @@ Items decided during design that must not be forgotten during the build. Tick th
 - [x] body-parser <version> and fast-uri <version> installed before min-release-age (security fixes GHSA-27r3-jxmh-p828 high, GHSA-w74x-v6f9-j3xg and related moderate); registry signatures verified. Zod 4.6.7 (GHSA-mrhx-c7xc-m3w5) installed normally.
 - [x] npm override: effect 3.22.4, unscoped (its only consumer is @prisma/config) — GHSA-7589-6fvf-x4pw (ReDoS, high). No stable Prisma 7.x ships a fixed effect (7.10.1 pins 3.20.0; 7.11 only dev, 8.x only RC). Same major (3.x); validated by prisma generate, migrate deploy, drift check and 240 integration tests. A scoped override under @prisma/config was not applied by npm with an existing lock file. Remove the override when a stable Prisma 7.x ships effect > 3.22.0.
 
+## Task 10 — Crypto utilities
+
+- [ ] **Attachments task:** the AAD for encrypted files binds the attachment id (`aadFor('attachments.file', id)`);
+      consider binding the organization id too.
+
 ## Task 12 — Authentication
 
 - [ ] Password hashing uses bcryptjs (pure JS, bcrypt $2b$ hashes, async API) to avoid native install scripts; measure hash time at cost 12 on the target server during task 12 and switch to native bcrypt if login latency exceeds the BNF01 budget.
+- [ ] JWT signing secrets held as KeyObjects with kid (two valid during rotation, L2 §8.2); no plain secret string in config.
+- [ ] Login timing: the unknown-e-mail path must match the known-e-mail path end-to-end (lookup + dummy bcrypt), not only bcrypt; add a test.
 
 ## Repository and publication
 
