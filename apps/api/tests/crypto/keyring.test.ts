@@ -3,6 +3,7 @@ import { inspect } from 'node:util';
 import {
   createKeyring,
   decodeCanonicalBase64,
+  HMAC_SHA256_KEY_SIZE,
   KeyringError,
   parseKeyringEntries,
 } from '../../src/platform/crypto/keyring';
@@ -45,6 +46,20 @@ describe('parseKeyringEntries', () => {
   });
 });
 
+describe('parseKeyringEntries with the HMAC-SHA256 size rule (JWT signing keys)', () => {
+  it.each([32, 48, 64])('accepts a key of %i bytes', (length) => {
+    const key = parseKeyringEntries(keyringEntry(1, randomBytes(length)), HMAC_SHA256_KEY_SIZE);
+
+    expect(key?.get(1)?.symmetricKeySize).toBe(length);
+  });
+
+  it.each([16, 31, 65])('refuses a key of %i bytes', (length) => {
+    expect(
+      parseKeyringEntries(keyringEntry(1, randomBytes(length)), HMAC_SHA256_KEY_SIZE),
+    ).toBeUndefined();
+  });
+});
+
 describe('decodeCanonicalBase64', () => {
   it('accepts canonical base64 and refuses anything Buffer.from would silently repair', () => {
     const value = randomBytes(32).toString('base64');
@@ -63,6 +78,16 @@ describe('createKeyring', () => {
 
   it('refuses a key that is not 32 bytes', () => {
     expect(() => createKeyring(1, new Map([[1, randomKey(16)]]))).toThrow(KeyringError);
+  });
+
+  it('applies the size rule it is given', () => {
+    expect(() =>
+      createKeyring(1, new Map([[1, randomKey(48)]]), HMAC_SHA256_KEY_SIZE),
+    ).not.toThrow();
+    expect(() => createKeyring(1, new Map([[1, randomKey(31)]]), HMAC_SHA256_KEY_SIZE)).toThrow(
+      KeyringError,
+    );
+    expect(() => createKeyring(1, new Map([[1, randomKey(48)]]))).toThrow(KeyringError);
   });
 
   it('refuses an id outside 1..65535', () => {

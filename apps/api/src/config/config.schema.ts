@@ -2,6 +2,7 @@ import type { KeyObject } from 'node:crypto';
 import { z } from 'zod';
 import {
   decodeCanonicalBase64,
+  HMAC_SHA256_KEY_SIZE,
   type Keyring,
   parseKeyId,
   parseKeyringEntries,
@@ -12,7 +13,7 @@ import {
 export const SECRET_KEYS = [
   'DATABASE_URL',
   'REDIS_URL',
-  'JWT_SECRET',
+  'JWT_SIGNING_KEYS',
   'DATA_ENCRYPTION_KEYS',
   'RATE_LIMIT_HMAC_KEY',
 ] as const;
@@ -41,7 +42,16 @@ export const ConfigSchema = z
     LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
     DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
     REDIS_URL: z.url({ protocol: /^rediss?$/ }),
-    JWT_SECRET: z.string().min(32),
+    // JWT HS256 signing keys (L2 §8.2, §8.6): same `<id>:<base64>` ring format as the data keys, each key 32 to
+    // 64 bytes. Its own secret: different purpose and rotation (yearly, two keys valid during the overlap).
+    JWT_SIGNING_KEYS: z
+      .string()
+      .refine((value) => parseKeyringEntries(value, HMAC_SHA256_KEY_SIZE) !== undefined),
+    // Not a secret: the kid of new tokens. Rotation: deploy the new key to every replica, then switch this id.
+    JWT_ACTIVE_KEY_ID: z
+      .string()
+      .refine((value) => parseKeyId(value) !== undefined)
+      .transform(Number),
     // Keyring (L2 §8.6): `<id>:<base64 of 32 bytes>` per line or comma-separated; see platform/crypto/keyring.ts.
     DATA_ENCRYPTION_KEYS: z.string().refine((value) => parseKeyringEntries(value) !== undefined),
     // Not a secret. Separate from the ring so rotation is two steps: deploy the new key to the API and the worker,
@@ -57,13 +67,17 @@ export const ConfigSchema = z
   .strict()
   .superRefine((config, ctx) => {
     // Zod 4 runs this even after a field check failed: a malformed ring is already reported on its own key.
-    const ring = parseKeyringEntries(config.DATA_ENCRYPTION_KEYS);
-    if (ring !== undefined && !ring.has(config.DATA_ENCRYPTION_ACTIVE_KEY_ID)) {
+    const dataRing = parseKeyringEntries(config.DATA_ENCRYPTION_KEYS);
+    if (dataRing !== undefined && !dataRing.has(config.DATA_ENCRYPTION_ACTIVE_KEY_ID)) {
       ctx.addIssue({
         code: 'custom',
         path: ['DATA_ENCRYPTION_ACTIVE_KEY_ID'],
         message: 'not in ring',
       });
+    }
+    const jwtRing = parseKeyringEntries(config.JWT_SIGNING_KEYS, HMAC_SHA256_KEY_SIZE);
+    if (jwtRing !== undefined && !jwtRing.has(config.JWT_ACTIVE_KEY_ID)) {
+      ctx.addIssue({ code: 'custom', path: ['JWT_ACTIVE_KEY_ID'], message: 'not in ring' });
     }
   });
 
@@ -76,7 +90,7 @@ export interface AppConfig {
   readonly logLevel: LogLevel;
   readonly databaseUrl: string;
   readonly redisUrl: string;
-  readonly jwtSecret: string;
+  readonly jwtSigning: Keyring;
   readonly dataEncryption: Keyring;
   readonly rateLimitHmacKey: KeyObject;
 }

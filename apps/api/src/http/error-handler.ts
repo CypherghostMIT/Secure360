@@ -37,6 +37,9 @@ export function createErrorHandler(fallbackLogger: Logger): ErrorRequestHandler 
     }
     const classification = classifyError(error);
     logFailure(req.log ?? fallbackLogger, req, classification, error);
+    // RFC 9110 §15.5.2: a 401 carries a challenge. No RFC 6750 error= parameter: the response never says which
+    // check failed.
+    if (ERROR_HTTP_STATUS[classification.code] === 401) res.set('WWW-Authenticate', 'Bearer');
     if (classification.retryAfterSeconds !== undefined) {
       res.set('Retry-After', String(classification.retryAfterSeconds));
     }

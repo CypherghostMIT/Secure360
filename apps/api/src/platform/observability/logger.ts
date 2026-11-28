@@ -21,8 +21,8 @@ const SENSITIVE_KEYS = [
   'secret',
   // Message bodies (CreateMessageInputSchema.body).
   'body',
-  // AppConfig fields holding a secret or a URL with a password (the config itself also redacts them, see load-config).
-  'jwtSecret',
+  // AppConfig fields holding a URL with a password (the config itself also redacts them, see load-config). Keys are
+  // KeyObjects, which print nothing.
   'databaseUrl',
   'migrationDatabaseUrl',
   'redisUrl',

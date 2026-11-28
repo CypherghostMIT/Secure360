@@ -17,8 +17,7 @@ const SENSITIVE = [
   'resetCode',
   'secret',
   'body',
-  // AppConfig fields holding a secret or a URL with a password.
-  'jwtSecret',
+  // AppConfig fields holding a URL with a password.
   'databaseUrl',
   'migrationDatabaseUrl',
   'redisUrl',

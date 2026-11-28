@@ -11,6 +11,9 @@ declare global {
         userId?: string;
         orgId?: string;
         role?: UserRole;
+        // Access token id (jti) and session version (sv), set by authenticate: logout deny-lists the jti.
+        tokenId?: string;
+        sessionVersion?: number;
         // Set by rateLimit() for policies that must not answer 429 (password.forgot, client.errors): the route
         // still sends its usual generic response but skips the work.
         rateLimited?: boolean;
