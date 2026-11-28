@@ -1,5 +1,6 @@
 import type { ErrorCode, ValidationIssue } from '@secure360/shared';
 import { ZodError } from 'zod';
+import { DecryptionError } from '../platform/crypto/aes-gcm';
 import { readDbError } from '../platform/db/db-error';
 import { AppError } from './app-error';
 import { classifyDbError, type LogLevel } from './classify-db-error';
@@ -62,6 +63,10 @@ export function classifyError(error: unknown): ErrorClassification {
     // An aborted upload has no one left to answer: debug only.
     const level = parserType === 'request.aborted' ? 'debug' : 'info';
     return { code: BODY_PARSER_CODES[parserType] ?? 'INTERNAL_ERROR', level, reason: parserType };
+  }
+  // The failure reason goes to the log only; the client gets the generic INTERNAL_ERROR like any other bug.
+  if (error instanceof DecryptionError) {
+    return { code: 'INTERNAL_ERROR', level: 'error', reason: `decryption.${error.reason}` };
   }
   const db = readDbError(error);
   if (db) return classifyDbError(db);

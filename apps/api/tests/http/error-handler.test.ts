@@ -14,6 +14,8 @@ import {
   validationError,
 } from '../../src/http/app-error';
 import { createErrorHandler } from '../../src/http/error-handler';
+import { aadFor, decrypt, DecryptionError, encrypt } from '../../src/platform/crypto/aes-gcm';
+import { testKeyring } from '../helpers/keys';
 import { captureLogger } from '../helpers/log-capture';
 import { buildTestApp, errorOf } from '../helpers/test-app';
 
@@ -316,6 +318,45 @@ describe('error handler: unexpected errors', () => {
       expect(Object.keys(errorOf(res)).sort()).toEqual(['code', 'message', 'requestId']);
       expect(JSON.stringify(res.body)).not.toMatch(/Invalid|invocation|P20|42501|\\src|permission/);
     }
+  });
+});
+
+describe('error handler: decryption failures', () => {
+  it.each([
+    'too_short',
+    'bad_encoding',
+    'unknown_version',
+    'unknown_key_id',
+    'auth_failed',
+  ] as const)('logs reason %s but sends only the generic INTERNAL_ERROR', async (reason) => {
+    const { res, lines } = await expectEnvelope(
+      () => new DecryptionError(reason),
+      'INTERNAL_ERROR',
+      'en',
+    );
+
+    expect(errorOf(res).message).toBe('Something went wrong. Try again later.');
+    expect(Object.keys(errorOf(res)).sort()).toEqual(['code', 'message', 'requestId']);
+    expect(JSON.stringify(res.body)).not.toMatch(
+      /decrypt|reason|too_short|encoding|version|key_id|auth/i,
+    );
+    expect(failureLine(lines)).toMatchObject({
+      level: 'error',
+      reason: `decryption.${reason}`,
+      error_code: 'INTERNAL_ERROR',
+    });
+  });
+
+  it('logs a real decryption failure from the crypto module the same way', async () => {
+    const keyring = testKeyring([1]);
+    const blob = encrypt(keyring, Buffer.from('secret'), aadFor('users.totp_secret', 'a'));
+    const { res, lines } = await expectEnvelope(
+      () => decrypt(keyring, blob, aadFor('users.totp_secret', 'b')),
+      'INTERNAL_ERROR',
+    );
+
+    expect(JSON.stringify(res.body)).not.toMatch(/auth_failed|Decryption/);
+    expect(failureLine(lines)?.['reason']).toBe('decryption.auth_failed');
   });
 });
 

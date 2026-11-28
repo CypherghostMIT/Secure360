@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import { createApp } from './app';
 import { ConfigError, loadConfig } from './config';
 import type { AppConfig } from './config';
+import { warmUpPasswordHashing } from './platform/crypto';
 import { createRedisConnection, type RedisConnection } from './platform/cache/redis';
 import { createPrismaClient, type DbClient } from './platform/db/prisma-client';
 import { createLogger, type Logger } from './platform/observability/logger';
@@ -73,6 +74,8 @@ function main(): void {
   void redis.connect();
   // Connects lazily on the first query; owned here so shutdown can close it. Repositories receive it in their tasks.
   const db = createPrismaClient(config.databaseUrl);
+  // Dummy bcrypt hash for unknown-e-mail logins (L2 §8.2), computed before the first request needs it.
+  void warmUpPasswordHashing().catch(() => log.error('password.warmup.failure'));
   const server = createServer(createApp(config, { logger }));
   server.once('error', (error: NodeJS.ErrnoException) => {
     log.fatal({ err: { code: error.code } }, 'server.start.failure');

@@ -1,16 +1,24 @@
-import { randomBytes } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { inspect } from 'node:util';
 import { ConfigError, loadConfig } from '../src/config';
+import { aadFor, decrypt, encrypt } from '../src/platform/crypto/aes-gcm';
+import { captureLogger } from './helpers/log-capture';
+import { keyringEntry } from './helpers/keys';
 
 // Values are generated per run so no secret-looking literal lives in the repository.
+const urlPassword = (): string => randomBytes(24).toString('hex');
+
 function validEnv(): NodeJS.ProcessEnv {
   return {
-    DATABASE_URL: 'postgresql://app@127.0.0.1:5432/secure360',
-    REDIS_URL: 'redis://127.0.0.1:6379',
+    DATABASE_URL: `postgresql://app:${urlPassword()}@127.0.0.1:5432/secure360`,
+    REDIS_URL: `redis://:${urlPassword()}@127.0.0.1:6379`,
     JWT_SECRET: randomBytes(48).toString('base64'),
-    DATA_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
+    DATA_ENCRYPTION_KEYS: keyringEntry(1),
+    DATA_ENCRYPTION_ACTIVE_KEY_ID: '1',
+    RATE_LIMIT_HMAC_KEY: randomBytes(32).toString('base64'),
   };
 }
 
@@ -63,10 +71,10 @@ describe('loadConfig', () => {
   it('names an invalid key without echoing its value', () => {
     const shortKey = randomBytes(16).toString('base64');
     const error = captureError(() =>
-      loadConfig({ env: { ...validEnv(), DATA_ENCRYPTION_KEY: shortKey }, secretsDir }),
+      loadConfig({ env: { ...validEnv(), DATA_ENCRYPTION_KEYS: `1:${shortKey}` }, secretsDir }),
     );
 
-    expect(error.message).toContain('invalid: DATA_ENCRYPTION_KEY');
+    expect(error.message).toContain('invalid: DATA_ENCRYPTION_KEYS');
     expect(error.message).not.toContain(shortKey);
   });
 
@@ -127,5 +135,164 @@ describe('loadConfig', () => {
     writeSecret('log_level', 'trace');
 
     expect(loadConfig({ env: validEnv(), secretsDir }).logLevel).toBe('debug');
+  });
+});
+
+describe('loadConfig: encryption and HMAC keys', () => {
+  const bytesOf = (base64: string | undefined) => Buffer.from(base64 ?? '', 'base64');
+
+  it.each(['DATA_ENCRYPTION_KEYS', 'DATA_ENCRYPTION_ACTIVE_KEY_ID', 'RATE_LIMIT_HMAC_KEY'])(
+    'fails to boot when %s is missing',
+    (key) => {
+      const env: NodeJS.ProcessEnv = { ...validEnv(), [key]: undefined };
+      expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
+        `Invalid configuration (missing: ${key})`,
+      );
+    },
+  );
+
+  it.each([
+    ['a 31-byte data key', { DATA_ENCRYPTION_KEYS: keyringEntry(1, randomBytes(31)) }],
+    ['a 33-byte data key', { DATA_ENCRYPTION_KEYS: keyringEntry(1, randomBytes(33)) }],
+    ['a malformed second data key', { DATA_ENCRYPTION_KEYS: `${keyringEntry(1)}\n2:short` }],
+  ])('fails to boot with %s, without echoing it', (_label, override) => {
+    const env = { ...validEnv(), ...override };
+    const error = captureError(() => loadConfig({ env, secretsDir }));
+
+    expect(error.message).toBe('Invalid configuration (invalid: DATA_ENCRYPTION_KEYS)');
+    for (const part of override.DATA_ENCRYPTION_KEYS.split(/[:\n]/)) {
+      expect(error.message).not.toContain(part);
+    }
+  });
+
+  it('fails to boot with a 31-byte HMAC key, without echoing it', () => {
+    const short = randomBytes(31).toString('base64');
+    const error = captureError(() =>
+      loadConfig({ env: { ...validEnv(), RATE_LIMIT_HMAC_KEY: short }, secretsDir }),
+    );
+
+    expect(error.message).toBe('Invalid configuration (invalid: RATE_LIMIT_HMAC_KEY)');
+    expect(error.message).not.toContain(short);
+  });
+
+  it('accepts an HMAC key longer than 32 bytes', () => {
+    const env = { ...validEnv(), RATE_LIMIT_HMAC_KEY: randomBytes(48).toString('base64') };
+    expect(loadConfig({ env, secretsDir }).rateLimitHmacKey.symmetricKeySize).toBe(48);
+  });
+
+  it('fails to boot when the active key id is not in the ring', () => {
+    const env = { ...validEnv(), DATA_ENCRYPTION_ACTIVE_KEY_ID: '2' };
+    expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
+      'Invalid configuration (invalid: DATA_ENCRYPTION_ACTIVE_KEY_ID)',
+    );
+  });
+
+  // Id 2 is in the ring, so these fail only because of their form, not because the key is missing.
+  it.each(['0x2', '2e0', ' 2 ', '+2', '02', '0', '65536'])(
+    'rejects the active key id %p',
+    (activeKeyId) => {
+      const env = {
+        ...validEnv(),
+        DATA_ENCRYPTION_KEYS: `${keyringEntry(1)},${keyringEntry(2)}`,
+        DATA_ENCRYPTION_ACTIVE_KEY_ID: activeKeyId,
+      };
+      expect(captureError(() => loadConfig({ env, secretsDir })).message).toBe(
+        'Invalid configuration (invalid: DATA_ENCRYPTION_ACTIVE_KEY_ID)',
+      );
+    },
+  );
+
+  it('accepts the largest active key id', () => {
+    const env = {
+      ...validEnv(),
+      DATA_ENCRYPTION_KEYS: keyringEntry(65535),
+      DATA_ENCRYPTION_ACTIVE_KEY_ID: '65535',
+    };
+    expect(loadConfig({ env, secretsDir }).dataEncryption.activeKeyId).toBe(65535);
+  });
+
+  it('reads a multi-line keyring from its secret file and uses the active id', () => {
+    const oldBytes = randomBytes(32);
+    const newBytes = randomBytes(32);
+    writeSecret(
+      'data_encryption_keys',
+      `${keyringEntry(1, Buffer.from(oldBytes))}\n${keyringEntry(2, Buffer.from(newBytes))}\n`,
+    );
+    const env = {
+      ...validEnv(),
+      DATA_ENCRYPTION_KEYS: undefined,
+      DATA_ENCRYPTION_ACTIVE_KEY_ID: '2',
+    };
+
+    const { dataEncryption } = loadConfig({ env, secretsDir });
+
+    expect(dataEncryption.activeKeyId).toBe(2);
+    expect(dataEncryption.keyFor(1)?.export().equals(oldBytes)).toBe(true);
+    expect(dataEncryption.keyFor(2)?.export().equals(newBytes)).toBe(true);
+    expect(dataEncryption.keyFor(3)).toBeUndefined();
+    const aad = aadFor('users.totp_secret', 'user-1');
+    const blob = encrypt(dataEncryption, Buffer.from('x'), aad);
+    expect(decrypt(dataEncryption, blob, aad).toString()).toBe('x');
+  });
+
+  it('holds the HMAC key as a KeyObject with the configured bytes', () => {
+    const env = validEnv();
+    const { rateLimitHmacKey } = loadConfig({ env, secretsDir });
+    const expected = createHmac('sha256', bytesOf(env['RATE_LIMIT_HMAC_KEY']))
+      .update('a')
+      .digest('hex');
+
+    expect(rateLimitHmacKey.type).toBe('secret');
+    expect(createHmac('sha256', rateLimitHmacKey).update('a').digest('hex')).toBe(expected);
+  });
+
+  it('shows no key material through util.inspect, JSON.stringify or the logger', () => {
+    const env: NodeJS.ProcessEnv = {
+      ...validEnv(),
+      DATA_ENCRYPTION_KEYS: `${keyringEntry(1)}\n${keyringEntry(2)}`,
+    };
+    const config = loadConfig({ env, secretsDir });
+    const { logger, raw } = captureLogger();
+    logger.info(config, 'config.loaded');
+    logger.info({ config }, 'config.loaded');
+    logger.info({ app: { config } }, 'config.loaded');
+
+    const shown = [inspect(config, { depth: 10, showHidden: true }), JSON.stringify(config), raw()];
+    const keyTexts = [
+      ...(env['DATA_ENCRYPTION_KEYS'] ?? '').split('\n').map((entry) => entry.slice(2)),
+      env['RATE_LIMIT_HMAC_KEY'] ?? '',
+    ];
+    for (const keyText of keyTexts) {
+      const bytes = bytesOf(keyText);
+      for (const text of shown) {
+        expect(text).not.toContain(keyText);
+        expect(text).not.toContain(bytes.toString('base64url'));
+        expect(text).not.toContain(bytes.toString('hex'));
+      }
+    }
+    const secretTexts = [
+      env['JWT_SECRET'] ?? '',
+      new URL(env['DATABASE_URL'] ?? '').password,
+      new URL(env['REDIS_URL'] ?? '').password,
+    ];
+    for (const secret of secretTexts) {
+      expect(secret).not.toBe('');
+      for (const text of shown) expect(text).not.toContain(secret);
+    }
+  });
+
+  it('redacts secret fields in JSON and inspect output but keeps the real values readable', () => {
+    const env = validEnv();
+    const config = loadConfig({ env, secretsDir });
+    const json = JSON.parse(JSON.stringify(config)) as Record<string, unknown>;
+
+    for (const field of ['jwtSecret', 'databaseUrl', 'redisUrl'] as const) {
+      expect(json[field]).toBe('[REDACTED]');
+      expect(inspect(config)).toContain(`${field}: '[REDACTED]'`);
+    }
+    expect(json['port']).toBe(3000);
+    expect(config.jwtSecret).toBe(env['JWT_SECRET']);
+    expect(config.databaseUrl).toBe(env['DATABASE_URL']);
+    expect(Object.keys(config)).not.toContain('toJSON');
   });
 });

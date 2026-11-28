@@ -14,6 +14,7 @@ import { MemoryRateLimitStore } from '../../src/platform/cache/memory-store';
 import { hashEmailKey, type RateLimitPolicy } from '../../src/platform/cache/rate-limit-policies';
 import type { RateLimitStore } from '../../src/platform/cache/rate-limit-store';
 import { keyFor, RateLimiter } from '../../src/platform/cache/rate-limiter';
+import { randomKey } from '../helpers/keys';
 import { captureLogger } from '../helpers/log-capture';
 import { buildTestApp, errorOf } from '../helpers/test-app';
 
@@ -206,15 +207,16 @@ describe('rateLimit middleware', () => {
 
 describe('rate-limit key helpers', () => {
   const longEmail = (length: number) => `${'a'.repeat(length - '@x.cm'.length)}@x.cm`;
+  const hmacKey = randomKey();
 
   it('hashes a trimmed e-mail, the same key whatever the surrounding spaces', () => {
-    expect(emailKey('  Ada@Example.cm ')).toBe(hashEmailKey('ada@example.cm'));
-    expect(emailKey('ada@example.cm')).toMatch(/^[0-9a-f]{64}$/);
+    expect(emailKey('  Ada@Example.cm ', hmacKey)).toBe(hashEmailKey('ada@example.cm', hmacKey));
+    expect(emailKey('ada@example.cm', hmacKey)).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it('accepts an e-mail of exactly 254 characters and refuses 255', () => {
-    expect(emailKey(longEmail(MAX_EMAIL_KEY_LENGTH))).toBeDefined();
-    expect(emailKey(longEmail(MAX_EMAIL_KEY_LENGTH + 1))).toBeUndefined();
+    expect(emailKey(longEmail(MAX_EMAIL_KEY_LENGTH), hmacKey)).toBeDefined();
+    expect(emailKey(longEmail(MAX_EMAIL_KEY_LENGTH + 1), hmacKey)).toBeUndefined();
   });
 
   it('trims a device id and caps it at 128 characters', () => {
@@ -234,7 +236,7 @@ describe('rate-limit key helpers', () => {
     ['an empty string', ''],
     ['only spaces', '   '],
   ])('gives no key for %s', (_label, value) => {
-    expect(emailKey(value)).toBeUndefined();
+    expect(emailKey(value, hmacKey)).toBeUndefined();
     expect(deviceIdKey(value)).toBeUndefined();
   });
 });
